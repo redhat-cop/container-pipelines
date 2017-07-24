@@ -16,6 +16,7 @@ objects:
     labels:
       application: ${APPLICATION_NAME}
     name: "${APPLICATION_NAME}-pipeline"
+    namespace: "${NAMESPACE}"
   spec:
     source:
       type: Git
@@ -41,6 +42,7 @@ objects:
     labels:
       application: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
+    namespace: "${NAMESPACE}"
   spec:
     output:
       to:
@@ -60,7 +62,10 @@ parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true
-  value: jws-app
+  value: basic-tomcat
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
