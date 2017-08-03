@@ -44,11 +44,11 @@ The second template, `deploy/basic-tomcat-template.yml` is the "Deploy" template
 
 The idea behind the split between the templates is that I can deploy the build template only once (to my dev project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
 
-### Pipeline Scipt
+### Pipeline Script
 
 This project includes a sample `pipeline.groovy` Jenkins Pipeline script that could be included with a Java project in order to implement a basic CI/CD pipeline for that project, under the following assumptions:
 
-* The project is build with Maven
+* The project is built with Maven
 * The `pipeline.groovy` script is placed in the same directory as the `pom.xml` file in the git source.
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
