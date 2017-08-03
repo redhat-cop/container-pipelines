@@ -12,7 +12,7 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 
 Run the following commands to instantiate this example.
 
-----
+```
 cd ./basic-tomcat
 oc create -f projects/projects.yml
 oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-tomcat-dev
@@ -20,7 +20,7 @@ oc process -f deploy/basic-tomcat-template.yml --param-file=deploy/dev/params | 
 oc process -f deploy/basic-tomcat-template.yml --param-file=deploy/stage/params | oc apply -f-
 oc process -f deploy/basic-tomcat-template.yml --param-file=deploy/prod/params | oc apply -f-
 oc process -f build/basic-java-template.yml --param-file build/dev/params | oc apply -f-
-----
+```
 
 ## Architecture
 
