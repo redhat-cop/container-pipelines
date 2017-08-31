@@ -1,12 +1,14 @@
 # A Sample OpenShift Pipeline for Blue Green deployments
 
-This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in OpenShift Container Platform. This sample demonstrates the following capabilities:
+This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. This sample demonstrates the following capabilities:
 
 * Deploying an integrated Jenkins server inside of OpenShift
 * Running both custom and oob Jenkins slaves as pods in OpenShift
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
+* Tagging images with the current version of the artifact defined in the pom.xml file
 * Promotion of an application's container image to a blue/green production configuration
+* Switching production routes between blue and green deployments after confirmation
 
 ## Quickstart
 
@@ -26,7 +28,7 @@ oc process -f build/basic-java-template.yml --param-file build/dev/params | oc a
 
 ### OpenShift Templates
 
-The components of this pipeline are divided into two templates.
+The components of this pipeline are divided into three templates.
 
 The first template, `build/simple-spring-boot-template.yml` is what we are calling the "Build" template. It contains:
 
@@ -34,12 +36,18 @@ The first template, `build/simple-spring-boot-template.yml` is what we are calli
 * An `s2i` BuildConfig
 * An ImageStream for the s2i build config to push to
 
-The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/etsauer/ticket-monster).
+The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/malacourse/simple-spring-boot-web).
 
 The second template, `deploy/simple-spring-boot-template.yml` is the "Deploy" template. It contains:
 
-* A tomcat8 DeploymentConfig
+* A openjdk8 DeploymentConfig
 * A Service definition
+* A Route
+
+The third template, `deploy/simple-spring-boot-template-prod.yml` is the "Deploy" template for a blue/green project. It contains:
+
+* Two openjdk8 DeploymentConfig's
+* Two Service definition's
 * A Route
 
 The idea behind the split between the templates is that I can deploy the build template only once (to my dev project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
@@ -52,13 +60,13 @@ This project includes a sample `pipeline.groovy` Jenkins Pipeline script that co
 * The `pipeline.groovy` script is placed in the same directory as the `pom.xml` file in the git source.
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-For convenience, this pipeline script is already included in the following git repository, based on the [JBoss Developers Ticket Monster](https://github.com/jboss-developer/ticket-monster) app.
+For convenience, this pipeline script is already included in the following git repository, based on a [Simple Spring Boot Web app](https://github.com/malacourse/simple-spring-boot-web) app.  The app displays a message that will change color based on which deployment is live in the production project.
 
-https://github.com/etsauer/ticket-monster
+https://github.com/malacourse/simple-spring-boot-web
 
 ## Bill of Materials
 
-* One or Two OpenShift Container Platform Clusters
+* One OpenShift Container Platform Clusters
   * OpenShift 3.5+ is required.
 * Access to GitHub
 
@@ -97,7 +105,7 @@ service "jenkins" created
 
 ### 4. Instantiate Pipeline
 
-A _deploy template_ is provided at `deploy/simple-spring-boot-template.yml` that defines all of the resources required to run our Tomcat application. It includes:
+A _deploy template_ is provided at `deploy/simple-spring-boot-template.yml` that defines all of the resources required to run the openjdk8 application. It includes:
 
 * A `Service`
 * A `Route`
@@ -105,7 +113,17 @@ A _deploy template_ is provided at `deploy/simple-spring-boot-template.yml` that
 * A `DeploymentConfig`
 * A `RoleBinding` to allow Jenkins to deploy in each namespace.
 
-This template should be instantiated once in each of the namespaces that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
+This template should be instantiated once in each of the lower level namespaces (dev, stage,qa) that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
+
+A production blue/green_deploy template_ is provided at `deploy/simple-spring-boot-template-prod.yml` that defines all of the resources required to run the openjdk8 application. It includes:
+
+* Two `Service's` 
+* A `Route`
+* Two `ImageStream's`
+* Two `DeploymentConfig's`
+* A `RoleBinding` to allow Jenkins to deploy in each namespace.
+
+This template should be instantiated in the production blue/green namespace that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
 
 Deploy the deployment template to all three projects.
 ```
@@ -121,7 +139,7 @@ route "simple-spring-boot" created
 imagestream "simple-spring-boot" created
 deploymentconfig "simple-spring-boot" created
 rolebinding "jenkins_edit" created
-$ oc process -f deploy/simple-spring-boot-template.yml --param-file=deploy/prod/params | oc apply -f-
+$ oc process -f deploy/simple-spring-boot-template-prod.yml --param-file=deploy/prod/params | oc apply -f-
 service "simple-spring-boot" created
 route "simple-spring-boot" created
 imagestream "simple-spring-boot" created
@@ -141,7 +159,7 @@ buildconfig "simple-spring-boot-pipeline" created
 buildconfig "simple-spring-boot" created
 ```
 
-At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `myapp-dev` project, and going to *Builds* -> *Pipelines*. At several points you will be prompted for input on the pipeline. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
+At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `myapp-dev` project, and going to *Builds* -> *Pipelines*. There is a prompt for input on the pipeline before the production route is switched to the new deployment. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
 
 ## Cleanup
 
