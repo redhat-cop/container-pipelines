@@ -66,28 +66,26 @@ node('maven') {
 
     openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE1}", verifyReplicaCount: true)
 
-    //input "Promote Application to ${env.STAGE2}?"
+    input "Promote Application to Stage?"
   }
 
   stage("Promote To ${env.STAGE2}") {
-    openshiftTag (alias: 'true', apiURL: "${ocpApiServer}", 
-                  authToken: "${env.TOKEN}", destStream: "${env.APP_NAME}", 
-                  destTag: 'latest', destinationAuthToken: "${env.TOKEN}", destinationNamespace: "${env.STAGE2}", 
-                  namespace: "${env.STAGE1}", srcStream: "${env.APP_NAME}", srcTag: 'latest', verbose: 'false')
+    sh """
+    ${env.OC_CMD} tag ${env.STAGE1}/${env.APP_NAME}:latest ${env.STAGE2}/${env.APP_NAME}:latest
+    """
   }
 
   stage("Verify Deployment to ${env.STAGE2}") {
 
     openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE2}", verifyReplicaCount: true)
 
-    //input "Promote Application to ${env.STAGE3}?"
+    input "Promote Application to Prod?"
   }
 
   stage("Promote To ${env.STAGE3}") {
-    openshiftTag (alias: 'true', apiURL: "${ocpApiServer}", 
-                  authToken: "${env.TOKEN}", destStream: "${env.APP_NAME}", 
-                  destTag: 'latest', destinationAuthToken: "${env.TOKEN}", destinationNamespace: "${env.STAGE3}", 
-                  namespace: "${env.STAGE2}", srcStream: "${env.APP_NAME}", srcTag: 'latest', verbose: 'false')
+    sh """
+    ${env.OC_CMD} tag ${env.STAGE2}/${env.APP_NAME}:latest ${env.STAGE3}/${env.APP_NAME}:latest
+    """
   }
 
   stage("Verify Deployment to ${env.STAGE3}") {
