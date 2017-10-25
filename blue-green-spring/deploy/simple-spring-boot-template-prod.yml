@@ -45,7 +45,7 @@ objects:
   kind: Route
   metadata:
     annotations:
-      description: Route for application's http service.
+      description: Current live route for application's http service.
     labels:
       application: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
@@ -54,6 +54,34 @@ objects:
     host: ${HOSTNAME_HTTP}
     to:
       name: ${APPLICATION_NAME}-blue
+- apiVersion: v1
+  id: ${APPLICATION_NAME}-http
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for the blue deployment.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}-blue
+    namespace: ${NAMESPACE}
+  spec:
+    host: ${HOSTNAME_HTTP}
+    to:
+      name: ${APPLICATION_NAME}-blue
+- apiVersion: v1
+  id: ${APPLICATION_NAME}-http
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for green deployment.
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}-green
+    namespace: ${NAMESPACE}
+  spec:
+    host: ${HOSTNAME_HTTP}
+    to:
+      name: ${APPLICATION_NAME}-green
 - apiVersion: v1
   kind: ImageStream
   metadata:

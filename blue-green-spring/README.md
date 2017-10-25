@@ -1,6 +1,8 @@
 # A Sample OpenShift Pipeline for Blue Green deployments
 
-This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. This sample demonstrates the following capabilities:
+This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. The pipleine will create two instances of the applicaiton in the Production namespace.  There will be three routes in the namespace; a blue, green and blue-green route.  The blue-green route will switch to the latest deployment when the pipeline completes.  This allows for tesing of the new deployment prior to switching live traffic.  Also, the previous deployment can be used to compmare the previous deployment.  
+
+This sample demonstrates the following capabilities:
 
 * Deploying an integrated Jenkins server inside of OpenShift
 * Running both custom and oob Jenkins slaves as pods in OpenShift
@@ -118,7 +120,7 @@ This template should be instantiated once in each of the lower level namespaces 
 A production blue/green_deploy template_ is provided at `deploy/simple-spring-boot-template-prod.yml` that defines all of the resources required to run the openjdk8 application. It includes:
 
 * Two `Service's` 
-* A `Route`
+* Three `Route's` a blue route, green route and main route that switches between the two deployments/services.
 * Two `ImageStream's`
 * Two `DeploymentConfig's`
 * A `RoleBinding` to allow Jenkins to deploy in each namespace.
