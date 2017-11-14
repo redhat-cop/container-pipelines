@@ -17,7 +17,7 @@ This sample demonstrates the following capabilities:
 Run the following commands to instantiate this example.
 
 ```
-cd ./simple-spring-boot
+cd ./blue-green-spring
 oc create -f projects/projects.yml
 oc process openshift//jenkins-ephemeral | oc apply -f- -n simple-spring-boot-dev
 oc process -f deploy/simple-spring-boot-template.yml --param-file=deploy/dev/params | oc apply -f-
