@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: List
+items:
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: simple-spring-boot-dev
+    creationTimestam: null
+  displayName: Dev - Spring Boot Blue Green
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: simple-spring-boot-stage
+    creationTimestam: null
+  displayName: Staging - Spring Boot Blue Green
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: simple-spring-boot-prod
+    creationTimestam: null
+  displayName: Prod - Spring Boot Blue Green
