@@ -1,4 +1,5 @@
 APPLICATION_NAME=spring-rest
 NAMESPACE=basic-spring-boot-dev
 SA_NAMESPACE=basic-spring-boot-dev
-READINESS_RESPONSE=This is my webservice!
+READINESS_RESPONSE=status.:.UP
+READINESS_PATH=/health
