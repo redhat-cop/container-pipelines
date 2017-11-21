@@ -1,0 +1,5 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=basic-spring-boot-stage
+SA_NAME=jenkins
+SA_NAMESPACE=basic-spring-boot-dev
+READINESS_RESPONSE=This is my webservice!
