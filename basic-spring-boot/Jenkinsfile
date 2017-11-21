@@ -22,8 +22,9 @@ node('master') {
 }
 
 node('maven') {
-  def mvnHome = "/usr/share/maven/"
-  def mvnCmd = "${mvnHome}bin/mvn"
+//  def mvnHome = "/usr/share/maven/"
+//  def mvnCmd = "${mvnHome}bin/mvn"
+  def mvnCmd = 'mvn'
   String pomFileLocation = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
 
   stage('SCM Checkout') {
@@ -36,21 +37,29 @@ node('maven') {
 
   }
 
+  stage('Unit Test') {
+
+     sh "${mvnCmd} test -f ${pomFileLocation}"
+
+  }
+
+  // The following variables need to be defined at the top level and not inside
+  // the scope of a stage - otherwise they would not be accessible from other stages.
+  // Extract version and other properties from the pom.xml
+  //def groupId    = getGroupIdFromPom("./pom.xml")
+  //def artifactId = getArtifactIdFromPom("./pom.xml")
+  //def version    = getVersionFromPom("./pom.xml")
+  //println("Artifact ID:" + artifactId + ", Group ID:" + groupId)
+  //println("New version tag:" + version)
+
   stage('Build Image') {
 
     sh """
-       rm -rf oc-build && mkdir -p oc-build/deployments
-
-       for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
-         cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
-       done
-
-       for i in oc-build/deployments/*.war; do
-          mv -v oc-build/deployments/\$(basename \$i) oc-build/deployments/ROOT.war
-          break
-       done
-
-       ${env.OC_CMD} start-build ${env.APP_NAME} --from-dir=oc-build --wait=true --follow=true || exit 1
+      rm -rf oc-build && mkdir -p oc-build/deployments
+      for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
+        cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
+      done
+      ${env.OC_CMD} start-build ${env.APP_NAME} --from-dir=oc-build --wait=true --follow=true || exit 1
     """
   }
 
@@ -87,37 +96,4 @@ node('maven') {
   }
 }
 
-/*
-podTemplate(label: 'promotion-slave', cloud: 'openshift', containers: [
-  containerTemplate(name: 'jenkins-slave-image-mgmt', image: "${env.SKOPEO_SLAVE_IMAGE}", ttyEnabled: true, command: 'cat'),
-  containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:2.62-alpine', args: '${computer.jnlpmac} ${computer.name}')
-]) {
-
-  node('promotion-slave') {
-
-    stage("Promote To ${env.STAGE3}") {
-
-      container('jenkins-slave-image-mgmt') {
-        sh """
-
-        set +x
-        imageRegistry=\$(${env.OC_CMD} get is ${env.APP_NAME} --template='{{ .status.dockerImageRepository }}' -n ${env.STAGE2} | cut -d/ -f1)
-
-        strippedNamespace=\$(echo ${env.NAMESPACE} | cut -d/ -f1)
-
-        echo "Promoting \${imageRegistry}/${env.STAGE2}/${env.APP_NAME} -> \${imageRegistry}/${env.STAGE3}/${env.APP_NAME}"
-        skopeo --tls-verify=false copy --remove-signatures --src-creds openshift:${env.TOKEN} --dest-creds openshift:${env.TOKEN} docker://\${imageRegistry}/${env.STAGE2}/${env.APP_NAME} docker://\${imageRegistry}/${env.STAGE3}/${env.APP_NAME}
-        """
-      }
-    }
-
-    stage("Verify Deployment to ${env.STAGE3}") {
-
-      openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE3}", verifyReplicaCount: true)
-
-    }
-
-  }
-}
-*/
 println "Application ${env.APP_NAME} is now in Production!"
