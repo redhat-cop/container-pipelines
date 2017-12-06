@@ -123,7 +123,7 @@ parameters:
 - description: Namespace of service account that can deploy to this project
   name: SA_NAMESPACE
   required: true
-  value: build
+  value: spring-boot-web-build
 - description: 'Custom hostname for http service route.  Leave blank for default hostname,
     e.g.: <application-name>-<project>.<default-domain-suffix>'
   name: HOSTNAME_HTTP

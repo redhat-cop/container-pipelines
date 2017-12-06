@@ -71,7 +71,7 @@ https://github.com/etsauer/ticket-monster
 
 For the purposes of this demo, we are going to create three stages for our application to be promoted through.
 
-- `build`
+- `basic-tomcat-build`
 - `basic-tomcat-dev`
 - `basic-tomcat-stage`
 - `basic-tomcat-prod`

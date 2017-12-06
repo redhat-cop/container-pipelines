@@ -12,7 +12,7 @@ openshift_cluster_content:
 - object: deployments
   content:
   - name: jenkins
-    namespace: build
+    namespace: spring-boot-web-build
     template: openshift//jenkins-ephemeral
     params: "{{ inventory_dir }}/../files/deployment/build/params"
   - name: basic-tomcat-dev

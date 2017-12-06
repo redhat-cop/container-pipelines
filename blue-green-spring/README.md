@@ -80,7 +80,7 @@ https://github.com/malacourse/simple-spring-boot-web
 
 For the purposes of this demo, we are going to create four stages for our application to be promoted through.
 
-- 'build'
+- 'spring-boot-web-build'
 - `spring-boot-web-dev`
 - `spring-boot-web-stage`
 - `spring-boot-web-prod`

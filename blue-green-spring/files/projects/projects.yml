@@ -22,6 +22,6 @@ items:
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
-    name: build
+    name: spring-boot-web-build
     creationTimestam: null
   displayName: Build - Jenkins is here
