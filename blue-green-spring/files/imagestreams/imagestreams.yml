@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Template
+metadata:
+  annotations:
+    description: ImageStream template
+objects:
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      name: redhat-openjdk18-openshift
+      namespace: "${NAMESPACE}"
+    spec:
+      lookupPolicy:
+        local: false
+      tags:
+      - from:
+          kind: DockerImage
+          name: "${IMAGE}"
+        name: "${TAG}"
+        referencePolicy:
+          type: Source
+parameters:
+- description: Image name to use for the ImageStream
+  name: IMAGE
+  required: true
+- description: The namespace where to create the ImageStream
+  name: NAMESPACE
+  required: true
+- description: Image tag to sync
+  name: TAG
+  required: true
+  value: latest

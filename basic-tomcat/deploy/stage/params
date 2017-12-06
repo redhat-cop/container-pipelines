@@ -1,4 +1,0 @@
-APPLICATION_NAME=basic-tomcat
-NAMESPACE=basic-tomcat-stage
-SA_NAME=jenkins
-SA_NAMESPACE=basic-tomcat-dev

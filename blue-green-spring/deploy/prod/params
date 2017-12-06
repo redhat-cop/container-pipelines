@@ -1,4 +1,0 @@
-APPLICATION_NAME=spring-boot-web
-NAMESPACE=simple-spring-boot-prod
-SA_NAME=jenkins
-SA_NAMESPACE=simple-spring-boot-dev
