@@ -4,11 +4,7 @@ openshift_cluster_content:
   content:
   - name: simple-spring-boot-spaces
     file: "{{ inventory_dir }}/../files/projects/projects.yml"
-- object: imagestreams
-  content:
-  - name: redhat-openjdk18-openshift
-    template: "{{ inventory_dir }}/../files/imagestreams/imagestreams.yml"
-    params: "{{ inventory_dir }}/../files/imagestreams/openshift/params"
+    file_action: create
 - object: deployments
   content:
   - name: jenkins

@@ -106,5 +106,5 @@ At this point you should be able to go to the Web Console and follow the pipelin
 Cleaning up this example is as simple as deleting the projects we created at the beginning.
 
 ```
-oc delete project basic-tomcat-dev basic-tomcat-prod basic-tomcat-stage
+oc delete project basic-tomcat-build basic-tomcat-dev basic-tomcat-prod basic-tomcat-stage
 ```

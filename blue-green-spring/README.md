@@ -125,5 +125,5 @@ At this point you should be able to go to the Web Console and follow the pipelin
 Cleaning up this example is as simple as deleting the projects we created at the beginning.
 
 ```
-oc delete project spring-boot-web-dev spring-boot-web-prod spring-boot-web-stage
+oc delete project spring-boot-web-build spring-boot-web-dev spring-boot-web-prod spring-boot-web-stage
 ```

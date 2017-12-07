@@ -1,3 +1,0 @@
-IMAGE=registry.access.redhat.com/jboss-webserver-3/webserver31-tomcat8-openshift
-NAMESPACE=openshift
-TAG=1.0
