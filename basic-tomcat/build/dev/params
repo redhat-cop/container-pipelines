@@ -1,3 +1,0 @@
-APPLICATION_NAME=basic-tomcat
-NAMESPACE=basic-tomcat-dev
-IMAGE_STREAM_TAG_NAME=jboss-webserver31-tomcat8-openshift:1.0

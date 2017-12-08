@@ -1,3 +1,0 @@
-APPLICATION_NAME=spring-boot-web
-NAMESPACE=simple-spring-boot-dev
-IMAGE_STREAM_TAG_NAME=redhat-openjdk18-openshift:1.1

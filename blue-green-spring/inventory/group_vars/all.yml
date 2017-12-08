@@ -1,0 +1,27 @@
+---
+openshift_cluster_content:
+- object: projectrequest
+  content:
+  - name: simple-spring-boot-spaces
+    file: "{{ inventory_dir }}/../files/projects/projects.yml"
+    file_action: create
+- object: deployments
+  content:
+  - name: jenkins
+    namespace: spring-boot-web-build
+    template: openshift//jenkins-ephemeral
+    params: "{{ inventory_dir }}/../files/deployment/build/params"
+  - name: basic-tomcat-dev
+    template: "{{ inventory_dir }}/../files/deployment/template.yml"
+    params: "{{ inventory_dir }}/../files/deployment/dev/params"
+  - name: basic-tomcat-stage
+    template: "{{ inventory_dir }}/../files/deployment/template.yml"
+    params: "{{ inventory_dir }}/../files/deployment/stage/params"
+  - name: basic-tomcat-prod
+    template: "{{ inventory_dir }}/../files/deployment/template-bg.yml"
+    params: "{{ inventory_dir }}/../files/deployment/prod/params"
+- object: builds
+  content:
+  - name: jenkins
+    template: "{{ inventory_dir }}/../files/builds/template.yml"
+    params: "{{ inventory_dir }}/../files/builds/params"

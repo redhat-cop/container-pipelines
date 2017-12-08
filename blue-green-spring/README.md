@@ -14,17 +14,19 @@ This sample demonstrates the following capabilities:
 
 ## Quickstart
 
-Run the following commands to instantiate this example.
+### Requirements
+1. [OpenShift Applier](https://github.com/redhat-cop/casl-ansible)
+   `git clone git@github.com:redhat-cop/casl-ansible.git`
+   `git checkout v3.6.1`
+2. [Ansible](https://www.ansible.com/)
+   `sudo dnf install ansible`
 
+### Installation
+Run the following commands to instantiate this example.
 ```
-cd ./blue-green-spring
-oc create -f projects/projects.yml
-oc process openshift//jenkins-ephemeral | oc apply -f- -n simple-spring-boot-dev
-oc process -f deploy/simple-spring-boot-template.yml --param-file=deploy/dev/params | oc apply -f-
-oc process -f deploy/simple-spring-boot-template.yml --param-file=deploy/stage/params | oc apply -f-
-oc process -f deploy/simple-spring-boot-template-prod.yml --param-file=deploy/prod/params | oc apply -f-
-oc process -f build/basic-java-template.yml --param-file build/dev/params | oc apply -f-
+ansible-playbook -i inventory/hosts ../casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
 ```
+The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
 
 ## Architecture
 
@@ -32,7 +34,7 @@ oc process -f build/basic-java-template.yml --param-file build/dev/params | oc a
 
 The components of this pipeline are divided into three templates.
 
-The first template, `build/simple-spring-boot-template.yml` is what we are calling the "Build" template. It contains:
+The first template, `files/builds/template.yml` is what we are calling the "Build" template. It contains:
 
 * A `jenkinsPipelineStrategy` BuildConfig
 * An `s2i` BuildConfig
@@ -40,13 +42,13 @@ The first template, `build/simple-spring-boot-template.yml` is what we are calli
 
 The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/malacourse/simple-spring-boot-web).
 
-The second template, `deploy/simple-spring-boot-template.yml` is the "Deploy" template. It contains:
+The second template, `files/deployment/template.yml` is the "Deploy" template. It contains:
 
 * A openjdk8 DeploymentConfig
 * A Service definition
 * A Route
 
-The third template, `deploy/simple-spring-boot-template-prod.yml` is the "Deploy" template for a blue/green project. It contains:
+The third template, `files/deployment/template-bg.yml` is the "Deploy" template for a blue/green project. It contains:
 
 * Two openjdk8 DeploymentConfig's
 * Two Service definition's
@@ -76,38 +78,22 @@ https://github.com/malacourse/simple-spring-boot-web
 
 ### 1. Create Lifecycle Stages
 
-For the purposes of this demo, we are going to create three stages for our application to be promoted through.
+For the purposes of this demo, we are going to create four stages for our application to be promoted through.
 
-- `simple-spring-boot-dev`
-- `simple-spring-boot-stage`
-- `simple-spring-boot-prod`
+- 'spring-boot-web-build'
+- `spring-boot-web-dev`
+- `spring-boot-web-stage`
+- `spring-boot-web-prod`
 
 In the spirit of _Infrastructure as Code_ we have a YAML file that defines the `ProjectRequests` for us. This is as an alternative to running `oc new-project`, but will yeild the same result.
 
-```
-$ oc create -f projects/projects.yml
-projectrequest "simple-spring-boot-dev" created
-projectrequest "simple-spring-boot-stage" created
-projectrequest "simple-spring-boot-prod" created
-```
+### 2. Stand up Jenkins master in build
 
-### 2. Stand up Jenkins master in dev
-
-For this step, the OpenShift default template set provides exactly what we need to get jenkins up and running.
-
-```
-$ oc process openshift//jenkins-ephemeral | oc apply -f- -n simple-spring-boot-dev
-route "jenkins" created
-deploymentconfig "jenkins" created
-serviceaccount "jenkins" created
-rolebinding "jenkins_edit" created
-service "jenkins-jnlp" created
-service "jenkins" created
-```
+For this step, the OpenShift default template set provides exactly what we need to get jenkins up and running. Jenkins will be running in the `build` project and promote and deploy to the `spring-boot-web-dev` project.
 
 ### 4. Instantiate Pipeline
 
-A _deploy template_ is provided at `deploy/simple-spring-boot-template.yml` that defines all of the resources required to run the openjdk8 application. It includes:
+A _deploy template_ is provided at `files/deployment/template.yml` that defines all of the resources required to run the openjdk8 application. It includes:
 
 * A `Service`
 * A `Route`
@@ -127,39 +113,10 @@ A production blue/green_deploy template_ is provided at `deploy/simple-spring-bo
 
 This template should be instantiated in the production blue/green namespace that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
 
-Deploy the deployment template to all three projects.
-```
-$ oc process -f deploy/simple-spring-boot-template.yml --param-file=deploy/dev/params | oc apply -f-
-service "simple-spring-boot" created
-route "simple-spring-boot" created
-imagestream "simple-spring-boot" created
-deploymentconfig "simple-spring-boot" created
-rolebinding "jenkins_edit" configured
-$ oc process -f deploy/simple-spring-boot-template.yml --param-file=deploy/stage/params | oc apply -f-
-service "simple-spring-boot" created
-route "simple-spring-boot" created
-imagestream "simple-spring-boot" created
-deploymentconfig "simple-spring-boot" created
-rolebinding "jenkins_edit" created
-$ oc process -f deploy/simple-spring-boot-template-prod.yml --param-file=deploy/prod/params | oc apply -f-
-service "simple-spring-boot" created
-route "simple-spring-boot" created
-imagestream "simple-spring-boot" created
-deploymentconfig "simple-spring-boot" created
-rolebinding "jenkins_edit" created
-```
-
-A _build template_ is provided at `build/basic-java-template.yml` that defines all the resources required to build our java app. It includes:
+A _build template_ is provided at `builds/template.yml` that defines all the resources required to build our java app. It includes:
 
 * A `BuildConfig` that defines a `JenkinsPipelineStrategy` build, which will be used to define out pipeline.
 * A `BuildConfig` that defines a `Source` build with `Binary` input. This will build our image.
-
-Deploy the pipeline template in dev only.
-```
-$ oc process -f build/basic-java-template.yml --param-file build/dev/params | oc apply -f-
-buildconfig "simple-spring-boot-pipeline" created
-buildconfig "simple-spring-boot" created
-```
 
 At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `myapp-dev` project, and going to *Builds* -> *Pipelines*. There is a prompt for input on the pipeline before the production route is switched to the new deployment. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
 
@@ -168,5 +125,5 @@ At this point you should be able to go to the Web Console and follow the pipelin
 Cleaning up this example is as simple as deleting the projects we created at the beginning.
 
 ```
-oc delete project simple-spring-boot-dev simple-spring-boot-prod simple-spring-boot-stage
+oc delete project spring-boot-web-build spring-boot-web-dev spring-boot-web-prod spring-boot-web-stage
 ```
