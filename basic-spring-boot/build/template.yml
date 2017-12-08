@@ -69,7 +69,7 @@ parameters:
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/etsauer/ticket-monster.git
+  value: https://github.com/redhat-cop/spring-rest.git
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
   value: "master"
@@ -99,4 +99,4 @@ parameters:
 - description: Image stream tag for the image you'd like to use to build the application
   name: IMAGE_STREAM_TAG_NAME
   required: true
-  value: jboss-webserver30-tomcat8-openshift:1.2
+  value: redhat-openjdk18-openshift:1.1

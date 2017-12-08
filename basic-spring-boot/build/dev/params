@@ -1,5 +1,2 @@
 APPLICATION_NAME=spring-rest
 NAMESPACE=basic-spring-boot-dev
-IMAGE_STREAM_TAG_NAME=redhat-openjdk18-openshift:1.1
-SOURCE_REPOSITORY_URL=https://github.com/redhat-cop/spring-rest.git
-PIPELINE_SCRIPT=Jenkinsfile
