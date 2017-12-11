@@ -62,7 +62,7 @@ parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true
-  value: basic-tomcat
+  value: basic-spring
 - description: The namespace to deploy into
   name: NAMESPACE
   required: true
@@ -78,7 +78,7 @@ parameters:
   value:
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
-  value: pipeline.groovy
+  value: Jenkinsfile
 - description: GitHub trigger secret
   from: '[a-zA-Z0-9]{8}'
   generate: expression
