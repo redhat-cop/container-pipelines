@@ -1,0 +1,4 @@
+APPLICATION_NAME=flask-rest
+NAMESPACE=basic-python-flask-prod
+SA_NAMESPACE=basic-python-flask-build
+READINESS_RESPONSE=status.:..success
