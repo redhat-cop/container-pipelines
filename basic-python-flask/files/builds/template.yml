@@ -21,7 +21,7 @@ objects:
     source:
       type: Git
       git:
-        uri: ${SOURCE_REPOSITORY_URI}
+        uri: ${SOURCE_REPOSITORY_URL}
         ref: ${SOURCE_REPOSITORY_REF}
       contextDir: ${CONTEXT_DIR}
     triggers:
@@ -55,6 +55,13 @@ objects:
           name: ${IMAGE_STREAM_TAG_NAME}
           namespace: ${IMAGE_STREAM_NAMESPACE}
       type: Source
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${NAMESPACE}
 parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
@@ -63,8 +70,8 @@ parameters:
 - description: The namespace to deploy into
   name: NAMESPACE
   required: true
-- description: Git source URI for application
-  name: SOURCE_REPOSITORY_URI
+- description: Git source URL for application
+  name: SOURCE_REPOSITORY_URL
   required: true
   value: https://github.com/redhat-cop/python-flask-rest.git
 - description: Git branch/tag reference

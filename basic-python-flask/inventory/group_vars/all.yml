@@ -5,11 +5,16 @@ openshift_cluster_content:
   - name: basic-python-flask-spaces
     file: "{{ inventory_dir }}/../files/projects/projects.yml"
     file_action: create
+- object: imagestream
+  content:
+  - name: jenkins-slave-python
+    file: "{{ inventory_dir }}/../files/imagestreams/imagestreams.yml"
+    namespace: basic-python-flask-build
 - object: deployments
   content:
   - name: jenkins
     namespace: basic-python-flask-build
-    template: openshift//jenkins-ephemeral
+    template: "{{ inventory_dir }}/../files/deployments/jenkins.yml"
     params: "{{ inventory_dir }}/../files/deployments/build/params"
   - name: basic-python-flask-dev
     template: "{{ inventory_dir }}/../files/deployments/template.yml"
