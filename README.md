@@ -30,7 +30,7 @@ Typically the things required to build a pipeline sample include:
   - A Source strategy binary buildConfig, which is used to build the container image
 - A deployment template that includes all the necessary objects to run the application in an environment. At a minimum:
   - A DeploymentConfig definition
-  - A Dervice definition
+  - A Service definition
 - it might also include:
   - Routes
   - Secrets
