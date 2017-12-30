@@ -5,13 +5,21 @@ openshift_cluster_content:
   - name: basic-python-flask-spaces
     file: "{{ inventory_dir }}/../files/projects/projects.yml"
     file_action: create
-- object: imagestream
+- object: builds
   content:
   - name: jenkins-slave-python
-    file: "{{ inventory_dir }}/../files/imagestreams/imagestreams.yml"
-    namespace: basic-python-flask-build
+    template: "{{ inventory_dir }}/../files/builds/jenkins-slave-template.yml"
+    params: "{{ inventory_dir }}/../files/builds/jenkins-slave/params"
 - object: deployments
   content:
+  - name: postgresql
+    namespace: basic-python-flask-build
+    template: openshift//postgresql-persistent
+    params: "{{ inventory_dir }}/../files/deployments/postgresql/params"
+  - name: sonarqube
+    namespace: basic-python-flask-build
+    template: https://raw.githubusercontent.com/rht-labs/labs-ci-cd/master/openshift-templates/sonarqube/template.json
+    params: "{{ inventory_dir }}/../files/deployments/sonar/params"
   - name: jenkins
     namespace: basic-python-flask-build
     template: "{{ inventory_dir }}/../files/deployments/jenkins.yml"
