@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: List
+items:
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-python-flask-dev
+    creationTimestamp: null
+  displayName: Dev - Python Flask App
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-python-flask-stage
+    creationTimestamp: null
+  displayName: Staging - Python Flask App
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-python-flask-prod
+    creationTimestamp: null
+  displayName: Prod - Python Flask App
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-python-flask-build
+    creationTimestam: null
+  displayName: Build - Jenkins is here

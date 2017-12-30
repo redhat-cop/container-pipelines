@@ -1,0 +1,4 @@
+SLAVE_NAME=slave-python
+NAMESPACE=basic-python-flask-build
+CONTEXT_DIR=slave-python
+SOURCE_REPOSITORY_REF=slave-python

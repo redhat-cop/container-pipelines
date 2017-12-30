@@ -1,0 +1,3 @@
+APPLICATION_NAME=flask-rest
+NAMESPACE=basic-python-flask-build
+SOURCE_REPOSITORY_URL=https://github.com/pabrahamsson/python-flask-rest.git
