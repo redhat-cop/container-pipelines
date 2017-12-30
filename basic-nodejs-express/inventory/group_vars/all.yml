@@ -1,0 +1,40 @@
+---
+openshift_cluster_content:
+- object: projectrequest
+  content:
+  - name: basic-nodejs-express-spaces
+    file: "{{ inventory_dir }}/../files/projects/projects.yml"
+    file_action: create
+- object: builds
+  content:
+  - name: jenkins-slave-nodejs
+    template: "{{ inventory_dir }}/../files/builds/jenkins-slave-template.yml"
+    params: "{{ inventory_dir }}/../files/builds/jenkins-slave/params"
+- object: deployments
+  content:
+  - name: postgresql
+    namespace: basic-nodejs-express-build
+    template: openshift//postgresql-persistent
+    params: "{{ inventory_dir }}/../files/deployments/postgresql/params"
+  - name: sonarqube
+    namespace: basic-nodejs-express-build
+    template: https://raw.githubusercontent.com/rht-labs/labs-ci-cd/master/openshift-templates/sonarqube/template.json
+    params: "{{ inventory_dir }}/../files/deployments/sonar/params"
+  - name: jenkins
+    namespace: basic-nodejs-express-build
+    template: "{{ inventory_dir }}/../files/deployments/jenkins.yml"
+    params: "{{ inventory_dir }}/../files/deployments/build/params"
+  - name: basic-nodejs-express-dev
+    template: "{{ inventory_dir }}/../files/deployments/template.yml"
+    params: "{{ inventory_dir }}/../files/deployments/dev/params"
+  - name: basic-nodejs-express-stage
+    template: "{{ inventory_dir }}/../files/deployments/template.yml"
+    params: "{{ inventory_dir }}/../files/deployments/stage/params"
+  - name: basic-nodejs-express-prod
+    template: "{{ inventory_dir }}/../files/deployments/template.yml"
+    params: "{{ inventory_dir }}/../files/deployments/prod/params"
+- object: builds
+  content:
+  - name: jenkins
+    template: "{{ inventory_dir }}/../files/builds/template.yml"
+    params: "{{ inventory_dir }}/../files/builds/dev/params"

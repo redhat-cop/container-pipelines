@@ -1,0 +1,2 @@
+INSTALL_PLUGINS=cobertura:1.12,sonar:2.6.1
+MEMORY_LIMIT=512Mi
