@@ -1,0 +1,8 @@
+---
+- hosts: seed-hosts[0]
+  vars:
+    ci_cd_namespace: "labs-ci-cd"
+    dev_namespace: "labs-dev"
+    demo_namespace: "labs-demo"
+  roles:
+    - casl-ansible/roles/openshift-applier

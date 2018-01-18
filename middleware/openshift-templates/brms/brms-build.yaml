@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: decisionserver64-https-s2i
+  xpaas: 1.4.7
+message: A new BRMS application with SSL support has been created in your project.
+  The username/password for accessing the KIE Server REST or JMS interface is ${KIE_SERVER_USER}/${KIE_SERVER_PASSWORD}.
+  Please be sure to create the "decisionserver-service-account" service account and
+  the secret named "${HTTPS_SECRET}" containing the ${HTTPS_KEYSTORE} file used for
+  serving secure content.
+metadata:
+  annotations:
+    description: An example BRMS decision server application. For more information
+      about using this template, see https://github.com/jboss-openshift/application-templates.
+    iconClass: icon-decisionserver
+    openshift.io/display-name: JBoss BRMS 6.4 decision server (with https)
+    openshift.io/provider-display-name: Red Hat, Inc.
+    tags: decisionserver,jboss
+    template.openshift.io/documentation-url: https://access.redhat.com/documentation/en/red-hat-jboss-brms/
+    template.openshift.io/long-description: This template defines resources needed
+      to develop Red Hat JBoss BRMS 6.4 decision server, including a build configuration,  application
+      deployment configuration and secured using https.
+    template.openshift.io/support-url: https://access.redhat.com
+    version: 1.4.7
+  name: decisionserver64-s2i-build
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      sourceStrategy:
+        env:
+        - name: KIE_CONTAINER_DEPLOYMENT
+          value: ${KIE_CONTAINER_DEPLOYMENT}
+        - name: MAVEN_MIRROR_URL
+          value: ${MAVEN_MIRROR_URL}
+        - name: ARTIFACT_DIR
+          value: ${ARTIFACT_DIR}
+        forcePull: true
+        from:
+          kind: ImageStreamTag
+          name: jboss-decisionserver64-openshift:1.1
+          namespace: ${IMAGE_STREAM_NAMESPACE}
+      type: Source
+    triggers:
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+    - generic:
+        secret: ${GENERIC_WEBHOOK_SECRET}
+      type: Generic
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+parameters:
+- description: 'The KIE Container deployment configuration in format: containerId=groupId:artifactId:version|c2=g2:a2:v2'
+  displayName: KIE Container Deployment
+  name: KIE_CONTAINER_DEPLOYMENT
+  value: decisionserver-hellorules=org.openshift.quickstarts:decisionserver-hellorules:1.3.0.Final
+- description: The name for the application.
+  displayName: Application Name
+  name: APPLICATION_NAME
+  required: true
+  value: kie-app
+- description: Git source URI for application
+  displayName: Git Repository URL
+  name: SOURCE_REPOSITORY_URL
+  required: true
+  value: https://github.com/jboss-openshift/openshift-quickstarts.git
+- description: Git branch/tag reference
+  displayName: Git Reference
+  name: SOURCE_REPOSITORY_REF
+  value: "1.3"
+- description: Path within Git project to build; empty for root project directory.
+  displayName: Context Directory
+  name: CONTEXT_DIR
+  value: decisionserver/hellorules
+- description: GitHub trigger secret
+  displayName: Github Webhook Secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+  required: true
+- description: Generic build trigger secret
+  displayName: Generic Webhook Secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GENERIC_WEBHOOK_SECRET
+  required: true
+- description: Namespace in which the ImageStreams for Red Hat Middleware images are
+    installed. These ImageStreams are normally installed in the openshift namespace.
+    You should only need to modify this if you've installed the ImageStreams in a
+    different namespace/project.
+  displayName: ImageStream Namespace
+  name: IMAGE_STREAM_NAMESPACE
+  required: true
+  value: openshift
+- description: Maven mirror to use for S2I builds
+  displayName: Maven mirror URL
+  name: MAVEN_MIRROR_URL
+- description: List of directories from which archives will be copied into the deployment
+    folder. If unspecified, all archives in /target will be copied.
+  name: ARTIFACT_DIR

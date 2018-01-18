@@ -1,0 +1,26 @@
+---
+openshift_cluster_content:
+- object: ci-cd-builds
+  content:
+  - name: brms-build
+    template: "{{ inventory_dir }}/../openshift-templates/brms/brms-build.yaml"
+    params: "{{ inventory_dir }}/../params/brms/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - brms
+- object: dev-deploys
+  content:
+  - name: brms-dev
+    template: "{{ inventory_dir }}/../openshift-templates/brms/brms-deploy-http.yaml"
+    params: "{{ inventory_dir }}/../params/brms/dev"
+    namespace: "{{ dev_namespace }}"
+    tags:
+    - brms
+- object: demo-deploys
+  content:
+  - name: brms-dev
+    template: "{{ inventory_dir }}/../openshift-templates/brms/brms-deploy-http.yaml"
+    params: "{{ inventory_dir }}/../params/brms/demo"
+    namespace: "{{ demo_namespace }}"
+    tags:
+    - brms
