@@ -7,28 +7,30 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`) - Coming Soon!
+* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) Ansible role.
 
-## Quickstart
+## Automated Quickstart
 
-Run the following commands to instantiate this example.
+This quickstart can be deployed quickly using Ansible. Here are the steps.
 
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git) and the [casl-ansible](https://github.com/redhat-cop/casl-ansible.git) repo.
+2. Log into an OpenShift cluster, then run the following command.
 ```
-cd ./basic-spring-boot
-oc create -f projects/projects.yml
-oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-spring-boot-dev
-oc process -f deploy/template.yml --param-file=deploy/dev/params | oc apply -f-
-oc process -f deploy/template.yml --param-file=deploy/stage/params | oc apply -f-
-oc process -f deploy/template.yml --param-file=deploy/prod/params | oc apply -f-
-oc process -f build/template.yml --param-file build/dev/params | oc apply -f-
+$ oc login
+$ ansible-playbook -i container-pipelines/basic-spring-boot/inventory/ casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
 ```
+
+At this point you should have 3 projects deployed (`basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
 
 ## Architecture
+
+The following breaks down the architecture of the pipeline deployed, as well as walks through the manual deployment steps
 
 ### OpenShift Templates
 
 The components of this pipeline are divided into two templates.
 
-The first template, `build/template.yml` is what we are calling the "Build" template. It contains:
+The first template, `files/builds/template.yml` is what we are calling the "Build" template. It contains:
 
 * A `jenkinsPipelineStrategy` BuildConfig
 * An `s2i` BuildConfig
@@ -36,7 +38,7 @@ The first template, `build/template.yml` is what we are calling the "Build" temp
 
 The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/redhat-cop/spring-rest).
 
-The second template, `deploy/template.yml` is the "Deploy" template. It contains:
+The second template, `files/deployments/template.yml` is the "Deploy" template. It contains:
 
 * A tomcat8 DeploymentConfig
 * A Service definition
@@ -62,7 +64,7 @@ https://github.com/redhat-cop/spring-rest
   * OpenShift 3.5+ is required.
 * Access to GitHub
 
-## Implementation Instructions
+## Manual Deployment Instructions
 
 ### 1. Create Lifecycle Stages
 

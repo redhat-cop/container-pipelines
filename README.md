@@ -39,3 +39,7 @@ Typically the things required to build a pipeline sample include:
   - etc.
 
 See our [basic spring boot](./basic-spring-boot) example for a very simple reference architecture.
+
+## Automated Deployments
+
+These pipeline quickstarts include an Ansible inventory through which they can be automatically deployed and managed using the [OpenShift Applier](https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) role.
