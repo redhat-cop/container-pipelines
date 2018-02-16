@@ -17,7 +17,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
 2. Log into an OpenShift cluster, then run the following command.
 ```
 $ oc login
-$ ansible-playbook -i container-pipelines/basic-spring-boot/inventory/ casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
+$ ansible-playbook -i container-pipelines/basic-spring-boot/inventory/ casl-ansible/playbooks/openshift-cluster-seed.yml
 ```
 
 At this point you should have 3 projects deployed (`basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
