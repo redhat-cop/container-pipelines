@@ -19,6 +19,17 @@ node('master') {
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
 
+  sh"""
+    oc version
+    oc get is jenkins-slave-image-mgmt -o jsonpath='{ .status.dockerImageRepository }' > /tmp/jenkins-slave-image-mgmt.out;
+    oc get secret prod-credentials -o jsonpath='{ .data.api }' | base64 --decode > /tmp/prod_api;
+    oc get secret prod-credentials -o jsonpath='{ .data.registry }' | base64 --decode > /tmp/prod_registry
+    oc get secret prod-credentials -o jsonpath='{ .data.token }' | base64 --decode > /tmp/prod_token
+  """
+  env.SKOPEO_SLAVE_IMAGE = readFile('/tmp/jenkins-slave-image-mgmt.out').trim()
+  env.PROD_API= readFile('/tmp/prod_api').trim()
+  env.PROD_REGISTRY = readFile('/tmp/prod_registry').trim()
+  env.PROD_TOKEN = readFile('/tmp/prod_token').trim()
 }
 
 node('maven') {
@@ -81,18 +92,6 @@ podTemplate(label: 'promotion-slave', cloud: 'openshift', serviceAccount: "jenki
 ]) {
 
   node('promotion-slave') {
-
-    sh"""
-      oc version
-      oc get is jenkins-slave-image-mgmt -o jsonpath='{ .status.dockerImageRepository }' > /tmp/jenkins-slave-image-mgmt.out;
-      oc get secret prod-credentials -o jsonpath='{ .data.api }' | base64 --decode > /tmp/prod_api;
-      oc get secret prod-credentials -o jsonpath='{ .data.registry }' | base64 --decode > /tmp/prod_registry
-      oc get secret prod-credentials -o jsonpath='{ .data.token }' | base64 --decode > /tmp/prod_token
-    """
-    env.SKOPEO_SLAVE_IMAGE = readFile('/tmp/jenkins-slave-image-mgmt.out').trim()
-    env.PROD_API= readFile('/tmp/prod_api').trim()
-    env.PROD_REGISTRY = readFile('/tmp/prod_registry').trim()
-    env.PROD_TOKEN = readFile('/tmp/prod_token').trim()
 
     stage("Promote To ${env.STAGE3}") {
 
