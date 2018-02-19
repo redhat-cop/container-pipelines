@@ -32,7 +32,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
     ```
     TOKEN=$(oc serviceaccounts get-token promoter -n field-guides-prod)
     ```
-The Ansible automation for your _Dev_ cluster will expect a parameters file to be created at `./applier/params/prod-credentials`. It should look something like this:
+    The Ansible automation for your _Dev_ cluster will expect a parameters file to be created at `./applier/params/prod-credentials`. It should look something like this:
     ```
     $ echo "TOKEN=${TOKEN}
     API_URL=https://master.example.com
