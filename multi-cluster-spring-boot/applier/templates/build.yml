@@ -33,11 +33,13 @@ objects:
       type: "JenkinsPipeline"
       jenkinsPipelineStrategy:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
-      env:
-      - name: SOURCE_CODE_URL
-        value: ${SOURCE_CODE_URL}
-      - name: SOURCE_CODE_BRANCH
-        value: ${SOURCE_CODE_BRANCH}
+        env:
+        - name: SOURCE_CODE_URL
+          value: ${SOURCE_CODE_URL}
+        - name: SOURCE_CODE_BRANCH
+          value: ${SOURCE_CODE_BRANCH}
+        - name: SKIP_TLS
+          value: "true"
 - apiVersion: v1
   kind: BuildConfig
   metadata:

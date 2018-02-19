@@ -108,7 +108,7 @@ podTemplate(label: 'promotion-slave', cloud: 'openshift', serviceAccount: "jenki
 
     stage("Verify Deployment to ${env.STAGE3}") {
 
-      openshiftVerifyDeployment(apiURL: "${PROD_API}", authToken: "${PROD_TOKEN}", deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE3}", verifyReplicaCount: true)
+      openshiftVerifyDeployment(apiURL: "${PROD_API}", authToken: "${PROD_TOKEN}", deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE3}", verifyReplicaCount: true )
 
     }
   }

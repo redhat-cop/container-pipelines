@@ -6,16 +6,10 @@ items:
   metadata:
     name: multicluster-spring-boot-dev
     creationTimestam: null
-  displayName: Dev - Spring Rest App
+  displayName: MultiCluster Pipeline - Dev
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: multicluster-spring-boot-stage
     creationTimestam: null
-  displayName: Staging - Spring Rest App
-- kind: ProjectRequest
-  apiVersion: v1
-  metadata:
-    name: multicluster-spring-boot-prod
-    creationTimestam: null
-  displayName: Prod - Spring Rest App
+  displayName: MultiCluster Pipeline - Stage

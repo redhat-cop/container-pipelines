@@ -1,0 +1,13 @@
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    file: "{{ inventory_dir }}/../projects/projects-prod.yml"
+    file_action: create
+  - name: "create promoter account"
+    file: "{{ inventory_dir }}/../projects/promoter-sa.yml"
+- object: deployments
+  content:
+  - name: "deply prod environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-prod"
