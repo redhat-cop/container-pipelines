@@ -79,6 +79,7 @@ pipeline {
           openshift.withCluster() {
             echo "Looking for secret in ${openshift.project()}"
             openshift.verbose()
+            openshift.raw('whoami')
             def secretData = openshift.selector('secret', 'prod-credentials')
             echo "${secretData.object()}"
             openshift.verbose(false)
