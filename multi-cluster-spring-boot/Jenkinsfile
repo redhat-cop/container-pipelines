@@ -77,7 +77,9 @@ pipeline {
       steps {
         script {
           openshift.withCluster() {
-            def secretData = openshift.selector('secret/prod-credentials').object().data
+            echo "Looking for secret in ${openshift.project()}"
+            def secretData = openshift.selector('secret/prod-credentials')
+            secretData.describe()
 /*
             openshift.withProject("${STAGE2}") {
               def imageRegistry = openshift.selector( 'is', "${APP_NAME}").object().status.dockerImageRepository
