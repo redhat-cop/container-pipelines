@@ -1,10 +1,7 @@
 openshift.withCluster() {
   env.SKOPEO_IMAGE = openshift.selector( 'is/jenkins-slave-image-mgmt' ).object().status.dockerImageRepository
 }
-env.SOURCE_CODE_URL = 'https://github.com/redhat-cop/spring-rest.git'
-
-//env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
-env.APP_NAME = 'spring-rest'
+env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
 def projectBase = "${env.NAMESPACE}".replaceAll(/-dev/, '')
 env.STAGE1 = "${projectBase}-dev"
 env.STAGE2 = "${projectBase}-stage"
