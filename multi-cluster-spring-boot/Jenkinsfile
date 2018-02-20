@@ -2,6 +2,7 @@ openshift.withCluster() {
   env.SKOPEO_IMAGE = openshift.selector( 'is/jenkins-slave-image-mgmt' ).object().status.dockerImageRepository
 }
 env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
+echo "Starting Pipeline for ${APP_NAME}..."
 def projectBase = "${env.NAMESPACE}".replaceAll(/-dev/, '')
 env.STAGE1 = "${projectBase}-dev"
 env.STAGE2 = "${projectBase}-stage"
@@ -33,7 +34,7 @@ pipeline {
       }
     }
 
-    stage ('Verify Deployment to ${STAGE1}') {
+    stage ('Verify Deployment to Dev') {
       steps {
         script {
           openshift.withCluster() {
