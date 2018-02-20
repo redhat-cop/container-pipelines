@@ -79,6 +79,9 @@ pipeline {
           openshift.withCluster() {
             echo "Looking for secret in ${openshift.project()}"
             openshift.verbose()
+            testImage = openshift.selector( 'is/jenkins-slave-image-mgmt' ).object().status.dockerImageRepository
+            echo "Test Image: ${testImage}"
+
             openshift.raw('whoami')
             def secretData = openshift.selector('secret', 'prod-credentials')
             echo "${secretData.object()}"
