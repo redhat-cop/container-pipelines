@@ -83,8 +83,8 @@ pipeline {
             def localToken = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
 
             def secretData = openshift.selector('secret/prod-credentials').object().data
-            def registry = Base64.decodeBase64(secretData.registry.getByte())
-            def token = Base64.decodeBase64(secretData.token.getByte())
+            def registry = Base64.decodeBase64(secretData.registry.getBytes())
+            def token = Base64.decodeBase64(secretData.token.getBytes())
 
             openshift.withProject("${STAGE2}") {
               def imageRegistry = openshift.selector( 'is', "${APP_NAME}").object().status.dockerImageRepository
