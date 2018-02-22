@@ -137,12 +137,14 @@ pipeline {
           }
           openshift.withCluster( env.API, env.TOKEN ) {
             openshift.withProject("${STAGE3}") {
+              openshift.skipTLSVerify(true)
               def dcObj = openshift.selector('dc', env.APP_NAME).object()
               def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
               podSelector.untilEach {
                   echo "pod: ${it.name()}"
                   return it.object().status.containerStatuses[0].ready
               }
+              openshift.skipTLSVerify(false)
             }
           }
         }
