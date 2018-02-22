@@ -133,7 +133,7 @@ pipeline {
             def encodedAPI = secretData.api
             def encodedToken = secretData.token
             env.API = sh(script:"set +x; echo ${encodedAPI} | base64 --decode", returnStdout: true)
-            end.TOKEN = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
+            env.TOKEN = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
           }
           openshift.withCluster( env.API, env.TOKEN ) {
             openshift.withProject("${STAGE3}") {
