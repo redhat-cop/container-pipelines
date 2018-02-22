@@ -132,19 +132,17 @@ pipeline {
             def secretData = openshift.selector('secret/prod-credentials').object().data
             def encodedAPI = secretData.api
             def encodedToken = secretData.token
-            env.API = sh(script:"set +x; echo ${encodedAPI} | base64 --decode", returnStdout: true)
+            env.API = sh(script:"set +x; echo ${encodedAPI} | base64 --decode", returnStdout: true).replaceAll(/https?/, 'insecure')
             env.TOKEN = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
           }
           openshift.withCluster( env.API, env.TOKEN ) {
             openshift.withProject("${STAGE3}") {
-              openshift.skipTLSVerify(true)
               def dcObj = openshift.selector('dc', env.APP_NAME).object()
               def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
               podSelector.untilEach {
                   echo "pod: ${it.name()}"
                   return it.object().status.containerStatuses[0].ready
               }
-              openshift.skipTLSVerify(false)
             }
           }
         }
