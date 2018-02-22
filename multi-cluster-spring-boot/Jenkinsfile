@@ -80,7 +80,7 @@ pipeline {
         script {
           openshift.withCluster() {
 
-            def secretData = openshift.selector('secret', 'prod-credentials')
+            def secretData = openshift.selector('secret', 'prod-credentials').object()
             def registry = secretData.registry
             def token = secretData.token
 
