@@ -19,7 +19,7 @@ pipeline {
     stage('Code Build') {
       steps {
         git url: "${SOURCE_CODE_URL}"
-        sh "mvn clean install"
+        sh "mvn clean install -q"
       }
     }
 
