@@ -89,7 +89,12 @@ pipeline {
             openshift.withProject("${STAGE2}") {
               def imageRegistry = openshift.selector( 'is', "${APP_NAME}").object().status.dockerImageRepository
               echo "Promoting ${imageRegistry}/${STAGE2}/${APP_NAME} -> ${registry}/${STAGE3}/${APP_NAME}"
-              sh "skopeo copy --tls-verify=false --remove-signatures --src-creds openshift:${localToken} --dest-creds openshift:${token} docker://${imageRegistry}/${STAGE2}/${APP_NAME} docker://${registry}/${STAGE3}/${APP_NAME}"
+              sh """
+              skopeo copy --remove-signatures \
+                --src-creds openshift:${localToken} --src-cert-dir /run/secrets/kubernetes.io/serviceaccount/ca.crt \
+                --dest-creds openshift:${token}  --dest-tls-verify false \
+                docker://${imageRegistry}/${STAGE2}/${APP_NAME} docker://${registry}/${STAGE3}/${APP_NAME}
+              """
             }
 
           }
