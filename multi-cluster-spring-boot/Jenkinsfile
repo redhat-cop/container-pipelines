@@ -88,13 +88,13 @@ pipeline {
             def secretData = openshift.selector('secret', 'prod-credentials')
             echo "${secretData.object()}"
             openshift.verbose(false)
-/*
+
             openshift.withProject("${STAGE2}") {
               def imageRegistry = openshift.selector( 'is', "${APP_NAME}").object().status.dockerImageRepository
               echo "Promoting ${imageRegistry}/${STAGE2}/${APP_NAME} -> ${secretData.registry}/${STAGE3}/${APP_NAME}"
               sh "skopeo copy --tls-verify=false --remove-signatures --src-creds openshift:${TOKEN} --dest-creds openshift:${secretData.token} docker://${imageRegistry}/${STAGE2}/${APP_NAME} docker://${secretData.registry}/${STAGE3}/${APP_NAME}"
             }
-*/
+
           }
         }
       }
