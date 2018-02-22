@@ -93,8 +93,8 @@ pipeline {
               echo "Promoting ${imageRegistry} -> ${registry}/${STAGE3}/${APP_NAME}"
               sh """
               skopeo copy --remove-signatures \
-                --src-creds openshift:${localToken} --src-cert-dir /run/secrets/kubernetes.io/serviceaccount/ca.crt \
-                --dest-creds openshift:${token}  --dest-tls-verify false \
+                --src-creds openshift:${localToken} --src-cert-dir=/run/secrets/kubernetes.io/serviceaccount/ \
+                --dest-creds openshift:${token}  --dest-tls-verify=false \
                 docker://${imageRegistry} docker://${registry}/${STAGE3}/${APP_NAME}
               """
             }
