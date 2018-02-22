@@ -82,7 +82,7 @@ pipeline {
 
             def localToken = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
 
-            def secretData = openshift.selector('secret', 'prod-credentials').object()
+            def secretData = openshift.selector('secret/prod-credentials').object().data
             def registry = secretData.registry
             def token = secretData.token
 
