@@ -11,14 +11,18 @@ openshift.withCluster() {
 
 
 pipeline {
+
   agent { label 'maven' }
+
   stages {
+
     stage('Code Build') {
       steps {
         git url: "${SOURCE_CODE_URL}"
         sh "mvn clean install"
       }
     }
+
     stage('Image Build') {
       steps {
         sh """
@@ -119,30 +123,31 @@ pipeline {
           }
         }
       }
+    }
 
-      stage ('Verify Deployment to Prod') {
-        steps {
-          script {
-            openshift.withCluster() {
-              def secretData = openshift.selector('secret/prod-credentials').object().data
-              def encodedAPI = secretData.api
-              def encodedToken = secretData.token
-              def api = sh(script:"set +x; echo ${encodedAPI} | base64 --decode", returnStdout: true)
-              def token = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
-            }
-            openshift.withCluster( api, token ) {
-                openshift.withProject("${STAGE3}") {
-                def dcObj = openshift.selector('dc', env.APP_NAME).object()
-                def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
-                podSelector.untilEach {
-                    echo "pod: ${it.name()}"
-                    return it.object().status.containerStatuses[0].ready
-                }
+    stage ('Verify Deployment to Prod') {
+      steps {
+        script {
+          openshift.withCluster() {
+            def secretData = openshift.selector('secret/prod-credentials').object().data
+            def encodedAPI = secretData.api
+            def encodedToken = secretData.token
+            def api = sh(script:"set +x; echo ${encodedAPI} | base64 --decode", returnStdout: true)
+            def token = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
+          }
+          openshift.withCluster( api, token ) {
+            openshift.withProject("${STAGE3}") {
+              def dcObj = openshift.selector('dc', env.APP_NAME).object()
+              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+              podSelector.untilEach {
+                  echo "pod: ${it.name()}"
+                  return it.object().status.containerStatuses[0].ready
               }
             }
           }
         }
       }
     }
+
   }
 }
