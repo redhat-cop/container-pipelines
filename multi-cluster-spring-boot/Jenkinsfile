@@ -83,17 +83,18 @@ pipeline {
             def localToken = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
 
             def secretData = openshift.selector('secret/prod-credentials').object().data
-            def registry = Base64.decodeBase64(secretData.registry.getBytes())
-            def token = Base64.decodeBase64(secretData.token.getBytes())
+            def registry = secretData.registry
+            def token = secretData.token
 
             openshift.withProject("${STAGE2}") {
               def imageRegistry = openshift.selector( 'is', "${APP_NAME}").object().status.dockerImageRepository
               echo "Promoting ${imageRegistry}/${STAGE2}/${APP_NAME} -> ${registry}/${STAGE3}/${APP_NAME}"
               sh """
+              set +x
               skopeo copy --remove-signatures \
                 --src-creds openshift:${localToken} --src-cert-dir /run/secrets/kubernetes.io/serviceaccount/ca.crt \
-                --dest-creds openshift:${token}  --dest-tls-verify false \
-                docker://${imageRegistry}/${STAGE2}/${APP_NAME} docker://${registry}/${STAGE3}/${APP_NAME}
+                --dest-creds openshift:\$(echo ${token} | base64 --decode)  --dest-tls-verify false \
+                docker://${imageRegistry}/${STAGE2}/${APP_NAME} docker://\$(echo ${registry} | base64 --decode)/${STAGE3}/${APP_NAME}
               """
             }
 
