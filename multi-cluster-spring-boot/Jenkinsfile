@@ -67,10 +67,12 @@ pipeline {
           cloud 'openshift'
           serviceAccount 'jenkins'
           containerTemplate {
-            name 'jenkins-slave-image-mgmt'
-            image "${SKOPEO_IMAGE}"
-            ttyEnabled true
-            command 'cat'
+            name 'jnlp'
+            image "docker-registry.default.svc:5000/${NAMESPACE}/jenkins-slave-image-mgmt"
+            alwaysPullImage true
+            workingDir '/tmp'
+            args '${computer.jnlpmac} ${computer.name}'
+            ttyEnabled false
           }
         }
       }
