@@ -30,7 +30,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
     ```
 3. One of the things that was created by ansible is a `ServiceAccount` that will be used for promoting your app from _Dev_ to _Prod_. We'll need to extract its credentials so that our pipeline can use that account.
     ```
-    TOKEN=$(oc serviceaccounts get-token promoter -n field-guides-prod)
+    TOKEN=$(oc serviceaccounts get-token promoter -n multicluster-spring-boot-prod)
     ```
     The Ansible automation for your _Dev_ cluster will expect a parameters file to be created at `./applier/params/prod-credentials`. It should look something like this:
     ```
