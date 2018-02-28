@@ -14,7 +14,7 @@ node('master') {
   env.OC_CMD = "oc --token=${env.TOKEN} --server=${ocpApiServer} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${env.NAMESPACE}"
 
   env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
-  def projectBase = "${env.NAMESPACE}".replaceAll(/-dev/, '')
+  def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
   env.STAGE1 = "${projectBase}-dev"
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
@@ -25,14 +25,9 @@ node('maven') {
   def mvnCmd = 'mvn'
   String pomFileLocation = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
 
-  stage('SCM Checkout') {
-    checkout scm
-  }
-
   stage('Build') {
-
+    git url: "${APPLICATION_SOURCE_REPO}"
     sh "${mvnCmd} clean install -DskipTests=true -f ${pomFileLocation}"
-
   }
 
   stage('Unit Test') {
@@ -50,6 +45,12 @@ node('maven') {
         cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
       done
       ${env.OC_CMD} start-build ${env.APP_NAME} --from-dir=oc-build --wait=true --follow=true || exit 1
+    """
+  }
+
+  stage("Promote To ${env.STAGE1}") {
+    sh """
+    ${env.OC_CMD} tag ${env.NAMESPACE}/${env.APP_NAME}:latest ${env.STAGE1}/${env.APP_NAME}:latest
     """
   }
 
