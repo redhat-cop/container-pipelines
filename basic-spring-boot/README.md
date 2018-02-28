@@ -20,7 +20,7 @@ $ oc login
 $ ansible-playbook -i ./applier/inventory/ /path/to/casl-ansible/playbooks/openshift-cluster-seed.yml
 ```
 
-At this point you should have 3 projects deployed (`basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
+At this point you should have 3 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
 
 ## Architecture
 
@@ -51,12 +51,9 @@ The idea behind the split between the templates is that I can deploy the build t
 This project includes a sample `Jenkinsfile` pipeline script that could be included with a Java project in order to implement a basic CI/CD pipeline for that project, under the following assumptions:
 
 * The project is built with Maven
-* The `Jenkinsfile` script is placed in the same directory as the `pom.xml` file in the git source.
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-For convenience, this pipeline script is already included in the following git repository, based on our [Spring Boot Demo App](https://github.com/redhat-cop/spring-rest) app.
-
-https://github.com/redhat-cop/spring-rest
+This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redhat-cop/spring-rest).
 
 ## Bill of Materials
 
@@ -70,6 +67,7 @@ https://github.com/redhat-cop/spring-rest
 
 For the purposes of this demo, we are going to create three stages for our application to be promoted through.
 
+- `basic-spring-boot-build`
 - `basic-spring-boot-dev`
 - `basic-spring-boot-stage`
 - `basic-spring-boot-prod`
@@ -78,6 +76,7 @@ In the spirit of _Infrastructure as Code_ we have a YAML file that defines the `
 
 ```
 $ oc create -f applier/projects/projects.yml
+projectrequest "basic-spring-boot-build" created
 projectrequest "basic-spring-boot-dev" created
 projectrequest "basic-spring-boot-stage" created
 projectrequest "basic-spring-boot-prod" created
@@ -88,7 +87,7 @@ projectrequest "basic-spring-boot-prod" created
 For this step, the OpenShift default template set provides exactly what we need to get jenkins up and running.
 
 ```
-$ oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-spring-boot-dev
+$ oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-spring-boot-build
 route "jenkins" created
 deploymentconfig "jenkins" created
 serviceaccount "jenkins" created
@@ -150,5 +149,5 @@ At this point you should be able to go to the Web Console and follow the pipelin
 Cleaning up this example is as simple as deleting the projects we created at the beginning.
 
 ```
-oc delete project basic-spring-boot-dev basic-spring-boot-prod basic-spring-boot-stage
+oc delete project basic-spring-boot-build basic-spring-boot-dev basic-spring-boot-prod basic-spring-boot-stage
 ```

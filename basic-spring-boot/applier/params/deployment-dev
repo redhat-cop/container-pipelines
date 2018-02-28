@@ -1,5 +1,5 @@
 APPLICATION_NAME=spring-rest
 NAMESPACE=basic-spring-boot-dev
-SA_NAMESPACE=basic-spring-boot-dev
+SA_NAMESPACE=basic-spring-boot-build
 READINESS_RESPONSE=status.:.UP
 READINESS_PATH=/health
