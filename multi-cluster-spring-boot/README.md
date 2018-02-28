@@ -21,14 +21,16 @@ In order to run this pipeline, you will need:
 
 This quickstart can be deployed quickly using Ansible. Here are the steps.
 
-1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git) and the [casl-ansible](https://github.com/redhat-cop/casl-ansible.git) repo.
-2. Log into your _Prod_ OpenShift cluster, and run the following command.
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git)
+2. `cd container-pipelines/multi-cluster-spring-boot`
+3. Run `ansible-galaxy install -r requirements.yml --roles-path=roles`
+4. Log into your _Prod_ OpenShift cluster, and run the following command.
     ```
     $ oc login <prod cluster>
     ...
-    $ ansible-playbook -i ./applier/inventory-prod/ /path/to/casl-ansible/playbooks/openshift-cluster-seed.yml
+    $ ansible-playbook -i ./applier/inventory-prod/ roles/casl-ansible/playbooks/openshift-cluster-seed.yml
     ```
-3. One of the things that was created by ansible is a `ServiceAccount` that will be used for promoting your app from _Dev_ to _Prod_. We'll need to extract its credentials so that our pipeline can use that account.
+5. One of the things that was created by ansible is a `ServiceAccount` that will be used for promoting your app from _Dev_ to _Prod_. We'll need to extract its credentials so that our pipeline can use that account.
     ```
     TOKEN=$(oc serviceaccounts get-token promoter -n multicluster-spring-boot-prod)
     ```
@@ -39,7 +41,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
     REGISTRY_URL=docker-registry-default.apps.example.com
     " > ./applier/params/prod-credentials
     ```
-4. Now, Log into your _Dev_ cluster, and instantiate the pipeline.
+6. Now, Log into your _Dev_ cluster, and instantiate the pipeline.
     ```
     $ oc login <dev cluster>
     ...
