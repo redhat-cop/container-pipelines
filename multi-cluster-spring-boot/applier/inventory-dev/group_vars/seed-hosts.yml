@@ -1,0 +1,31 @@
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    file: "{{ inventory_dir }}/../projects/projects.yml"
+    file_action: create
+- object: deployments
+  content:
+  - name: "deploy jenkins"
+    template: "openshift//jenkins-ephemeral"
+    params: "{{ inventory_dir }}/../params/jenkins"
+    namespace: multicluster-spring-boot-dev
+  - name: "create prod cluster credential"
+    template: "{{ inventory_dir }}/../templates/cluster-secret.yml"
+    params: "{{ inventory_dir }}/../params/prod-credentials"
+    namespace: multicluster-spring-boot-dev
+  - name: "deploy dev environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-dev"
+  - name: "deply stage environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-stage"
+- object: builds
+  content:
+  - name: Apply Image Build"
+    namespace: "multicluster-spring-boot-dev"
+    template: "https://raw.githubusercontent.com/redhat-cop/containers-quickstarts/master/jenkins-slaves/templates/jenkins-slave-image-mgmt-template.json"
+    params: "{{ inventory_dir }}/../params/build-slave-dev"
+  - name: "deploy build pipeline to dev"
+    template: "{{ inventory_dir }}/../templates/build.yml"
+    params: "{{ inventory_dir }}/../params/build-dev"
