@@ -1,0 +1,4 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=basic-spring-boot-build
+SOURCE_REPOSITORY_URL=https://github.com/etsauer/container-pipelines.git
+SOURCE_REPOSITORY_REF=applier-enable

@@ -10,6 +10,13 @@ metadata:
     version: 1.2.0
   name: generic-java-jenkins-pipeline
 objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${NAMESPACE}
 - kind: "BuildConfig"
   apiVersion: "v1"
   metadata:
@@ -33,9 +40,9 @@ objects:
       type: "JenkinsPipeline"
       jenkinsPipelineStrategy:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
-      env:
-        - name: "BUILD_CONTEXT_DIR"
-          value: "demo"
+        env:
+        - name: "APPLICATION_SOURCE_REPO"
+          value: "${APPLICATION_SOURCE_REPO}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -69,13 +76,17 @@ parameters:
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/redhat-cop/spring-rest.git
+  value: https://github.com/redhat-cop/container-pipelines.git
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
   value: "master"
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
-  value:
+  value: basic-spring-boot
+- description: Source code repo for demo app
+  name: APPLICATION_SOURCE_REPO
+  required: true
+  value: https://github.com/redhat-cop/spring-rest.git
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile
