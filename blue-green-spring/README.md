@@ -17,10 +17,18 @@ This sample demonstrates the following capabilities:
 
 ### Requirements
 1. [OpenShift Applier](https://github.com/redhat-cop/openshift-applier)
-   `git clone git@github.com:redhat-cop/openshift-applier.git`
-   `git checkout v3.7.2`
+
+    ```
+    git clone git@github.com:redhat-cop/openshift-applier.git
+    cd openshift-applier
+    git checkout v3.7.2
+    ```
+
 2. [Ansible](https://www.ansible.com/)
-   `sudo dnf install ansible`
+
+    ```
+    sudo dnf install ansible
+    ```
 
 ### Installation
 Run the following commands to instantiate this example.
