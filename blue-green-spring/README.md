@@ -1,6 +1,6 @@
 # A Sample OpenShift Pipeline for Blue Green deployments
 
-This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. The pipleine will create two instances of the applicaiton in the Production namespace.  There will be three routes in the namespace; a blue, green and blue-green route.  The blue-green route will switch to the latest deployment when the pipeline completes.  This allows for tesing of the new deployment prior to switching live traffic.  Also, the previous deployment can be used to compmare the previous deployment.
+This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. The pipleine will create two instances of the application in the Production namespace.  There will be three routes in the namespace; a blue, green and blue-green route.  The blue-green route will switch to the latest deployment when the pipeline completes.  This allows for tesing of the new deployment prior to switching live traffic.  Also, the previous deployment can be used to compare the previous deployment.
 
 This sample demonstrates the following capabilities:
 
@@ -81,7 +81,7 @@ https://github.com/malacourse/simple-spring-boot-web
 
 For the purposes of this demo, we are going to create four stages for our application to be promoted through.
 
-- 'spring-boot-web-build'
+- `spring-boot-web-build`
 - `spring-boot-web-dev`
 - `spring-boot-web-stage`
 - `spring-boot-web-prod`
@@ -102,9 +102,9 @@ A _deploy template_ is provided at `files/deployment/template.yml` that defines 
 * A `DeploymentConfig`
 * A `RoleBinding` to allow Jenkins to deploy in each namespace.
 
-This template should be instantiated once in each of the lower level namespaces (dev, stage,qa) that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
+This template should be instantiated once in each of the lower level namespaces (dev, stage) that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
 
-A production blue/green_deploy template_ is provided at `deploy/simple-spring-boot-template-prod.yml` that defines all of the resources required to run the openjdk8 application. It includes:
+A production blue/green _deploy template_ is provided at `deploy/simple-spring-boot-template-prod.yml` that defines all of the resources required to run the openjdk8 application. It includes:
 
 * Two `Service's`
 * Three `Route's` a blue route, green route and main route that switches between the two deployments/services.
