@@ -11,21 +11,21 @@ This sample demonstrates the following capabilities:
 * Tagging images with the current version of the artifact defined in the pom.xml file
 * Promotion of an application's container image to a blue/green production configuration
 * Switching production routes between blue and green deployments after confirmation
-* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) Ansible role.
+* Automated rollout using the [openshift-applier](https://github.com/redhat-cop/openshift-applier/tree/master/roles/openshift-applier) Ansible role.
 
 ## Quickstart
 
 ### Requirements
-1. [OpenShift Applier](https://github.com/redhat-cop/casl-ansible)
-   `git clone git@github.com:redhat-cop/casl-ansible.git`
-   `git checkout v3.6.1`
+1. [OpenShift Applier](https://github.com/redhat-cop/openshift-applier)
+   `git clone git@github.com:redhat-cop/openshift-applier.git`
+   `git checkout v3.7.2`
 2. [Ansible](https://www.ansible.com/)
    `sudo dnf install ansible`
 
 ### Installation
 Run the following commands to instantiate this example.
 ```
-ansible-playbook -i inventory/hosts ../casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
+ansible-playbook -i inventory/hosts ../../openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
 ```
 The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
 
