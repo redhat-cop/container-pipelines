@@ -16,15 +16,7 @@ This sample demonstrates the following capabilities:
 ## Quickstart
 
 ### Requirements
-1. [OpenShift Applier](https://github.com/redhat-cop/openshift-applier)
-
-    ```
-    git clone git@github.com:redhat-cop/openshift-applier.git
-    cd openshift-applier
-    git checkout v3.7.2
-    ```
-
-2. [Ansible](https://www.ansible.com/)
+1. [Ansible](https://www.ansible.com/)
 
     ```
     sudo dnf install ansible
@@ -32,10 +24,19 @@ This sample demonstrates the following capabilities:
 
 ### Installation
 Run the following commands to instantiate this example.
-```
-ansible-playbook -i inventory/hosts ../../openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
-```
-The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
+1. Clone this repository
+2. `cd container-pipelines/blue-green-spring`
+3. Run ansible-galaxy to install required Ansible roles
+
+    ```
+    ansible-galaxy install -r requirements.yml --roles-path=roles
+    ```
+
+4. Run the following Ansible playbook to install all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
+
+    ```
+    ansible-playbook -i inventory/hosts roles/openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
+    ```
 
 ## Architecture
 
