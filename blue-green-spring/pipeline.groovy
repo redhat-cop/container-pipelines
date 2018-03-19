@@ -119,7 +119,7 @@ node('maven') {
     openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}-${newState}", namespace: "${STAGE3}", verifyReplicaCount: true)
     println "Application ${env.APP_NAME}-${newState} is now in Production!"
 
-    input "Switch ${env.STAGE3} form ${currentState} to ${newState} deployment?"
+    input "Switch ${env.STAGE3} from ${currentState} to ${newState} deployment?"
     
     // Switch Route to new active c
     sh "oc patch route ${env.APP_NAME} --patch '{\"spec\": { \"to\": { \"name\": \"${env.APP_NAME}-${newState}\"}}}' -n ${env.STAGE3}"
