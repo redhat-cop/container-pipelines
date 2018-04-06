@@ -15,7 +15,6 @@ objects:
   metadata:
     annotations:
       openshift.io/display-name: Red Hat OpenJDK 8
-      openshift.io/image.dockerRepositoryCheck: 2018-04-06T20:39:19Z
       openshift.io/provider-display-name: Red Hat, Inc.
       version: 1.4.8
     name: redhat-openjdk18-openshift
