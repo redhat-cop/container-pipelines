@@ -20,7 +20,7 @@ objects:
       openshift.io/provider-display-name: Red Hat, Inc.
       version: 1.4.8
     name: redhat-openjdk18-openshift
-    namespace: openshift
+    namespace: ${IMAGE_STREAM_NAMESPACE}
   spec:
     tags:
     - annotations:
