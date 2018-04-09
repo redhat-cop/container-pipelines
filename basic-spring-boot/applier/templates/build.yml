@@ -12,6 +12,8 @@ metadata:
 objects:
 - apiVersion: v1
   kind: ImageStream
+  labels:
+    xpaas: 1.4.8
   metadata:
     annotations:
       openshift.io/display-name: Red Hat OpenJDK 8
@@ -29,15 +31,11 @@ objects:
         sampleRepo: https://github.com/jboss-openshift/openshift-quickstarts
         supports: java:8
         tags: builder,java,openjdk,hidden
-        version: "1.0"
+        version: '1.0'
       from:
         kind: DockerImage
-        name: registry.access.redhat.com/redhat-openjdk-18/redhat-openjdk18-openshift:1.0
-      generation: 2
-      importPolicy: {}
-      name: "1.0"
-      referencePolicy:
-        type: Source
+        name: registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.0
+      name: '1.0'
     - annotations:
         description: Build and run Java applications using Maven and OpenJDK 8.
         iconClass: icon-rh-openjdk
@@ -46,15 +44,11 @@ objects:
         sampleRepo: https://github.com/jboss-openshift/openshift-quickstarts
         supports: java:8
         tags: builder,java,openjdk
-        version: "1.1"
+        version: '1.1'
       from:
         kind: DockerImage
-        name: registry.access.redhat.com/redhat-openjdk-18/redhat-openjdk18-openshift:1.1
-      generation: 2
-      importPolicy: {}
-      name: "1.1"
-      referencePolicy:
-        type: Source
+        name: registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.1
+      name: '1.1'
     - annotations:
         description: Build and run Java applications using Maven and OpenJDK 8.
         iconClass: icon-rh-openjdk
@@ -63,15 +57,11 @@ objects:
         sampleRepo: https://github.com/jboss-openshift/openshift-quickstarts
         supports: java:8
         tags: builder,java,openjdk
-        version: "1.2"
+        version: '1.2'
       from:
         kind: DockerImage
-        name: registry.access.redhat.com/redhat-openjdk-18/redhat-openjdk18-openshift:1.2
-      generation: 2
-      importPolicy: {}
-      name: "1.2"
-      referencePolicy:
-        type: Source
+        name: registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:1.2
+      name: '1.2'
 - apiVersion: v1
   kind: ImageStream
   metadata:
