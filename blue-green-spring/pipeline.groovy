@@ -66,6 +66,12 @@ node('maven') {
      """
   }
 
+  stage("Promote To ${env.STAGE1}") {
+    sh """
+    ${env.OC_CMD} tag ${env.NAMESPACE}/${env.APP_NAME}:latest ${env.STAGE1}/${env.APP_NAME}:latest
+    """
+  }
+
   stage("Verify Deployment to ${env.STAGE1}") {
 
     openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE1}", verifyReplicaCount: true)
