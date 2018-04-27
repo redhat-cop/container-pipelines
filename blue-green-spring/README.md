@@ -1,6 +1,6 @@
 # A Sample OpenShift Pipeline for Blue Green deployments
 
-This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. The pipleine will create two instances of the applicaiton in the Production namespace.  There will be three routes in the namespace; a blue, green and blue-green route.  The blue-green route will switch to the latest deployment when the pipeline completes.  This allows for tesing of the new deployment prior to switching live traffic.  Also, the previous deployment can be used to compmare the previous deployment.  
+This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in a Blue/Green deployment in the OpenShift Container Platform. The pipleine will create two instances of the application in the Production namespace.  There will be three routes in the namespace; a blue, green and blue-green route.  The blue-green route will switch to the latest deployment when the pipeline completes.  This allows for tesing of the new deployment prior to switching live traffic.  Also, the previous deployment can be used to compare the previous deployment.
 
 This sample demonstrates the following capabilities:
 
@@ -11,22 +11,32 @@ This sample demonstrates the following capabilities:
 * Tagging images with the current version of the artifact defined in the pom.xml file
 * Promotion of an application's container image to a blue/green production configuration
 * Switching production routes between blue and green deployments after confirmation
+* Automated rollout using the [openshift-applier](https://github.com/redhat-cop/openshift-applier/tree/master/roles/openshift-applier) Ansible role.
 
 ## Quickstart
 
 ### Requirements
-1. [OpenShift Applier](https://github.com/redhat-cop/casl-ansible)
-   `git clone git@github.com:redhat-cop/casl-ansible.git`
-   `git checkout v3.6.1`
-2. [Ansible](https://www.ansible.com/)
-   `sudo dnf install ansible`
+1. [Ansible](https://www.ansible.com/)
+
+    ```
+    sudo dnf install ansible
+    ```
 
 ### Installation
 Run the following commands to instantiate this example.
-```
-ansible-playbook -i inventory/hosts ../casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
-```
-The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
+1. Clone this repository
+2. `cd container-pipelines/blue-green-spring`
+3. Run ansible-galaxy to install required Ansible roles
+
+    ```
+    ansible-galaxy install -r requirements.yml --roles-path=roles
+    ```
+
+4. Run the following Ansible playbook to install all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
+
+    ```
+    ansible-playbook -i inventory/hosts roles/openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
+    ```
 
 ## Architecture
 
@@ -80,7 +90,7 @@ https://github.com/malacourse/simple-spring-boot-web
 
 For the purposes of this demo, we are going to create four stages for our application to be promoted through.
 
-- 'spring-boot-web-build'
+- `spring-boot-web-build`
 - `spring-boot-web-dev`
 - `spring-boot-web-stage`
 - `spring-boot-web-prod`
@@ -101,11 +111,11 @@ A _deploy template_ is provided at `files/deployment/template.yml` that defines 
 * A `DeploymentConfig`
 * A `RoleBinding` to allow Jenkins to deploy in each namespace.
 
-This template should be instantiated once in each of the lower level namespaces (dev, stage,qa) that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
+This template should be instantiated once in each of the lower level namespaces (dev, stage) that our app will be deployed to. For this purpose, we have created a param file to be fed to `oc process` to customize the template for each environment.
 
-A production blue/green_deploy template_ is provided at `deploy/simple-spring-boot-template-prod.yml` that defines all of the resources required to run the openjdk8 application. It includes:
+A production blue/green _deploy template_ is provided at `deploy/simple-spring-boot-template-prod.yml` that defines all of the resources required to run the openjdk8 application. It includes:
 
-* Two `Service's` 
+* Two `Service's`
 * Three `Route's` a blue route, green route and main route that switches between the two deployments/services.
 * Two `ImageStream's`
 * Two `DeploymentConfig's`
