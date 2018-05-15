@@ -13,11 +13,11 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 
 This quickstart can be deployed quickly using Ansible. Here are the steps.
 
-1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git) and the [casl-ansible](https://github.com/redhat-cop/casl-ansible.git) repo.
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier.git) repo.
 2. Log into an OpenShift cluster, then run the following command.
 ```
 $ oc login
-$ ansible-playbook -i ./applier/inventory/ /path/to/casl-ansible/playbooks/openshift-cluster-seed.yml
+$ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
 At this point you should have 3 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
