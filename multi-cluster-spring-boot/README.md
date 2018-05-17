@@ -7,7 +7,7 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`)
-* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/casl-ansible/tree/master/roles/openshift-applier) Ansible role.
+* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier.git) project.
 
 ## Prerequisites
 
@@ -23,12 +23,12 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
 
 1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git)
 2. `cd container-pipelines/multi-cluster-spring-boot`
-3. Run `ansible-galaxy install -r requirements.yml --roles-path=roles`
+3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
 4. Log into your _Prod_ OpenShift cluster, and run the following command.
     ```
     $ oc login <prod cluster>
     ...
-    $ ansible-playbook -i ./applier/inventory-prod/ roles/casl-ansible/playbooks/openshift-cluster-seed.yml
+    $ ansible-playbook -i ./applier/inventory-prod/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
     ```
 5. One of the things that was created by ansible is a `ServiceAccount` that will be used for promoting your app from _Dev_ to _Prod_. We'll need to extract its credentials so that our pipeline can use that account.
     ```
@@ -45,7 +45,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
     ```
     $ oc login <dev cluster>
     ...
-    $ ansible-playbook -i ./applier/inventory-dev/ /path/to/casl-ansible/playbooks/openshift-cluster-seed.yml
+    $ ansible-playbook -i ./applier/inventory-dev/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
     ```
 
 At this point you should have 3 projects deployed (`multicluster-spring-boot-dev`, `multicluster-spring-boot-stage`, and `multicluster-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
