@@ -116,7 +116,7 @@ route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" configured
-$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployments-stage | oc apply -f-
+$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
