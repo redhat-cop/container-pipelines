@@ -7,20 +7,20 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`) - Coming Soon!
-* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier.git) project.
+* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
 ## Automated Quickstart
 
 This quickstart can be deployed quickly using Ansible. Here are the steps.
 
-1. Clone [this repo](https://github.com/redhat-cop/container-pipelines.git) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier.git) repo.
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier) repo.
 2. Log into an OpenShift cluster, then run the following command.
 ```
 $ oc login
 $ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
-At this point you should have 3 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest.git) demo application deployed to all 3.
+At this point you should have 3 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
 
 ## Architecture
 

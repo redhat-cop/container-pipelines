@@ -7,7 +7,7 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`)
-* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier.git) project.
+* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
 ## Quickstart
 
