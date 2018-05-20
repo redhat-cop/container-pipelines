@@ -58,7 +58,8 @@ This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redh
 ## Bill of Materials
 
 * One or Two OpenShift Container Platform Clusters
-  * OpenShift 3.5+ is required.
+  * OpenShift 3.5+ is required
+  * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
 * Access to GitHub
 
 ## Manual Deployment Instructions
