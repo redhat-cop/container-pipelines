@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: todomvc-projects
+metadata:
+  annotations:
+    description: Template for creating todomvc projects
+  name: todomvc-projects
+objects:
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: ${APPLICATION_NAME}-build
+    creationTimestam: null
+  displayName: "${APPLICATION_NAME} - Build"
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-dev"
+    creationTimestam: null
+  displayName: "${APPLICATION_NAME} - Dev"
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-stage"
+    creationTimestam: null
+  displayName: "${APPLICATION_NAME} - Stage"
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}-prod"
+    creationTimestam: null
+  displayName: "${APPLICATION_NAME} - Prod"
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: todomvc    
