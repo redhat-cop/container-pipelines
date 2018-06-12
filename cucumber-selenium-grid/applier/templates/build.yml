@@ -43,8 +43,8 @@ objects:
         env:
         - name: "APPLICATION_SOURCE_REPO"
           value: "${APPLICATION_SOURCE_REPO}"
-        - name: "CONTEXT_ROOT"
-          value: "${APPLICATION_CONTEXT_ROOT}"  
+        - name: "CONTEXT_DIR"
+          value: "${APPLICATION_CONTEXT_DIR}"  
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -89,8 +89,8 @@ parameters:
   name: APPLICATION_SOURCE_REPO
   required: true
   value: https://github.com/raffaelespazzoli/todomvc
-- description: Application context root
-  name: APPLICATION_CONTEXT_ROOT
+- description: Application context dir
+  name: APPLICATION_CONTEXT_DIR
   required: true
   value: '.'  
 - description: Path within Git project pointing to the pipeline run script

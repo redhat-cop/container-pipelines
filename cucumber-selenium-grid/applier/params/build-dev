@@ -2,4 +2,4 @@ APPLICATION_NAME=todo-mvc
 NAMESPACE=todomvc-build
 SOURCE_REPOSITORY_URL=https://github.com/raffaelespazzoli/container-pipelines
 SOURCE_REPOSITORY_REF=selenium
-APPLICATION_CONTEXT_ROOT=examples/angularjs
+APPLICATION_CONTEXT_DIR=examples/angularjs
