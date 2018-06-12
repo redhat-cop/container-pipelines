@@ -48,15 +48,6 @@ pipeline {
       }
     }
 
-    // Run Maven build, skipping tests
-    stage('Build'){
-      steps {
-        sh "cd ${CONTEXT_DIR}"
-        //sh "echo $PATH" 
-        //sh "/bin/bash -c 'npm install'"
-      }
-    }
-
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){
       steps {
@@ -68,7 +59,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("${STAGE0}") {
-              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=.").logs("-f")
+              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=${CONTEXT_DIR}").logs("-f")
             }
           }
         }
