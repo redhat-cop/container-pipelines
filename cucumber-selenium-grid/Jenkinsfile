@@ -53,7 +53,7 @@ pipeline {
       steps {
         sh "cd ${CONTEXT_DIR}"
         sh "echo $PATH" 
-        sh "'npm install'"
+        sh "/bin/bash -c 'npm install'"
       }
     }
 
