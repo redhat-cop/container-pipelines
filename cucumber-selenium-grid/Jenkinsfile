@@ -8,7 +8,7 @@ openshift.withCluster() {
   env.STAGE1 = "${projectBase}-dev"
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
-  def label = "nodejs-slave-${UUID.randomUUID().toString()}"
+  env.LABEL = "nodejs-slave-${UUID.randomUUID().toString()}"
 }
 
 pipeline {
@@ -19,7 +19,7 @@ pipeline {
   // workspace
   agent {
     kubernetes {
-      label "${label}"
+      label "${LABEL}"
       cloud 'openshift'
       serviceAccount 'jenkins'
       containerTemplate {
