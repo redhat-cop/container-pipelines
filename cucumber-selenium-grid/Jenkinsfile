@@ -19,7 +19,7 @@ pipeline {
   // workspace
   agent {
     kubernetes {
-      label ${label}
+      label "${label}"
       cloud 'openshift'
       serviceAccount 'jenkins'
       containerTemplate {
