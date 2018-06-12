@@ -8,6 +8,7 @@ openshift.withCluster() {
   env.STAGE1 = "${projectBase}-dev"
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
+  def label = "nodejs-slave-${UUID.randomUUID().toString()}"
 }
 
 pipeline {
@@ -17,8 +18,19 @@ pipeline {
   // After Pipeline completes the Pod is killed so every run will have clean
   // workspace
   agent {
-    label 'nodejs'
-  }
+    kubernetes {
+      label label
+      cloud 'openshift'
+      serviceAccount 'jenkins'
+      containerTemplate {
+        name 'jnlp'
+        image "docker-registry.default.svc:5000/${NAMESPACE}/jenkins-slave-nodejs8"
+        alwaysPullImage true
+        workingDir '/tmp'
+        args '${computer.jnlpmac} ${computer.name}'
+        ttyEnabled false
+      }
+    }
 
   // Pipeline Stages start here
   // Requeres at least one stage
