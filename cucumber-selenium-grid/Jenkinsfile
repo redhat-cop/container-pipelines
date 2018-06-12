@@ -51,7 +51,7 @@ pipeline {
     // Run Maven build, skipping tests
     stage('Build'){
       steps {
-        sh "cd ${CONTEXT_DIR} && npm install"
+        sh "cd ${CONTEXT_DIR} && /opt/rh/rh-nodejs8/root/usr/bin/npm install"
       }
     }
 
