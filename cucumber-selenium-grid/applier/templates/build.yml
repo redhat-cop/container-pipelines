@@ -43,6 +43,8 @@ objects:
         env:
         - name: "APPLICATION_SOURCE_REPO"
           value: "${APPLICATION_SOURCE_REPO}"
+        - name: "CONTEXT_ROOT"
+          value: "${APPLICATION_CONTEXT_ROOT}"  
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -87,6 +89,10 @@ parameters:
   name: APPLICATION_SOURCE_REPO
   required: true
   value: https://github.com/raffaelespazzoli/todomvc
+- description: Application context root
+  name: APPLICATION_CONTEXT_ROOT
+  required: true
+  value: '.'  
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile
