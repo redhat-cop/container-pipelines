@@ -17,7 +17,7 @@ pipeline {
   // After Pipeline completes the Pod is killed so every run will have clean
   // workspace
   agent {
-    label 'maven'
+    label 'nodejs'
   }
 
   // Pipeline Stages start here
@@ -38,28 +38,14 @@ pipeline {
     // Run Maven build, skipping tests
     stage('Build'){
       steps {
-        sh "mvn clean install -DskipTests=true -f ${POM_FILE}"
-      }
-    }
-
-    // Run Maven unit tests
-    stage('Unit Test'){
-      steps {
-        sh "mvn test -f ${POM_FILE}"
+        sh "cd ${CONTEXT_DIR}
+        sh "npm install"
       }
     }
 
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){
       steps {
-        // Copy the resulting artifacts into common directory
-        sh """
-          ls target/*
-          rm -rf oc-build && mkdir -p oc-build/deployments
-          for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
-            cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
-          done
-        """
 
         // Build container image using local Openshift cluster
         // Giving all the artifacts to OpenShift Binary Build
@@ -68,7 +54,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("${STAGE0}") {
-              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=oc-build").logs("-f")
+              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=.").logs("-f")
             }
           }
         }
