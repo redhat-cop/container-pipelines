@@ -124,7 +124,7 @@ pipeline {
       steps {
         sh "cd ${CONTEXT_DIR}/integration-tests"
         sh "/bin/bash -c 'npm install'"                   
-        sh "/bin/bash -c 'node ./node_modules/protractor/bin/protractor protractor-conf.js'"
+        sh "/bin/bash -c 'node_modules/protractor/bin/protractor protractor-conf.js'"
 //        script {            
 //          archive (includes: 'pkg/*.gem')
 //          publishHTML (target: [
