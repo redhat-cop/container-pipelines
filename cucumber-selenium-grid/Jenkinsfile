@@ -122,7 +122,7 @@ pipeline {
     
     stage ('Run integration tests') {
       steps {
-        sh "${CONTEXT_DIR}/integration-tests"
+        sh "cd ${CONTEXT_DIR}/integration-tests"
         sh "/bin/bash -c 'npm install'"                   
         sh "/bin/bash -c 'node ./node_modules/protractor/bin/protractor protractor-conf.js'"
 //        script {            
