@@ -82,7 +82,7 @@ objects:
             args:
               - start
               - '--desiredContainers'
-              - '2'
+              - '0'
               - '--screenWidth'
               - '1440'
               - '--screenHeight'
@@ -123,6 +123,18 @@ objects:
                 claimName: zalenium-mounted
         serviceAccountName: zalenium
         serviceAccount: zalenium
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+    labels:
+      application: todomvc
+      template: basic-nodejs
+    name: todomvc
+  spec:
+    to:
+      kind: Service
+      name: todomvc
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
