@@ -1,4 +1,4 @@
-APPLICATION_NAME=todo-mvc
+APPLICATION_NAME=todomvc
 NAMESPACE=todomvc-build
 SOURCE_REPOSITORY_URL=https://github.com/raffaelespazzoli/container-pipelines
 SOURCE_REPOSITORY_REF=selenium

@@ -1,6 +1,4 @@
-APPLICATION_NAME=spring-rest
-NAMESPACE=basic-spring-boot-stage
+APPLICATION_NAME=todomvc
+NAMESPACE=todomvc-stage
 SA_NAME=jenkins
-SA_NAMESPACE=basic-spring-boot-build
-READINESS_RESPONSE=status.:.UP
-READINESS_PATH=/health
+SA_NAMESPACE=todomvc-build

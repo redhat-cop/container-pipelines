@@ -119,6 +119,30 @@ pipeline {
         }
       }
     }
+    
+    stage ('Run integration tests') {
+      steps {
+        sh ${CONTEXT_DIR}/integration-tests
+        sh "/bin/bash -c 'npm install'"                   
+        sh "/bin/bash -c 'node ./node_modules/protractor/bin/protractor protractor-conf.js'"
+//        script {            
+//          archive (includes: 'pkg/*.gem')
+//          publishHTML (target: [
+//            allowMissing: false,
+//            alwaysLinkToLastBuild: false,
+//            keepAll: true,
+//            reportDir: 'coverage',
+//            reportFiles: 'index.html',
+//            reportName: "RCov Report"
+//          ])
+//        }                           
+      }
+                            
+    }
+
+    
+    
+    
     stage('Promote from Stage to Prod') {
       steps {
         script {
