@@ -82,7 +82,7 @@ objects:
             args:
               - start
               - '--desiredContainers'
-              - '0'
+              - '2'
               - '--screenWidth'
               - '1440'
               - '--screenHeight'
@@ -127,14 +127,12 @@ objects:
   kind: Route
   metadata:
     annotations:
-    labels:
-      application: todomvc
-      template: basic-nodejs
-    name: todomvc
+    name: zalenium
+    namespace: ${NAMESPACE}
   spec:
     to:
       kind: Service
-      name: todomvc
+      name: zalenium
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:

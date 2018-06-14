@@ -45,7 +45,6 @@ pipeline {
         // Turn off Git's SSL cert check, uncomment if needed
         // sh 'git config --global http.sslVerify false'
         git url: "${APPLICATION_SOURCE_REPO}"
-        stash 'source'
       }
     }
 
@@ -143,20 +142,36 @@ pipeline {
         dir ("${CONTEXT_DIR}"){
          sh "/bin/bash -c 'npm install'"                   
          sh "/bin/bash -c 'npm run integration-test'"
-    //        script {            
-    //          archive (includes: 'pkg/*.gem')
-    //          publishHTML (target: [
-    //            allowMissing: false,
-    //            alwaysLinkToLastBuild: false,
-    //            keepAll: true,
-    //            reportDir: 'coverage',
-    //            reportFiles: 'index.html',
-    //            reportName: "RCov Report"
-    //          ])
-    //        }                           
-      }           
-        }
-
+//         script {            
+//           archive (includes: 'cucumber/*')
+//           publishHTML (target: [
+//             allowMissing: false,
+//             alwaysLinkToLastBuild: false,
+//             keepAll: true,
+//             reportDir: 'report',
+//             reportFiles: 'index.html',
+//             reportName: "Cucumber Report"
+//           ])
+//         }                           
+       }           
+     }
+     post {
+       always {
+         dir ("${CONTEXT_DIR}"){
+           script {            
+             archive (includes: 'cucumber/*')
+             publishHTML (target: [
+               allowMissing: false,
+               alwaysLinkToLastBuild: false,
+               keepAll: true,
+               reportDir: 'report',
+               reportFiles: 'index.html',
+               reportName: "Cucumber Report"
+             ])
+           }
+         }
+       }
+     }
 
                             
     }
