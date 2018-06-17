@@ -143,7 +143,8 @@ pipeline {
       steps {
 //        unstash 'source'
         dir ("${CONTEXT_DIR}"){
-         sh "/bin/bash -c 'npm install'"                   
+         sh "/bin/bash -c 'npm install'"
+         sh "/bin/bash -c 'node ./node_modules/protractor/bin/webdriver-manager update'"                   
          sh "/bin/bash -c 'npm run integration-test'"
 //         script {            
 //           archive (includes: 'cucumber/*')
