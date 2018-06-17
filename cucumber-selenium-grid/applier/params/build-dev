@@ -3,3 +3,4 @@ NAMESPACE=todomvc-build
 SOURCE_REPOSITORY_URL=https://github.com/raffaelespazzoli/container-pipelines
 SOURCE_REPOSITORY_REF=selenium
 APPLICATION_CONTEXT_DIR=examples/angularjs
+BASE_APP_DOMAIN=apps.raffa1.casl-contrib.osp.rht-labs.com

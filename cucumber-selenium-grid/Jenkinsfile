@@ -9,6 +9,9 @@ openshift.withCluster() {
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
   env.LABEL = "nodejs-slave-${UUID.randomUUID().toString()}"
+  env.APP_BASE_URL = "http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}"
+  env.SELENIUM_URL = "http://zalenium.${STAGE2}.svc:4444/wd/hub"
+  
 }
 
 pipeline {

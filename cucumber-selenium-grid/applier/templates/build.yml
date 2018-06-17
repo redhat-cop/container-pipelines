@@ -44,7 +44,9 @@ objects:
         - name: "APPLICATION_SOURCE_REPO"
           value: "${APPLICATION_SOURCE_REPO}"
         - name: "CONTEXT_DIR"
-          value: "${APPLICATION_CONTEXT_DIR}"  
+          value: "${APPLICATION_CONTEXT_DIR}"
+        - name: "BASE_APP_DOMAIN"
+          value: "${BASE_APP_DOMAIN}"    
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -117,3 +119,6 @@ parameters:
   name: IMAGE_STREAM_TAG_NAME
   required: true
   value: nodejs:8
+- description: the base domain that this app will have when accessed from outside OCP
+  name: BASE_APP_DOMAIN
+  required: true 
