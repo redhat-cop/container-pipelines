@@ -143,8 +143,8 @@ pipeline {
       steps {
 //        unstash 'source'
         dir ("${CONTEXT_DIR}"){
-         sh "/bin/bash -c 'npm install'"
-         sh "/bin/bash -c 'echo selenuim url: $SELENIUM_URL , app base path: $APP_BASE_PATH'"                   
+         sh "/bin/bash -c 'echo selenuim url: $SELENIUM_URL , app base path: $APP_BASE_PATH'"
+         sh "/bin/bash -c 'npm install'"                            
          sh "/bin/bash -c 'npm run integration-test'"
 //         script {            
 //           archive (includes: 'cucumber/*')
@@ -168,7 +168,7 @@ pipeline {
                allowMissing: false,
                alwaysLinkToLastBuild: false,
                keepAll: true,
-               reportDir: 'report',
+               reportDir: 'cucumber/report',
                reportFiles: 'index.html',
                reportName: "Cucumber Report"
              ])
