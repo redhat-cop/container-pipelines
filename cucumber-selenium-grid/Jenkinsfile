@@ -128,7 +128,7 @@ pipeline {
         dir ("${CONTEXT_DIR}"){
          //sh "/bin/bash -c 'echo selenuim url: ${SELENIUM_URL} , app base path: ${APP_BASE_PATH}'"
          sh "/bin/bash -c 'npm install'"                            
-         sh "/bin/bash -c 'SELENIUM_URL=http://zalenium.${STAGE2}.svc:4444/wd/hub APP_BASE_PATH=http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}/#! npm run integration-test'"                          
+         sh "/bin/bash -c './node_modules/protractor/bin/protractor ./integration-tests/protractor-conf.js --selenuimAddress=http://zalenium.${STAGE2}.svc:4444/wd/hub --baseUrl=http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}/#!'"                          
        }           
      }
      post {

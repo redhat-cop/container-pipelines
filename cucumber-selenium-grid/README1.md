@@ -1,7 +1,7 @@
 setup
 ```
 oc process -f applier/projects/projects.yml | oc apply -f -
-oc process openshift//jenkins-ephemeral | oc apply -f- -n todomvc-build
+oc process openshift//jenkins-ephemeral JENKINS_JAVA_OVERRIDES=-Dhudson.model.DirectoryBrowserSupport.CSP= | oc apply -f- -n todomvc-build
 oc new-build --strategy docker --name jenkins-slave-nodejs8 --context-dir cucumber-selenium-grid/nodejs-slave https://github.com/raffaelespazzoli/container-pipelines#selenium -n todomvc-build 
 oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-dev | oc apply -f-
 oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
