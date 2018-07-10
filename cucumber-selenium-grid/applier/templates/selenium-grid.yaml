@@ -82,7 +82,7 @@ objects:
             args:
               - start
               - '--desiredContainers'
-              - '2'
+              - '0'
               - '--screenWidth'
               - '1440'
               - '--screenHeight'
@@ -114,6 +114,8 @@ objects:
                 mountPath: /home/seluser/videos
               - name: zalenium-mounted
                 mountPath: /tmp/mounted
+            securityContext:
+              runAsUser: 1000    
         volumes:
             - name: zalenium-data
               persistentVolumeClaim:
@@ -123,6 +125,8 @@ objects:
                 claimName: zalenium-mounted
         serviceAccountName: zalenium
         serviceAccount: zalenium
+        securityContext:
+          fsGroup: 1000
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
