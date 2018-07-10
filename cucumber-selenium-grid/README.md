@@ -1,26 +1,10 @@
 # A Sample OpenShift Pipeline for a Spring Boot Application
 
-This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in OpenShift Container Platform. This sample demonstrates the following capabilities:
-
-* Deploying an integrated Jenkins server inside of OpenShift
-* Running both custom and oob Jenkins slaves as pods in OpenShift
-* "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
-* Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
-* Run of integration tests using selenium in the stage environment
-* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
-
-## Automated Quickstart
-
-This quickstart can be deployed quickly using Ansible. Here are the steps.
-
-1. Clone [this repo](https://github.com/redhat-cop/container-pipelines) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier) repo.
-2. Log into an OpenShift cluster, then run the following command.
-```
-$ oc login
-$ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
-```
-
-At this point you should have 3 projects deployed (`todomvc-build`, `todomvc-dev`, `todomvc-stage`, and `todomvc-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
+This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in OpenShift Container Platform.
+On top of the features showed in the [basic spring boot example](https://github.com/redhat-cop/container-pipelines/tree/master/basic-spring-boot), this example shows
+* how to run integration tests written using the cucumber/protractor/selenium/zalenium stack
+* tests can in throry be run on any combination of browser and os, that can be containerized. In practice here we show chrome and firefox 
+* how to collect the test result and show the report in the jenkins pipeline result.
 
 ## Architecture
 
@@ -46,6 +30,8 @@ The second template, `applier/templates/deployment.yml` is the "Deploy" template
 
 The idea behind the split between the templates is that I can deploy the build template only once (to my dev project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
 
+There is also an additional template that sets up the zalenium infrastructure in `applier/templates/selenium-grid.yaml`
+
 ### Pipeline Script
 
 This project includes a sample `Jenkinsfile` pipeline script that could be included with a Java project in order to implement a basic CI/CD pipeline for that project, under the following assumptions:
@@ -61,8 +47,28 @@ This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redh
   * OpenShift 3.5+ is required
   * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
 * Access to GitHub
+* dynamic provisioning able to provsion RWO and RWM types of volumes.
+* ability to make calls from the dev project to the stage project
 
 ## Manual Deployment Instructions
+
+### tl;dr
+```
+oc process -f applier/projects/projects.yml | oc apply -f -
+oc process openshift//jenkins-ephemeral | oc apply -f- -n todomvc-build
+oc env dc/jenkins JENKINS_JAVA_OVERRIDES=-Dhudson.model.DirectoryBrowserSupport.CSP='' INSTALL_PLUGINS=ansicolor:0.5.2 -n todomvc-build
+oc new-build --strategy docker --name jenkins-slave-nodejs8 --context-dir cucumber-selenium-grid/nodejs-slave https://github.com/raffaelespazzoli/container-pipelines#selenium -n todomvc-build 
+oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-dev | oc apply -f-
+oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
+oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-prod | oc apply -f-
+oc adm policy add-scc-to-user anyuid -z zalenium -n todomvc-stage
+oc process -f applier/templates/selenium-grid.yaml NAMESPACE=todomvc-stage | oc apply -f -
+oc process -f applier/templates/build.yml --param-file applier/params/build-dev | oc apply -f-
+```
+to clean up
+```
+oc delete project todomvc-build todomvc-dev todomvc-prod todomvc-stage
+```
 
 ### 1. Create Lifecycle Stages
 
@@ -95,6 +101,11 @@ serviceaccount "jenkins" created
 rolebinding "jenkins_edit" created
 service "jenkins-jnlp" created
 service "jenkins" created
+```
+
+modify jenkins to support this build:
+```
+oc env dc/jenkins JENKINS_JAVA_OVERRIDES=-Dhudson.model.DirectoryBrowserSupport.CSP='' INSTALL_PLUGINS=ansicolor:0.5.2 -n todomvc-build
 ```
 
 ### 4. Instantiate Pipeline
@@ -130,6 +141,16 @@ imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" created
 ```
+Deploy Zalenium
+```
+oc adm policy add-scc-to-user anyuid -z zalenium -n todomvc-stage
+oc process -f applier/templates/selenium-grid.yaml NAMESPACE=todomvc-stage | oc apply -f -
+```
+
+Create the node jenkins slave that can run the tests
+```
+oc new-build --strategy docker --name jenkins-slave-nodejs8 --context-dir cucumber-selenium-grid/nodejs-slave https://github.com/raffaelespazzoli/container-pipelines#selenium -n todomvc-build 
+```
 
 A _build template_ is provided at `applier/templates/build.yml` that defines all the resources required to build our java app. It includes:
 
@@ -144,6 +165,8 @@ buildconfig "spring-rest" created
 ```
 
 At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `todomvc-dev` project, and going to *Builds* -> *Pipelines*. At several points you will be prompted for input on the pipeline. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
+
+
 
 ## Cleanup
 

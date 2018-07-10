@@ -19,7 +19,7 @@ objects:
   - verbs: ['list', 'create', 'delete', 'get']         
     resources: ['services']  
   - verbs: ['create', 'get']         
-    resources: ['pod/exec']    
+    resources: ['pods/exec']    
 
 - apiVersion: v1
   kind: ServiceAccount
