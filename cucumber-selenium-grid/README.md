@@ -8,6 +8,20 @@ On top of the features showed in the [basic spring boot example](https://github.
 
 ## Architecture
 
+The test archietcture is shown in the followinf image
+
+![test-architecture](media/integrated-tests-architecture.png)
+
+the main components are:
+* [gherkin](https://docs.cucumber.io/gherkin/) tests, tests expressed in english natural languafe to enable [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development)
+* [cucumber](https://cucumber.io/) as the interepreter of gherkin
+* [protractor](https://www.protractortest.org/#/) as the framework to run the tests (as this is an angularjs application)
+* a custom jenkins slave able to run the protractor tests
+* [zalenium](https://opensource.zalando.com/zalenium/) to dynamically create [selenium grid](https://www.seleniumhq.org/docs/07_selenium_grid.jsp) clusters of variable size based on demand in kubernetes
+* selenium hub, the brain of the selenium cluster
+* selenium nodes with chrome and firefox
+* the target application
+
 The following breaks down the architecture of the pipeline deployed, as well as walks through the manual deployment steps
 
 ### OpenShift Templates
