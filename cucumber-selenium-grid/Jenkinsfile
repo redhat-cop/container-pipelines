@@ -52,7 +52,7 @@ pipeline {
     }
 
     // Build Container Image using the artifacts produced in previous stages
-/*    stage('Build Container Image'){
+    stage('Build Container Image'){
       steps {
 
         // Build container image using local Openshift cluster
@@ -121,7 +121,7 @@ pipeline {
           }
         }
       }
-    }*/
+    }
     
     stage ('Run integration tests') {
       steps {
