@@ -46,7 +46,9 @@ objects:
         - name: "CONTEXT_DIR"
           value: "${APPLICATION_CONTEXT_DIR}"
         - name: "BASE_APP_DOMAIN"
-          value: "${BASE_APP_DOMAIN}"    
+          value: "${BASE_APP_DOMAIN}"
+        - name: "APPLICATION_REF"
+          value: "${APPLICATION_REF}"      
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -90,11 +92,14 @@ parameters:
 - description: Source code repo for demo app
   name: APPLICATION_SOURCE_REPO
   required: true
-  value: https://github.com/raffaelespazzoli/todomvc
+  value: https://github.com/raffaelespazzoli/container-pipelines
 - description: Application context dir
   name: APPLICATION_CONTEXT_DIR
   required: true
   value: '.'  
+- description: git branch where the app resides
+  name: APPLICATION_REF
+  required: false
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile

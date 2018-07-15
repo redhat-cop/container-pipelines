@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "karma start test/config/karma.conf.js",
+    "start": "node application.js",
+    "integration-test": "node ./node_modules/protractor/bin/protractor ./integration-tests/protractor-conf.js"
+  },
+  "dependencies": {
+    "angular": "^1.4.3",
+    "angular-resource": "^1.4.3",
+    "angular-route": "^ 1.4.3",
+    "express": "^4.16.3",
+    "todomvc-app-css": "^2.1.0",
+    "todomvc-common": "^1.0.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "^1.4.3",
+    "jasmine-core": "^2.2.0",
+    "karma": "^0.13.0",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-firefox-launcher": "^0.1.7",
+    "karma-jasmine": "^0.3.5",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "cucumber": "^4.2.0",
+    "express": "^4.16.3",
+    "protractor": "^5.3.2",
+    "protractor-cucumber-framework": "^5.0.0",
+    "protractor-multiple-cucumber-html-reporter-plugin": "^1.7.0",
+    "underscore": "^1.9.1"
+  }
+}
