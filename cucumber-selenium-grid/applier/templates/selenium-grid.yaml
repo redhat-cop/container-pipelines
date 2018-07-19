@@ -160,6 +160,51 @@ objects:
     resources:
       requests:
         storage: 2Gi
+- kind: SecurityContextConstraints
+  apiVersion: security.openshift.io/v1
+  allowHostDirVolumePlugin: false
+  allowHostIPC: false
+  allowHostNetwork: false
+  allowHostPID: false
+  allowHostPorts: false
+  allowPrivilegedContainer: false
+  allowedCapabilities: null
+  allowedFlexVolumes: null
+  defaultAddCapabilities: null
+  fsGroup:
+    type: RunAsAny
+  groups:
+  - system:cluster-admins
+  users:
+  - system:serviceaccount:${NAMESPACE}:zalenium  
+  metadata:
+    annotations:
+      kubernetes.io/description: anyuid provides all features of the restricted SCC
+        but allows users to run with any UID and any GID.
+    creationTimestamp: 2018-07-09T13:38:28Z
+    name: anyuid-zalenium
+    resourceVersion: "5412"
+    selfLink: /apis/security.openshift.io/v1/securitycontextconstraints/anyuid
+    uid: 5c7a7d67-837d-11e8-a8dc-fa163e2f4463
+  priority: 10
+  readOnlyRootFilesystem: false
+  requiredDropCapabilities:
+  - MKNOD
+  runAsUser:
+    type: RunAsAny
+  seLinuxContext:
+    type: MustRunAs
+  supplementalGroups:
+    type: RunAsAny
+  users:
+  - system:serviceaccount:todomvc-stage:zalenium
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret        
 parameters:
 - description: The namespace to deploy into
   name: NAMESPACE
