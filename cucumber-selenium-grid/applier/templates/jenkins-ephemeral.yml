@@ -80,7 +80,7 @@ objects:
           - name: JENKINS_JAVA_OVERRIDES
             value: "-Dhudson.model.DirectoryBrowserSupport.CSP=''"
           - name: INSTALL_PLUGINS
-            value: ansicolor:0.5.2  
+            value: ansicolor:0.5.2, pipeline:2.5  
           image: ' '
           imagePullPolicy: IfNotPresent
           livenessProbe:
