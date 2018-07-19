@@ -23,7 +23,7 @@ objects:
         openshift.io/imported-from: registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
       from:
         kind: DockerImage
-        name: docker-registry.default.svc:5000/pippo/jenkins-slave-base-rhel7:latest
+        name: registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
       generation: 2
       importPolicy: {}
       name: latest
