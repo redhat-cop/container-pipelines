@@ -53,7 +53,7 @@ $ oc login
 $ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
-At this point you should have 4 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
+At this point you should have 4 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`).
 
 ## Project Structure
 
@@ -86,16 +86,14 @@ This project includes a sample `Jenkinsfile` pipeline script that could be inclu
 * The project is built with Maven
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redhat-cop/spring-rest).
 
 ## Bill of Materials
 
 * One or Two OpenShift Container Platform Clusters
   * OpenShift 3.5+ is required
-  * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
 * Access to GitHub
 * dynamic provisioning able to provsion RWO and RWM types of volumes.
-* ability to make calls from the dev project to the stage project
+* ability to make calls from the `dev` project to the `stage` project
 
 ## Manual Deployment Instructions
 
