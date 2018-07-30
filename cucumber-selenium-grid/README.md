@@ -1,4 +1,4 @@
-# A Sample OpenShift Pipeline for a Spring Boot Application
+# A Sample OpenShift Pipeline for running integration tests
 
 This example demonstrates how to implement a full end-to-end Jenkins Pipeline for a Java application in OpenShift Container Platform.
 On top of the features showed in the [basic spring boot example](https://github.com/redhat-cop/container-pipelines/tree/master/basic-spring-boot), this example shows
@@ -23,6 +23,39 @@ the main components are:
 * the target application
 
 The following breaks down the architecture of the pipeline deployed, as well as walks through the manual deployment steps
+
+## Deployment tl;dr
+```
+oc process -f applier/projects/projects.yml | oc apply -f -
+oc process openshift//jenkins-ephemeral | oc apply -f- -n todomvc-build
+oc env dc/jenkins JENKINS_JAVA_OVERRIDES=-Dhudson.model.DirectoryBrowserSupport.CSP='' INSTALL_PLUGINS=ansicolor:0.5.2 -n todomvc-build
+oc new-build --strategy docker --name jenkins-slave-nodejs8 --context-dir cucumber-selenium-grid/nodejs-slave https://github.com/raffaelespazzoli/container-pipelines#selenium -n todomvc-build 
+oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-dev | oc apply -f-
+oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
+oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-prod | oc apply -f-
+oc adm policy add-scc-to-user anyuid -z zalenium -n todomvc-stage
+oc process -f applier/templates/selenium-grid.yaml NAMESPACE=todomvc-stage | oc apply -f -
+oc process -f applier/templates/build.yml --param-file applier/params/build-dev | oc apply -f-
+```
+to clean up
+```
+oc delete project todomvc-build todomvc-dev todomvc-prod todomvc-stage
+```
+
+## Automated Quickstart
+
+This quickstart can be deployed quickly using Ansible. Here are the steps.
+
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier) repo.
+2. Log into an OpenShift cluster, then run the following command.
+```
+$ oc login
+$ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
+```
+
+At this point you should have 4 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
+
+## Project Structure
 
 ### OpenShift Templates
 
@@ -65,24 +98,6 @@ This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redh
 * ability to make calls from the dev project to the stage project
 
 ## Manual Deployment Instructions
-
-### tl;dr
-```
-oc process -f applier/projects/projects.yml | oc apply -f -
-oc process openshift//jenkins-ephemeral | oc apply -f- -n todomvc-build
-oc env dc/jenkins JENKINS_JAVA_OVERRIDES=-Dhudson.model.DirectoryBrowserSupport.CSP='' INSTALL_PLUGINS=ansicolor:0.5.2 -n todomvc-build
-oc new-build --strategy docker --name jenkins-slave-nodejs8 --context-dir cucumber-selenium-grid/nodejs-slave https://github.com/raffaelespazzoli/container-pipelines#selenium -n todomvc-build 
-oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-dev | oc apply -f-
-oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
-oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-prod | oc apply -f-
-oc adm policy add-scc-to-user anyuid -z zalenium -n todomvc-stage
-oc process -f applier/templates/selenium-grid.yaml NAMESPACE=todomvc-stage | oc apply -f -
-oc process -f applier/templates/build.yml --param-file applier/params/build-dev | oc apply -f-
-```
-to clean up
-```
-oc delete project todomvc-build todomvc-dev todomvc-prod todomvc-stage
-```
 
 ### 1. Create Lifecycle Stages
 
