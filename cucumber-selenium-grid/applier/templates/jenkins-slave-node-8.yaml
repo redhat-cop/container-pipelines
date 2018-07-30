@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: jenkins-slave-node-8
+metadata:
+  annotations:
+    description: jenkins-slave-node-8
+    tags: jenkins, node
+  name: jenkins-slave-node-8
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      build: jenkins-slave-nodejs8
+    name: jenkins-slave-base-rhel7
+    namespace: ${NAMESPACE}
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
+      generation: 2
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      build: jenkins-slave-nodejs8
+    name: jenkins-slave-nodejs8
+    namespace: ${NAMESPACE}
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      build: jenkins-slave-nodejs8
+    name: jenkins-slave-nodejs8
+    namespace: ${NAMESPACE}
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: jenkins-slave-nodejs8:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: cucumber-selenium-grid/nodejs-slave
+      git:
+        ref: selenium
+        uri: https://github.com/raffaelespazzoli/container-pipelines
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jenkins-slave-base-rhel7:latest
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: amfuEOy_4bMoTyw2oM8Y
+      type: GitHub
+    - generic:
+        secret: kS_2uiAQf47DQqFyj1YC
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+parameters:
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true    
+

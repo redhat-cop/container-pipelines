@@ -1,0 +1,31 @@
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    template: "{{ inventory_dir }}/../projects/projects.yml"
+    params: "{{ inventory_dir }}/../params/projects"
+- object: deployments
+  content:
+  - name: "deploy dev environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-dev"
+  - name: "deploy jenkins slave image"
+    template: "{{ inventory_dir }}/../templates/jenkins-slave-node-8.yaml"
+    params: "{{ inventory_dir }}/../params/jenkins"     
+  - name: "deploy jenkins"
+    template: "{{ inventory_dir }}/../templates/jenkins-ephemeral.yml"
+    params: "{{ inventory_dir }}/../params/jenkins"    
+  - name: "deply stage environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-stage"
+  - name: "deply zalenium"
+    template: "{{ inventory_dir }}/../templates/selenium-grid.yaml"
+    params: "{{ inventory_dir }}/../params/zalenium"    
+  - name: "deply prod environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-prod"
+- object: builds
+  content:
+  - name: "deploy build pipeline to dev"
+    template: "{{ inventory_dir }}/../templates/build.yml"
+    params: "{{ inventory_dir }}/../params/build-dev"

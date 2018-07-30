@@ -1,0 +1,189 @@
+openshift.withCluster() {
+  env.NAMESPACE = openshift.project()
+  env.POM_FILE = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
+  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '').replaceAll("/", '')
+  echo "Starting Pipeline for ${APP_NAME}..."
+  def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
+  env.STAGE0 = "${projectBase}-build"
+  env.STAGE1 = "${projectBase}-dev"
+  env.STAGE2 = "${projectBase}-stage"
+  env.STAGE3 = "${projectBase}-prod"
+  env.LABEL = "nodejs-slave-${UUID.randomUUID().toString()}"
+  env.APP_BASE_URL = "http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}"
+  env.SELENIUM_URL = "http://zalenium.${STAGE2}.svc:4444/wd/hub"
+  
+}
+
+pipeline {
+  // Use Jenkins Maven slave
+  // Jenkins will dynamically provision this as OpenShift Pod
+  // All the stages and steps of this Pipeline will be executed on this Pod
+  // After Pipeline completes the Pod is killed so every run will have clean
+  // workspace
+  agent {
+    kubernetes {
+      label "${LABEL}"
+      cloud 'openshift'
+      serviceAccount 'jenkins'
+      containerTemplate {
+        name 'jnlp'
+        image "docker-registry.default.svc:5000/${NAMESPACE}/jenkins-slave-nodejs8"
+        alwaysPullImage true
+        workingDir '/tmp'
+        args '${computer.jnlpmac} ${computer.name}'
+        ttyEnabled false
+      }
+    }
+  }
+
+  // Pipeline Stages start here
+  // Requeres at least one stage
+  stages {
+
+    // Checkout source code
+    // This is required as Pipeline code is originally checkedout to
+    // Jenkins Master but this will also pull this same code to this slave
+    stage('Git Checkout') {
+      steps {
+        // Turn off Git's SSL cert check, uncomment if needed
+        // sh 'git config --global http.sslVerify false'
+        git url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_REF}"
+        //git([url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_REF}"])
+      }
+    }
+
+    // Build Container Image using the artifacts produced in previous stages
+    stage('Build Container Image'){
+      steps {
+
+        // Build container image using local Openshift cluster
+        // Giving all the artifacts to OpenShift Binary Build
+        // This places your artifacts into right location inside your S2I image
+        // if the S2I image supports it.
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${STAGE0}") {
+              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=${CONTEXT_DIR}").logs("-f")
+            }
+          }
+        }
+      }
+    }
+
+    stage('Promote from Build to Dev') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.tag("${env.STAGE0}/${env.APP_NAME}:latest", "${env.STAGE1}/${env.APP_NAME}:latest")
+          }
+        }
+      }
+    }
+
+    stage ('Verify Deployment to Dev') {
+      steps {
+        script {
+          openshift.withCluster() {
+              openshift.withProject("${STAGE1}") {
+              def dcObj = openshift.selector('dc', env.APP_NAME).object()
+              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+              podSelector.untilEach {
+                  echo "pod: ${it.name()}"
+                  return it.object().status.containerStatuses[0].ready
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Promote from Dev to Stage') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.tag("${env.STAGE1}/${env.APP_NAME}:latest", "${env.STAGE2}/${env.APP_NAME}:latest")
+          }
+        }
+      }
+    }
+
+    stage ('Verify Deployment to Stage') {
+      steps {
+        script {
+          openshift.withCluster() {
+              openshift.withProject("${STAGE2}") {
+              def dcObj = openshift.selector('dc', env.APP_NAME).object()
+              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+              podSelector.untilEach {
+                  echo "pod: ${it.name()}"
+                  return it.object().status.containerStatuses[0].ready
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    stage ('Run integration tests') {
+      steps {
+        dir ("${CONTEXT_DIR}"){
+         //sh "/bin/bash -c 'echo selenuim url: ${SELENIUM_URL} , app base path: ${APP_BASE_PATH}'"
+         sh "/bin/bash -c 'npm install'" 
+         ansiColor('xterm') {
+           sh "/bin/bash -c './node_modules/protractor/bin/protractor ./integration-tests/protractor-conf.js --seleniumAddress=http://zalenium.${STAGE2}.svc:4444/wd/hub --baseUrl=http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}'"                          
+         }                           
+       }           
+     }
+     post {
+       always {
+         dir ("${CONTEXT_DIR}"){
+           script {            
+             archive (includes: 'cucumber/*')
+             publishHTML (target: [
+               allowMissing: false,
+               alwaysLinkToLastBuild: false,
+               keepAll: true,
+               reportDir: 'cucumber/report',
+               reportFiles: 'index.html',
+               reportName: "Cucumber Report"
+             ])
+           }
+         }
+       }
+     }
+
+                            
+    }
+
+    
+    
+    
+    stage('Promote from Stage to Prod') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.tag("${env.STAGE2}/${env.APP_NAME}:latest", "${env.STAGE3}/${env.APP_NAME}:latest")
+          }
+        }
+      }
+    }
+
+    stage ('Verify Deployment to Prod') {
+      steps {
+        script {
+          openshift.withCluster() {
+              openshift.withProject("${STAGE3}") {
+              def dcObj = openshift.selector('dc', env.APP_NAME).object()
+              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+              podSelector.untilEach {
+                  echo "pod: ${it.name()}"
+                  return it.object().status.containerStatuses[0].ready
+              }
+            }
+          }
+        }
+      }
+    }
+
+  }
+}

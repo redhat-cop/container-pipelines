@@ -1,0 +1,212 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: zalenium
+metadata:
+  annotations:
+    description: zalenium deployment
+    tags: selenium,selenium-grid,zalenium
+  name: zalenium
+objects:
+- apiVersion: v1
+  kind: ClusterRole
+  metadata:
+    name: zalenium-role
+    namespace: ${NAMESPACE}
+  rules:
+  - verbs: ['create','list','get','delete','exec']         
+    resources: ['pods']
+  - verbs: ['list', 'create', 'delete', 'get']         
+    resources: ['services']  
+  - verbs: ['create', 'get']         
+    resources: ['pods/exec']    
+
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: zalenium
+    namespace: ${NAMESPACE}
+
+- apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: ClusterRoleBinding
+  metadata:
+    name: zalenium-role-zalenium-binding
+    namespace: ${NAMESPACE}
+  roleRef:
+    kind: ClusterRole
+    name: zalenium-role
+  subjects:
+  - kind: ServiceAccount
+    name: zalenium
+    namespace: ${NAMESPACE}            
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: zalenium
+    name: zalenium
+    namespace: ${NAMESPACE}
+  spec:
+    ports:
+    - name: zalenium
+      port: 4444
+      protocol: TCP
+      targetPort: 4444
+    selector:
+      app: zalenium
+      role: grid
+    type: ClusterIP
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: zalenium
+    namespace: ${NAMESPACE}
+  spec:
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: zalenium
+          role: grid
+      spec:
+        # Added to test manually https://github.com/zalando/zalenium/issues/246
+        hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+          - "foo.local"
+          - "bar.local"
+        containers:
+          - name: zalenium
+            image: dosel/zalenium:latest
+            args:
+              - start
+              - '--desiredContainers'
+              - '0'
+              - '--screenWidth'
+              - '1440'
+              - '--screenHeight'
+              - '810'
+              - '--seleniumImageName'
+              - 'elgalu/selenium'
+              - '--maxTestSessions'
+              - '4'
+            env:
+              - name: ZALENIUM_KUBERNETES_CPU_REQUEST
+                value: 250m
+              - name: ZALENIUM_KUBERNETES_CPU_LIMIT
+                value: 500m
+              - name: ZALENIUM_KUBERNETES_MEMORY_REQUEST
+                value: 500Mi
+              - name: ZALENIUM_KUBERNETES_MEMORY_LIMIT
+                value: 1Gi
+              - name: OVERRIDE_WAIT_TIME
+                value: 5m
+            resources:
+              requests:
+                cpu: 250m
+                memory: 400Mi
+            ports:
+              - containerPort: 4444
+                protocol: TCP
+            volumeMounts:
+              - name: zalenium-data
+                mountPath: /home/seluser/videos
+              - name: zalenium-mounted
+                mountPath: /tmp/mounted
+            securityContext:
+              runAsUser: 1000    
+        volumes:
+            - name: zalenium-data
+              persistentVolumeClaim:
+                claimName: zalenium-data
+            - name: zalenium-mounted
+              persistentVolumeClaim:
+                claimName: zalenium-mounted
+        serviceAccountName: zalenium
+        serviceAccount: zalenium
+        securityContext:
+          fsGroup: 1000
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+    name: zalenium
+    namespace: ${NAMESPACE}
+  spec:
+    to:
+      kind: Service
+      name: zalenium
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: zalenium-mounted
+    namespace: ${NAMESPACE}
+  spec:
+    accessModes:
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 2Gi
+    storageClassName: local-pod    
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: zalenium-data
+    namespace: ${NAMESPACE}
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2Gi
+- kind: SecurityContextConstraints
+  apiVersion: security.openshift.io/v1
+  allowHostDirVolumePlugin: false
+  allowHostIPC: false
+  allowHostNetwork: false
+  allowHostPID: false
+  allowHostPorts: false
+  allowPrivilegedContainer: false
+  allowedCapabilities: null
+  allowedFlexVolumes: null
+  defaultAddCapabilities: null
+  fsGroup:
+    type: RunAsAny
+  groups:
+  - system:cluster-admins
+  users:
+  - system:serviceaccount:${NAMESPACE}:zalenium  
+  metadata:
+    annotations:
+      kubernetes.io/description: anyuid provides all features of the restricted SCC
+        but allows users to run with any UID and any GID.
+    name: anyuid-zalenium
+  priority: 10
+  readOnlyRootFilesystem: false
+  requiredDropCapabilities:
+  - MKNOD
+  runAsUser:
+    type: RunAsAny
+  seLinuxContext:
+    type: MustRunAs
+  supplementalGroups:
+    type: RunAsAny
+  users:
+  - system:serviceaccount:todomvc-stage:zalenium
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret        
+parameters:
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true    
+
+
+
+
+
