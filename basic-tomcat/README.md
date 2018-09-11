@@ -7,12 +7,13 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`)
+* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
 ## Quickstart
 
 ### Requirements
-1. [OpenShift Applier](https://github.com/redhat-cop/casl-ansible)
-   `git clone git@github.com:redhat-cop/casl-ansible.git`
+1. [OpenShift Applier](https://github.com/redhat-cop/openshift-applier)
+   `git clone git@github.com:redhat-cop/openshift-applier.git`
    `git checkout v3.6.1`
 2. [Ansible](https://www.ansible.com/)
    `sudo dnf install ansible`
@@ -20,7 +21,7 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 ### Installation
 Run the following commands to instantiate this example.
 ```
-ansible-playbook -i inventory/hosts ../casl-ansible/playbooks/openshift-cluster-seed.yml --connection=local
+ansible-playbook -i inventory/hosts ../openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
 ```
 The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
 Run the following commands to instantiate this example.

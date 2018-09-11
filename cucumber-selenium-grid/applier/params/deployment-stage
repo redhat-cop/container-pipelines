@@ -1,0 +1,4 @@
+APPLICATION_NAME=todomvc
+NAMESPACE=todomvc-stage
+SA_NAME=jenkins
+SA_NAMESPACE=todomvc-build

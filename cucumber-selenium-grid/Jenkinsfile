@@ -8,6 +8,10 @@ openshift.withCluster() {
   env.STAGE1 = "${projectBase}-dev"
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
+  env.LABEL = "nodejs-slave-${UUID.randomUUID().toString()}"
+  env.APP_BASE_URL = "http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}"
+  env.SELENIUM_URL = "http://zalenium.${STAGE2}.svc:4444/wd/hub"
+  
 }
 
 pipeline {
@@ -17,7 +21,19 @@ pipeline {
   // After Pipeline completes the Pod is killed so every run will have clean
   // workspace
   agent {
-    label 'maven'
+    kubernetes {
+      label "${LABEL}"
+      cloud 'openshift'
+      serviceAccount 'jenkins'
+      containerTemplate {
+        name 'jnlp'
+        image "docker-registry.default.svc:5000/${NAMESPACE}/jenkins-slave-nodejs8"
+        alwaysPullImage true
+        workingDir '/tmp'
+        args '${computer.jnlpmac} ${computer.name}'
+        ttyEnabled false
+      }
+    }
   }
 
   // Pipeline Stages start here
@@ -31,35 +47,14 @@ pipeline {
       steps {
         // Turn off Git's SSL cert check, uncomment if needed
         // sh 'git config --global http.sslVerify false'
-        git url: "${APPLICATION_SOURCE_REPO}"
-      }
-    }
-
-    // Run Maven build, skipping tests
-    stage('Build'){
-      steps {
-        sh "mvn clean install -DskipTests=true -f ${POM_FILE}"
-      }
-    }
-
-    // Run Maven unit tests
-    stage('Unit Test'){
-      steps {
-        sh "mvn test -f ${POM_FILE}"
+        git url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_REF}"
+        //git([url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_REF}"])
       }
     }
 
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){
       steps {
-        // Copy the resulting artifacts into common directory
-        sh """
-          ls target/*
-          rm -rf oc-build && mkdir -p oc-build/deployments
-          for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
-            cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
-          done
-        """
 
         // Build container image using local Openshift cluster
         // Giving all the artifacts to OpenShift Binary Build
@@ -68,7 +63,7 @@ pipeline {
         script {
           openshift.withCluster() {
             openshift.withProject("${STAGE0}") {
-              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=oc-build").logs("-f")
+              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=${CONTEXT_DIR}").logs("-f")
             }
           }
         }
@@ -128,6 +123,41 @@ pipeline {
         }
       }
     }
+    
+    stage ('Run integration tests') {
+      steps {
+        dir ("${CONTEXT_DIR}"){
+         //sh "/bin/bash -c 'echo selenuim url: ${SELENIUM_URL} , app base path: ${APP_BASE_PATH}'"
+         sh "/bin/bash -c 'npm install'" 
+         ansiColor('xterm') {
+           sh "/bin/bash -c './node_modules/protractor/bin/protractor ./integration-tests/protractor-conf.js --seleniumAddress=http://zalenium.${STAGE2}.svc:4444/wd/hub --baseUrl=http://${APP_NAME}-${STAGE2}.${env.BASE_APP_DOMAIN}'"                          
+         }                           
+       }           
+     }
+     post {
+       always {
+         dir ("${CONTEXT_DIR}"){
+           script {            
+             archive (includes: 'cucumber/*')
+             publishHTML (target: [
+               allowMissing: false,
+               alwaysLinkToLastBuild: false,
+               keepAll: true,
+               reportDir: 'cucumber/report',
+               reportFiles: 'index.html',
+               reportName: "Cucumber Report"
+             ])
+           }
+         }
+       }
+     }
+
+                            
+    }
+
+    
+    
+    
     stage('Promote from Stage to Prod') {
       steps {
         script {

@@ -1,0 +1,3 @@
+APPLICATION_NAME=todomvc
+NAMESPACE=todomvc-dev
+SA_NAMESPACE=todomvc-build

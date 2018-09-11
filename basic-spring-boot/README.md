@@ -7,28 +7,30 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`) - Coming Soon!
+* Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
-## Quickstart
+## Automated Quickstart
 
-Run the following commands to instantiate this example.
+This quickstart can be deployed quickly using Ansible. Here are the steps.
 
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier) repo.
+2. Log into an OpenShift cluster, then run the following command.
 ```
-cd ./basic-spring-boot
-oc create -f projects/projects.yml
-oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-spring-boot-dev
-oc process -f deploy/template.yml --param-file=deploy/dev/params | oc apply -f-
-oc process -f deploy/template.yml --param-file=deploy/stage/params | oc apply -f-
-oc process -f deploy/template.yml --param-file=deploy/prod/params | oc apply -f-
-oc process -f build/template.yml --param-file build/dev/params | oc apply -f-
+$ oc login
+$ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
+
+At this point you should have 3 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
 
 ## Architecture
+
+The following breaks down the architecture of the pipeline deployed, as well as walks through the manual deployment steps
 
 ### OpenShift Templates
 
 The components of this pipeline are divided into two templates.
 
-The first template, `build/template.yml` is what we are calling the "Build" template. It contains:
+The first template, `applier/templates/build.yml` is what we are calling the "Build" template. It contains:
 
 * A `jenkinsPipelineStrategy` BuildConfig
 * An `s2i` BuildConfig
@@ -36,7 +38,7 @@ The first template, `build/template.yml` is what we are calling the "Build" temp
 
 The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/redhat-cop/spring-rest).
 
-The second template, `deploy/template.yml` is the "Deploy" template. It contains:
+The second template, `applier/templates/deployment.yml` is the "Deploy" template. It contains:
 
 * A tomcat8 DeploymentConfig
 * A Service definition
@@ -49,25 +51,24 @@ The idea behind the split between the templates is that I can deploy the build t
 This project includes a sample `Jenkinsfile` pipeline script that could be included with a Java project in order to implement a basic CI/CD pipeline for that project, under the following assumptions:
 
 * The project is built with Maven
-* The `Jenkinsfile` script is placed in the same directory as the `pom.xml` file in the git source.
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-For convenience, this pipeline script is already included in the following git repository, based on our [Spring Boot Demo App](https://github.com/redhat-cop/spring-rest) app.
-
-https://github.com/redhat-cop/spring-rest
+This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redhat-cop/spring-rest).
 
 ## Bill of Materials
 
 * One or Two OpenShift Container Platform Clusters
-  * OpenShift 3.5+ is required.
+  * OpenShift 3.5+ is required
+  * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
 * Access to GitHub
 
-## Implementation Instructions
+## Manual Deployment Instructions
 
 ### 1. Create Lifecycle Stages
 
 For the purposes of this demo, we are going to create three stages for our application to be promoted through.
 
+- `basic-spring-boot-build`
 - `basic-spring-boot-dev`
 - `basic-spring-boot-stage`
 - `basic-spring-boot-prod`
@@ -75,7 +76,8 @@ For the purposes of this demo, we are going to create three stages for our appli
 In the spirit of _Infrastructure as Code_ we have a YAML file that defines the `ProjectRequests` for us. This is as an alternative to running `oc new-project`, but will yeild the same result.
 
 ```
-$ oc create -f projects/projects.yml
+$ oc create -f applier/projects/projects.yml
+projectrequest "basic-spring-boot-build" created
 projectrequest "basic-spring-boot-dev" created
 projectrequest "basic-spring-boot-stage" created
 projectrequest "basic-spring-boot-prod" created
@@ -86,7 +88,7 @@ projectrequest "basic-spring-boot-prod" created
 For this step, the OpenShift default template set provides exactly what we need to get jenkins up and running.
 
 ```
-$ oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-spring-boot-dev
+$ oc process openshift//jenkins-ephemeral | oc apply -f- -n basic-spring-boot-build
 route "jenkins" created
 deploymentconfig "jenkins" created
 serviceaccount "jenkins" created
@@ -97,7 +99,7 @@ service "jenkins" created
 
 ### 4. Instantiate Pipeline
 
-A _deploy template_ is provided at `deploy/template.yml` that defines all of the resources required to run our Tomcat application. It includes:
+A _deploy template_ is provided at `applier/templates/deployment.yml` that defines all of the resources required to run our Tomcat application. It includes:
 
 * A `Service`
 * A `Route`
@@ -109,19 +111,19 @@ This template should be instantiated once in each of the namespaces that our app
 
 Deploy the deployment template to all three projects.
 ```
-$ oc process -f deploy/template.yml --param-file=deploy/dev/params | oc apply -f-
+$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-dev | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" configured
-$ oc process -f deploy/template.yml --param-file=deploy/stage/params | oc apply -f-
+$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" created
-$ oc process -f deploy/template.yml --param-file=deploy/prod/params | oc apply -f-
+$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-prod | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
@@ -129,14 +131,14 @@ deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" created
 ```
 
-A _build template_ is provided at `build/template.yml` that defines all the resources required to build our java app. It includes:
+A _build template_ is provided at `applier/templates/build.yml` that defines all the resources required to build our java app. It includes:
 
 * A `BuildConfig` that defines a `JenkinsPipelineStrategy` build, which will be used to define out pipeline.
 * A `BuildConfig` that defines a `Source` build with `Binary` input. This will build our image.
 
 Deploy the pipeline template in dev only.
 ```
-$ oc process -f build/template.yml --param-file build/dev/params | oc apply -f-
+$ oc process -f applier/templates/build.yml --param-file applier/params/build-dev | oc apply -f-
 buildconfig "spring-rest-pipeline" created
 buildconfig "spring-rest" created
 ```
@@ -148,5 +150,5 @@ At this point you should be able to go to the Web Console and follow the pipelin
 Cleaning up this example is as simple as deleting the projects we created at the beginning.
 
 ```
-oc delete project basic-spring-boot-dev basic-spring-boot-prod basic-spring-boot-stage
+oc delete project basic-spring-boot-build basic-spring-boot-dev basic-spring-boot-prod basic-spring-boot-stage
 ```

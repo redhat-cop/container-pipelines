@@ -1,0 +1,1 @@
+Note: this directory is not in the features directory in order to avoid it being parsed by Cucumber as it looks for step definitions and hooks etc.
