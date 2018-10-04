@@ -12,7 +12,7 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 ## Automated Deployment
 
 1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
-2. `cd container-pipelines/basic-spring-boot`
+2. `cd container-pipelines/basic-tomcat`
 3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
 4. Run the following commands to instantiate this example.
 ```
