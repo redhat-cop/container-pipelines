@@ -29,7 +29,6 @@ node('maven') {
   stage('SCM Checkout') {
 
     git url: "${APPLICATION_SOURCE_REPO}"
-    sh "orig=\$(pwd); cd \$(dirname ${pomFileLocation}); git describe --tags; cd \$orig"
   }
 
   stage('Build') {
