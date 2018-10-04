@@ -4,7 +4,7 @@ openshift_cluster_content:
   content:
   - name: simple-spring-boot-spaces
     file: "{{ inventory_dir }}/../.openshift/projects/projects.yml"
-    file_action: create
+    action: create
 - object: deployments
   content:
   - name: jenkins
