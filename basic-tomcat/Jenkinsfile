@@ -14,6 +14,7 @@ node('master') {
   env.OC_CMD = "oc --token=${env.TOKEN} --server=${ocpApiServer} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${env.NAMESPACE}"
 
   env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
+  println "Starting Pipeline for Application: ${APP_NAME}"
   def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
   env.STAGE0 = "${projectBase}-build"
   env.STAGE1 = "${projectBase}-dev"
