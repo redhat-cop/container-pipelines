@@ -21,12 +21,6 @@ node('master') {
 }
 
 node('maven') {
-//  def artifactory = Artifactory.server(env.ARTIFACTORY_SERVER)
-  // def artifactoryMaven = Artifactory.newMavenBuild()
-  // def buildInfo = Artifactory.newBuildInfo()
-  // def scannerHome = tool env.SONARQUBE_TOOL
-  def mvnHome = "/usr/share/maven/"
-  def mvnCmd = "${mvnHome}bin/mvn"
 
   stage('SCM Checkout') {
     git url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_SOURCE_REF}"
@@ -35,7 +29,7 @@ node('maven') {
   stage('Build') {
 
     String pomFileLocation = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
-    sh "${mvnCmd} clean install -DskipTests=true -f ${pomFileLocation}"
+    sh "mvn clean install -DskipTests=true -f ${pomFileLocation}"
 
   }
 
