@@ -6,21 +6,22 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * Running both custom and oob Jenkins slaves as pods in OpenShift
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
 * Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
-* Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`) - Coming Soon!
 * Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
-## Automated Quickstart
+## Automated Deployment
 
 This quickstart can be deployed quickly using Ansible. Here are the steps.
 
-1. Clone [this repo](https://github.com/redhat-cop/container-pipelines) and the [openshift-applier](https://github.com/redhat-cop/openshift-applier) repo.
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
+2. `cd container-pipelines/basic-spring-boot`
+3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
 2. Log into an OpenShift cluster, then run the following command.
 ```
 $ oc login
-$ ansible-playbook -i ./applier/inventory/ /path/to/openshift-applier/playbooks/openshift-cluster-seed.yml
+$ ansible-playbook -i ./.applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
-At this point you should have 3 projects deployed (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
+At this point you should have 4 projects created (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with a pipeline in the `-build` project, and our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo app deployed to the dev/stage/prod projects.
 
 ## Architecture
 
