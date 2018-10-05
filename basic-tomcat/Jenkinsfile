@@ -32,14 +32,14 @@ node('maven') {
   // def scannerHome = tool env.SONARQUBE_TOOL
   def mvnHome = "/usr/share/maven/"
   def mvnCmd = "${mvnHome}bin/mvn"
-  String pomFileLocation = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
 
   stage('SCM Checkout') {
-    checkout scm
+    git url: "${APPLICATION_SOURCE_REPO}"
   }
 
   stage('Build') {
 
+    String pomFileLocation = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
     sh "${mvnCmd} clean install -DskipTests=true -f ${pomFileLocation}"
 
   }
