@@ -46,7 +46,7 @@ The second template, `files/deployment/template.yml` is the "Deploy" template. I
 * A Service definition
 * A Route
 
-The idea behind the split between the templates is that I can deploy the build template only once (to my dev project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
+The idea behind the split between the templates is that I can deploy the build template only once (to my build project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
 
 ### Pipeline Script
 
@@ -100,7 +100,7 @@ A _build template_ is provided at `files/builds/template.yml` that defines all t
 * A `BuildConfig` that defines a `JenkinsPipelineStrategy` build, which will be used to define out pipeline.
 * A `BuildConfig` that defines a `Source` build with `Binary` input. This will build our image.
 
-At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `myapp-dev` project, and going to *Builds* -> *Pipelines*. At several points you will be prompted for input on the pipeline. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
+At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `basic-tomcat-build` project, and going to *Builds* -> *Pipelines*. At several points you will be prompted for input on the pipeline. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
 
 ## Cleanup
 
