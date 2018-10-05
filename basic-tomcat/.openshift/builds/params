@@ -1,3 +1,1 @@
 NAMESPACE=basic-tomcat-build
-SOURCE_REPOSITORY_URL=https://github.com/pabrahamsson/ticket-monster.git
-SOURCE_REPOSITORY_REF=build
