@@ -29,7 +29,7 @@ node('maven') {
   def mvnCmd = "${mvnHome}bin/mvn"
 
   stage('SCM Checkout') {
-    git url: "${APPLICATION_SOURCE_REPO}"
+    git url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_SOURCE_REF}"
   }
 
   stage('Build') {
