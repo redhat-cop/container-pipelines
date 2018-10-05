@@ -45,6 +45,11 @@ node('maven') {
         cp -rfv ./${target}/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
       done
     """
+    openshift.withCluster() {
+      openshift.withProject("${STAGE0}") {
+        openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=oc-build").logs("-f")
+      }
+    }
   }
 
   stage ("Promote from Build to Dev") {
