@@ -15,6 +15,7 @@ node('master') {
 
   env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
   def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
+  env.STAGE0 = "${projectBase}-build"
   env.STAGE1 = "${projectBase}-dev"
   env.STAGE2 = "${projectBase}-stage"
   env.STAGE3 = "${projectBase}-prod"
@@ -44,6 +45,12 @@ node('maven') {
         cp -rfv ./${target}/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
       done
     """
+  }
+
+  stage ("Promote from Build to Dev") {
+    openshift.withCluster() {
+      openshift.tag("${env.STAGE0}/${env.APP_NAME}:latest", "${env.STAGE1}/${env.APP_NAME}:latest")
+    }
   }
 
   stage("Verify Deployment to ${env.STAGE1}") {
