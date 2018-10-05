@@ -83,6 +83,14 @@ pipeline {
       }
     }
 
+    stage('Promotion gate') {
+      steps {
+        script {
+          input message: 'Promote application to Production?'
+        }
+      }
+    }
+
     stage('Promote to Prod') {
       agent {
         kubernetes {
