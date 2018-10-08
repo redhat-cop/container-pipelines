@@ -1,0 +1,2 @@
+NAMESPACE=multicluster-spring-boot-stage
+SA_NAME=docker-registry-dev

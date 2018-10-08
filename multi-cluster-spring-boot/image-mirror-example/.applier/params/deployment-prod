@@ -1,0 +1,5 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=multicluster-spring-boot-prod
+SA_NAMESPACE=multicluster-spring-boot-stage
+READINESS_RESPONSE=status.:.UP
+READINESS_PATH=/health

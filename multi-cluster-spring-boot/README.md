@@ -17,7 +17,7 @@ In order to run this pipeline, you will need:
   * In this document, we will refer to the first cluster as *_Dev_* and the second as *_Prod_*.
 * Ansible installed on your machine
 
-## Automated Quickstart
+## Automated Quickstart for image mirror
 
 This quickstart can be deployed quickly using Ansible. Here are the steps.
 
@@ -28,7 +28,55 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
     ```
     $ oc login <prod cluster>
     ...
-    $ ansible-playbook -i ./applier/inventory-prod/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
+    $ ansible-playbook -i image-mirror-example/.applier/inventory-prod/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
+    ```
+5. One of the things that was created by ansible is a `ServiceAccount` that will be used for promoting your app from _Dev_ to _Prod_. We'll need to extract its credentials so that our pipeline can use that account.
+    ```
+    $ TOKEN=$(oc serviceaccounts get-token docker-registry-prod -n multicluster-spring-boot-prod)
+    ```
+    The Ansible automation for your _Dev_ cluster will expect a parameters file to be created at `./applier/params/prod-credentials`. It should look something like this:
+    ```
+    $ echo "TOKEN=${TOKEN}
+    SECRET_NAME=prod-credentials" > image-mirror-example/.applier/params/prod-credentials
+    ```
+6. We need to create the the *prod-api-credentials* param file so our pipeline will be able to verify a successful deployment to production.
+    ```
+    $ echo "TOKEN=${TOKEN}
+    API_URL=<API_URL>
+    REGISTRY_URL=<REGISTRY URL>
+    SECRET_NAME=prod-cluster-credentials" > image-mirror-example/.applier/params/prod-cluster-credentials
+    ```
+6. Now, Log into your _Dev_ cluster, and instantiate the pre-pipeline configuration.
+    ```
+    $ oc login <dev cluster>
+    ...
+    $ ansible-playbook -i image-mirror-example/.applier/inventory-pre-dev/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
+    ```
+7. Now the service account for the dev cluster docker registry has been created. We'll need to extract it's credentials so that our pipeline can authenticate to the dev cluster docker registry.
+    ```
+    $ TOKEN=$(oc serviceaccounts get-token docker-registry-dev -n multicluster-spring-boot-stage)
+    $ echo "TOKEN=${TOKEN}
+      SECRET_NAME=nonprod-credentials" > image-mirror-example/.applier/params/nonprod-credentials
+    ```
+8. Now, we will instantiate the pipeline and all configuration in the non-production cluster.
+   ```
+   $ ansible-playbook -i image-mirror-example/.applier/inventory-dev/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
+   ```
+
+At this point you should have 3 projects deployed (`multicluster-spring-boot-dev`, `multicluster-spring-boot-stage`, and `multicluster-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
+
+## Automated Quickstart for skopeo
+
+This quickstart can be deployed quickly using Ansible. Here are the steps.
+
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
+2. `cd container-pipelines/multi-cluster-spring-boot`
+3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
+4. Log into your _Prod_ OpenShift cluster, and run the following command.
+    ```
+    $ oc login <prod cluster>
+    ...
+    $ ansible-playbook -i skopeo-example/.applier/inventory-prod/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
     ```
 5. One of the things that was created by ansible is a `ServiceAccount` that will be used for promoting your app from _Dev_ to _Prod_. We'll need to extract its credentials so that our pipeline can use that account.
     ```
@@ -39,13 +87,13 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
     $ echo "TOKEN=${TOKEN}
     API_URL=https://master.example.com
     REGISTRY_URL=docker-registry-default.apps.example.com
-    " > ./applier/params/prod-credentials
+    " > skopeo-example/.applier/params/prod-credentials
     ```
 6. Now, Log into your _Dev_ cluster, and instantiate the pipeline.
     ```
     $ oc login <dev cluster>
     ...
-    $ ansible-playbook -i ./applier/inventory-dev/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
+    $ ansible-playbook -i skopeo-example/.applier/inventory-dev/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
     ```
 
 At this point you should have 3 projects deployed (`multicluster-spring-boot-dev`, `multicluster-spring-boot-stage`, and `multicluster-spring-boot-prod`) with our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo application deployed to all 3.
