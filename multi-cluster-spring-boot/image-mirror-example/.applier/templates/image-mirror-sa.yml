@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Template
+metadata:
+  annotations:
+    description: template for image mirror service account
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${SA_NAME}
+    namespace: ${NAMESPACE}
+- apiVersion: v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: null
+    name: edit
+    namespace: ${NAMESPACE}
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: ${SA_NAME}
+    namespace: ${NAMESPACE}
+  userNames:
+  - system:serviceaccount:${NAMESPACE}:${SA_NAME}
+parameters:
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true
+- description: The service account name
+  name: SA_NAME
+  required: true

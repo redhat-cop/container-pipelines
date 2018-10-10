@@ -1,0 +1,15 @@
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    file: "{{ inventory_dir }}/../projects/projects-prod.yml"
+    file_action: create
+  - name: "create prod cluster credential"
+    template: "{{ inventory_dir }}/../templates/image-mirror-sa.yml"
+    params: "{{ inventory_dir }}/../params/registry-sa-prod-cluster"
+    namespace: multicluster-spring-boot-prod
+- object: deployments
+  content:
+  - name: "deply prod environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-prod"

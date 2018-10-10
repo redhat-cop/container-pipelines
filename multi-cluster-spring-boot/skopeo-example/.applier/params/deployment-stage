@@ -1,0 +1,6 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=multicluster-spring-boot-stage
+SA_NAME=jenkins
+SA_NAMESPACE=multicluster-spring-boot-dev
+READINESS_RESPONSE=status.:.UP
+READINESS_PATH=/health

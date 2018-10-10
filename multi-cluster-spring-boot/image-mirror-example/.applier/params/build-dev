@@ -1,0 +1,9 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=multicluster-spring-boot-dev
+PIPELINE_REPOSITORY_URL=https://github.com/Gl4di4torRr/container-pipelines.git
+PIPELINE_REPOSITORY_REF=multi-cluster-image-mirror
+PIPELINE_REPOSITORY_CONTEXT_DIR=multi-cluster-spring-boot/image-mirror-example
+SRC_API_URL=<SRC_API_URL>
+DEST_API_URL=<DEST_API_URL>
+SRC_REGISTRY=<SRC_REGISTRY>
+DEST_REGISTRY=<DEST_REGISTRY>
