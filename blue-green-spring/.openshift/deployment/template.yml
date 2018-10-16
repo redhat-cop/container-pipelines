@@ -79,7 +79,8 @@ objects:
               command:
               - /bin/bash
               - -c
-              - curl -s 'http://localhost:8080/' |grep -iq 'Openshift'
+              - curl -s 'http://localhost:8080${READINESS_PATH}'
+                |grep -iq '${READINESS_RESPONSE}'
         terminationGracePeriodSeconds: 60
     triggers:
     - imageChangeParams:
@@ -127,3 +128,11 @@ parameters:
 - description: 'Custom hostname for http service route.  Leave blank for default hostname,
     e.g.: <application-name>-<project>.<default-domain-suffix>'
   name: HOSTNAME_HTTP
+- description: 'URI to check for app health'
+  name: READINESS_PATH
+  required: true
+  value: '/health'
+- description: 'String value expected back from readiness check'
+  name: READINESS_RESPONSE
+  required: true
+  value: 'UP'

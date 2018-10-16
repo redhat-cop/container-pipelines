@@ -6,22 +6,22 @@ items:
   metadata:
     name: spring-boot-web-dev
     creationTimestam: null
-  displayName: Dev - Spring Boot Blue Green
+  displayName: Spring Boot Blue Green - Dev
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: spring-boot-web-stage
     creationTimestam: null
-  displayName: Staging - Spring Boot Blue Green
+  displayName: Spring Boot Blue Green - Staging
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: spring-boot-web-prod
     creationTimestam: null
-  displayName: Prod - Spring Boot Blue Green
+  displayName: Spring Boot Blue Green - Prod
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: spring-boot-web-build
     creationTimestam: null
-  displayName: Build - Jenkins is here
+  displayName: Spring Boot Blue Green - Build

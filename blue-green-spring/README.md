@@ -13,29 +13,21 @@ This sample demonstrates the following capabilities:
 * Switching production routes between blue and green deployments after confirmation
 * Automated rollout using the [openshift-applier](https://github.com/redhat-cop/openshift-applier/tree/master/roles/openshift-applier) Ansible role.
 
-## Quickstart
+## Automated Deployment
 
-### Requirements
-1. [Ansible](https://www.ansible.com/)
-
-    ```
-    sudo dnf install ansible
-    ```
-
-### Installation
 Run the following commands to instantiate this example.
-1. Clone this repository
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
 2. `cd container-pipelines/blue-green-spring`
 3. Run ansible-galaxy to install required Ansible roles
 
     ```
-    ansible-galaxy install -r requirements.yml --roles-path=roles
+    ansible-galaxy install -r requirements.yml --roles-path=galaxy
     ```
 
 4. Run the following Ansible playbook to install all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
 
     ```
-    ansible-playbook -i inventory/hosts roles/openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
+    ansible-playbook -i .applier galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
     ```
 
 ## Architecture

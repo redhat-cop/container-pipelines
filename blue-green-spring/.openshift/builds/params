@@ -1,5 +1,3 @@
 APPLICATION_NAME=spring-boot-web
 NAMESPACE=spring-boot-web-build
 IMAGE_STREAM_TAG_NAME=redhat-openjdk18-openshift:1.1
-SOURCE_REPOSITORY_URL=https://github.com/pabrahamsson/simple-spring-boot-web.git
-SOURCE_REPOSITORY_REF=build
