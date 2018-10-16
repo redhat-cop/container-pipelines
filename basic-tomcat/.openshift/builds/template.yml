@@ -33,9 +33,13 @@ objects:
       type: "JenkinsPipeline"
       jenkinsPipelineStrategy:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
-      env:
+        env:
+        - name: "APPLICATION_SOURCE_REPO"
+          value: "${APPLICATION_SOURCE_REPO}"
+        - name: "APPLICATION_SOURCE_REF"
+          value: "${APPLICATION_SOURCE_REF}"
         - name: "BUILD_CONTEXT_DIR"
-          value: "demo"
+          value: "${APPLICATION_CONTEXT_DIR}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -78,16 +82,28 @@ parameters:
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/etsauer/ticket-monster.git
+  value: https://github.com/redhat-cop/container-pipelines.git
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
   value: "master"
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
-  value:
+  value: "basic-tomcat"
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
-  value: pipeline.groovy
+  value: Jenkinsfile
+- description: Source code repo for demo app
+  name: APPLICATION_SOURCE_REPO
+  required: true
+  value: https://github.com/jboss-developer/ticket-monster.git
+- description: Source code branch/tag
+  name: APPLICATION_SOURCE_REF
+  required: true
+  value: 2.7.0.Final-with-tutorials
+- description: Directory where POM file will be
+  name: APPLICATION_CONTEXT_DIR
+  required: true
+  value: demo
 - description: GitHub trigger secret
   from: '[a-zA-Z0-9]{8}'
   generate: expression

@@ -6,22 +6,22 @@ items:
   metadata:
     name: basic-tomcat-dev
     creationTimestam: null
-  displayName: Dev - Basic Tomcat App
+  displayName: Basic Tomcat App - Dev
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: basic-tomcat-stage
     creationTimestam: null
-  displayName: Staging - Basic Tomcat App
+  displayName: Basic Tomcat App - Stage
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: basic-tomcat-prod
     creationTimestam: null
-  displayName: Prod - Basic Tomcat App
+  displayName: Basic Tomcat App - Prod
 - kind: ProjectRequest
   apiVersion: v1
   metadata:
     name: basic-tomcat-build
     creationTimestam: null
-  displayName: Build - Jenkins is here
+  displayName: Basic Tomcat App - Build

@@ -9,19 +9,14 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`)
 * Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
-## Quickstart
+## Automated Deployment
 
-### Requirements
-1. [OpenShift Applier](https://github.com/redhat-cop/openshift-applier)
-   `git clone git@github.com:redhat-cop/openshift-applier.git`
-   `git checkout v3.6.1`
-2. [Ansible](https://www.ansible.com/)
-   `sudo dnf install ansible`
-
-### Installation
-Run the following commands to instantiate this example.
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
+2. `cd container-pipelines/basic-tomcat`
+3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
+4. Run the following commands to instantiate this example.
 ```
-ansible-playbook -i inventory/hosts ../openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
+ansible-playbook -i .applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
 Run the following commands to instantiate this example.
@@ -38,7 +33,7 @@ The first template, `files/builds/template.yml` is what we are calling the "Buil
 * An `s2i` BuildConfig
 * An ImageStream for the s2i build config to push to
 
-The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/etsauer/ticket-monster).
+The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/jboss-developer/ticket-monster.git).
 
 The second template, `files/deployment/template.yml` is the "Deploy" template. It contains:
 
@@ -56,9 +51,7 @@ This project includes a sample `pipeline.groovy` Jenkins Pipeline script that co
 * The `pipeline.groovy` script is placed in the same directory as the `pom.xml` file in the git source.
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-For convenience, this pipeline script is already included in the following git repository, based on the [JBoss Developers Ticket Monster](https://github.com/jboss-developer/ticket-monster) app.
-
-https://github.com/etsauer/ticket-monster
+For convenience, the project will, by default build and deploy the [JBoss Developers Ticket Monster](https://github.com/jboss-developer/ticket-monster.git) application.
 
 ## Bill of Materials
 

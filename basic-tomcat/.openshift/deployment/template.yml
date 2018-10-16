@@ -80,6 +80,7 @@ objects:
     namespace: ${APPLICATION_NAME}${ENV}
   spec:
     host: ${HOSTNAME_HTTP}
+    path: ${ROUTE_PATH}
     to:
       name: ${APPLICATION_NAME}
 - apiVersion: v1
@@ -154,6 +155,9 @@ parameters:
 - description: 'Custom hostname for http service route.  Leave blank for default hostname,
     e.g.: <application-name>-<project>.<default-domain-suffix>'
   name: HOSTNAME_HTTP
+- description: Path to use for route.
+  name: ROUTE_PATH
+  value: /ticket-monster
 - description: JWS Admin User
   from: '[a-zA-Z0-9]{8}'
   generate: expression
