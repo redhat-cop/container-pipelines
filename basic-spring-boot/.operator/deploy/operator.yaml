@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-app-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: spring-boot-app-operator
+  template:
+    metadata:
+      labels:
+        name: spring-boot-app-operator
+    spec:
+      containers:
+        - name: spring-boot-app-operator
+          image: quay.io/redhat/spring-boot-app-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace

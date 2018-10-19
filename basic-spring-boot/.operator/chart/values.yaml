@@ -1,0 +1,4 @@
+applicationName: spring-boot-app
+hostname: ""
+readinessPath: "/"
+readinessResponse: "Hello World!"

@@ -1,0 +1,44 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: helm-app-operator
+rules:
+- apiGroups:
+  - cop.redhat.com
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - routes
+  - deploymentconfigs
+  - imagestreams
+  - endpoints
+  - persistentvolumeclaims
+  - events
+  verbs:
+  - "*"
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - "*"
+
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: default-account-helm-app-operator
+subjects:
+- kind: ServiceAccount
+  name: default
+roleRef:
+  kind: Role
+  name: helm-app-operator
+apiGroup: rbac.authorization.k8s.io
