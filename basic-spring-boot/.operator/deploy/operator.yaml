@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: spring-boot-app-operator
-          image: quay.io/redhat/spring-boot-app-operator
+          image: quay.io/cpitman/spring-boot-operator-demo
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE

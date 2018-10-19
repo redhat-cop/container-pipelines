@@ -10,4 +10,4 @@ spec:
     plural: springbootapps
     singular: springbootapp
   scope: Namespaced
-version: v1alpha1
+  version: v1alpha1
