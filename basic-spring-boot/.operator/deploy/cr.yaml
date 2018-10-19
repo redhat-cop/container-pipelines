@@ -1,0 +1,8 @@
+apiVersion: cop.redhat.com/v1alpha1
+kind: SpringBootApp
+metadata:
+  name: testapp
+spec:
+  applicationName: spring-rest
+  readinessResponse: status.:.UP
+  readinessPath: /health
