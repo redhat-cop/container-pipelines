@@ -128,6 +128,13 @@ pipeline {
         }
       }
     }
+    stage('Promotion gate') {
+      steps {
+        script {
+          input message: 'Promote application to Production?'
+        }
+      }
+    }
     stage('Promote from Stage to Prod') {
       steps {
         script {
