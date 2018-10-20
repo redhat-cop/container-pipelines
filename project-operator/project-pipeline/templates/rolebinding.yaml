@@ -15,6 +15,6 @@ subjects:
   name: "{{ $jenkinsServiceAccountName }}"
   namespace: "{{ $jenkinsServiceAccountNamespace }}"
 userNames:
-- "system:serviceaccount:"{{ $jenkinsServiceAccountNamespace }}":{{ $jenkinsServiceAccountName }}"
+- "system:serviceaccount:{{ $jenkinsServiceAccountNamespace }}:{{ $jenkinsServiceAccountName }}"
 {{- end}}
 

@@ -1,7 +1,7 @@
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: helm-app-operator
+  name: project-pipeline-operator
 rules:
 - apiGroups:
   - cop.redhat.com
@@ -24,14 +24,15 @@ rules:
 
 ---
 
-kind: RoleBinding
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: default-account-helm-app-operator
+  name: project-pipeline-default-account-project-pipeline-operator
 subjects:
 - kind: ServiceAccount
   name: default
+  namespace: project-pipeline
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: helm-app-operator
 apiGroup: rbac.authorization.k8s.io
