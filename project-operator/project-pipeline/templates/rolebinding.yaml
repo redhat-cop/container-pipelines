@@ -1,0 +1,20 @@
+{{- $baseName := .Values.baseName -}}
+{{- $jenkinsServiceAccountName := .Values.jenkinsServiceAccountName -}}
+{{- $jenkinsServiceAccountNamespace := .Values.jenkinsServiceAccountNamespace -}}
+{{- range .Values.environments }}
+---
+apiVersion: v1
+kind: RoleBinding
+metadata:
+  name: jenkins_edit
+  namespace: "{{ $baseName }}-{{ . }}"
+roleRef:
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: "{{ $jenkinsServiceAccountName }}"
+  namespace: "{{ $jenkinsServiceAccountNamespace }}"
+userNames:
+- "system:serviceaccount:"{{ $jenkinsServiceAccountNamespace }}":{{ $jenkinsServiceAccountName }}"
+{{- end}}
+

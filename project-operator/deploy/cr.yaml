@@ -1,0 +1,7 @@
+apiVersion: cop.redhat.com/v1alpha1
+kind: ProjectPipeline
+metadata:
+  name: test
+spec:
+  baseName: test
+  friendlyBaseName: A Test Project

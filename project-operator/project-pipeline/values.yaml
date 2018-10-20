@@ -1,0 +1,9 @@
+baseName: example-app
+baseFriendlyName: An Example App
+jenkinsServiceAccountName: jenkins
+jenkinsServiceAccountNamespace: jenkins
+environments:
+  - build
+  - dev
+  - stage
+  - prod

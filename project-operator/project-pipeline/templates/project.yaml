@@ -1,0 +1,10 @@
+{{- $baseName := .Values.baseName -}}
+{{- $friendlyBaseName := .Values.friendlyBaseName -}}
+{{- range .Values.environments }}
+---
+kind: ProjectRequest
+apiVersion: v1
+metadata:
+  name: "{{ $baseName }}-{{ . }}"
+displayName: "{{ $friendlyBaseName }} - {{ . }}"
+{{- end}}
