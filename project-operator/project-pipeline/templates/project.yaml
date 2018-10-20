@@ -2,9 +2,13 @@
 {{- $friendlyBaseName := .Values.friendlyBaseName -}}
 {{- range .Values.environments }}
 ---
-kind: ProjectRequest
-apiVersion: project.openshift.io/v1
+kind: Namespace
+apiVersion: v1
 metadata:
   name: "{{ $baseName }}-{{ . }}"
-displayName: "{{ $friendlyBaseName }} - {{ . }}"
+  annotations:
+    openshift.io/display-name: "{{ $friendlyBaseName }} - {{ . | Title }}"
+    openshift.io/sa.scc.mcs: s0:c11,c5
+    openshift.io/sa.scc.supplemental-groups: 1000120000/10000
+    openshift.io/sa.scc.uid-range: 1000120000/10000
 {{- end}}

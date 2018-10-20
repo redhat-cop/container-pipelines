@@ -1,5 +1,5 @@
 baseName: example-app
-baseFriendlyName: An Example App
+friendlyBaseName: An Example App
 jenkinsServiceAccountName: jenkins
 jenkinsServiceAccountNamespace: jenkins
 environments:
