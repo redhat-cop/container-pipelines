@@ -10,6 +10,24 @@ rules:
   verbs:
   - "*"
 - apiGroups:
+  - image.openshift.io
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - apps.openshift.io
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - "*"
+  verbs:
+  - "*"
+- apiGroups:
   - ""
   resources:
   - pods
@@ -20,6 +38,7 @@ rules:
   - endpoints
   - persistentvolumeclaims
   - events
+  - namespaces
   verbs:
   - "*"
 - apiGroups:
