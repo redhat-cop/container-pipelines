@@ -3,7 +3,7 @@
 {{- range .Values.environments }}
 ---
 kind: ProjectRequest
-apiVersion: projects.openshift.io/v1
+apiVersion: project.openshift.io/v1
 metadata:
   name: "{{ $baseName }}-{{ . }}"
 displayName: "{{ $friendlyBaseName }} - {{ . }}"
