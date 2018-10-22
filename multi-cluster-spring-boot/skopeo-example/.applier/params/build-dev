@@ -1,0 +1,5 @@
+APPLICATION_NAME=spring-rest
+NAMESPACE=multicluster-spring-boot-dev
+PIPELINE_REPOSITORY_URL=https://github.com/etsauer/container-pipelines.git
+PIPELINE_REPOSITORY_REF=multi-cluster-promotion
+PIPELINE_REPOSITORY_CONTEXT_DIR=multi-cluster-spring-boot/skopeo-example

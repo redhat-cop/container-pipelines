@@ -9,19 +9,14 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * Promotion of an application's container image to a separate OpenShift Cluster (using `skopeo`)
 * Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
-## Quickstart
+## Automated Deployment
 
-### Requirements
-1. [OpenShift Applier](https://github.com/redhat-cop/openshift-applier)
-   `git clone git@github.com:redhat-cop/openshift-applier.git`
-   `git checkout v3.6.1`
-2. [Ansible](https://www.ansible.com/)
-   `sudo dnf install ansible`
-
-### Installation
-Run the following commands to instantiate this example.
+1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
+2. `cd container-pipelines/basic-tomcat`
+3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
+4. Run the following commands to instantiate this example.
 ```
-ansible-playbook -i inventory/hosts ../openshift-applier/playbooks/openshift-cluster-seed.yml --connection=local
+ansible-playbook -i .applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 The above command will create all the necessary projects and OpenShift objects as well as a Jenkins instance that will build, promote and deploy the application.
 Run the following commands to instantiate this example.
@@ -38,7 +33,7 @@ The first template, `files/builds/template.yml` is what we are calling the "Buil
 * An `s2i` BuildConfig
 * An ImageStream for the s2i build config to push to
 
-The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/etsauer/ticket-monster).
+The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/jboss-developer/ticket-monster.git).
 
 The second template, `files/deployment/template.yml` is the "Deploy" template. It contains:
 
@@ -46,7 +41,7 @@ The second template, `files/deployment/template.yml` is the "Deploy" template. I
 * A Service definition
 * A Route
 
-The idea behind the split between the templates is that I can deploy the build template only once (to my dev project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
+The idea behind the split between the templates is that I can deploy the build template only once (to my build project) and that the pipeline will promote my image through all of the various stages of my application's lifecycle. The deployment template gets deployed once to each of the stages of the application lifecycle (once per OpenShift project).
 
 ### Pipeline Script
 
@@ -56,9 +51,7 @@ This project includes a sample `pipeline.groovy` Jenkins Pipeline script that co
 * The `pipeline.groovy` script is placed in the same directory as the `pom.xml` file in the git source.
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-For convenience, this pipeline script is already included in the following git repository, based on the [JBoss Developers Ticket Monster](https://github.com/jboss-developer/ticket-monster) app.
-
-https://github.com/etsauer/ticket-monster
+For convenience, the project will, by default build and deploy the [JBoss Developers Ticket Monster](https://github.com/jboss-developer/ticket-monster.git) application.
 
 ## Bill of Materials
 
@@ -100,7 +93,7 @@ A _build template_ is provided at `files/builds/template.yml` that defines all t
 * A `BuildConfig` that defines a `JenkinsPipelineStrategy` build, which will be used to define out pipeline.
 * A `BuildConfig` that defines a `Source` build with `Binary` input. This will build our image.
 
-At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `myapp-dev` project, and going to *Builds* -> *Pipelines*. At several points you will be prompted for input on the pipeline. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
+At this point you should be able to go to the Web Console and follow the pipeline by clicking in your `basic-tomcat-build` project, and going to *Builds* -> *Pipelines*. At several points you will be prompted for input on the pipeline. You can interact with it by clicking on the _input required_ link, which takes you to Jenkins, where you can click the *Proceed* button. By the time you get through the end of the pipeline you should be able to visit the Route for your app deployed to the `myapp-prod` project to confirm that your image has been promoted through all stages.
 
 ## Cleanup
 

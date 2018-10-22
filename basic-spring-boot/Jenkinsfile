@@ -100,6 +100,14 @@ pipeline {
       }
     }
 
+    stage('Promotion gate') {
+      steps {
+        script {
+          input message: 'Promote application to Production?'
+        }
+      }
+    }
+
     stage('Promote from Stage to Prod') {
       steps {
         tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.STAGE, toImagePath: env.PROD)
