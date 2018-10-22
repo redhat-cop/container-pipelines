@@ -1,4 +1,0 @@
-APPLICATION_NAME=express-rest
-NAMESPACE=basic-nodejs-express-dev
-SA_NAMESPACE=basic-nodejs-express-build
-READINESS_RESPONSE=status.:.success
