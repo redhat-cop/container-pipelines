@@ -1,0 +1,30 @@
+openshift_cluster_content:
+- object: deployments
+  content:
+  - name: "deploy jenkins"
+    template: "openshift//jenkins-ephemeral"
+    params: "{{ inventory_dir }}/../params/jenkins"
+    namespace: multicluster-spring-boot-dev
+  - name: "create prod cluster credential"
+    template: "{{ inventory_dir }}/../templates/cluster-secret.yml"
+    params: "{{ inventory_dir }}/../params/prod-cluster-credentials"
+    namespace: multicluster-spring-boot-dev
+  - name: "create image mirror nonprod secret"
+    template: "{{ inventory_dir }}/../templates/image-mirror-secret.yml"
+    params: "{{ inventory_dir }}/../params/nonprod-credentials"
+    namespace: multicluster-spring-boot-dev
+  - name: "create image mirror prod secret"
+    template: "{{ inventory_dir }}/../templates/image-mirror-secret.yml"
+    params: "{{ inventory_dir }}/../params/prod-credentials"
+    namespace: multicluster-spring-boot-dev
+  - name: "deploy dev environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-dev"
+  - name: "deply stage environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params: "{{ inventory_dir }}/../params/deployment-stage"
+- object: builds
+  content:
+  - name: "deploy build pipeline to dev"
+    template: "{{ inventory_dir }}/../templates/build.yml"
+    params: "{{ inventory_dir }}/../params/build-dev"

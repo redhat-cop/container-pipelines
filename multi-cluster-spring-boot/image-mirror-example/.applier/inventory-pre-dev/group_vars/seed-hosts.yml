@@ -1,0 +1,11 @@
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    file: "{{ inventory_dir }}/../projects/projects.yml"
+    file_action: create
+- object: deployments
+  content:
+  - name: "create image mirror service account"
+    template: "{{ inventory_dir }}/../templates/image-mirror-sa.yml"
+    params: "{{ inventory_dir }}/../params/registry-sa-nonprod-cluster"

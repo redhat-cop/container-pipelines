@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: generic-java-jenkins-pipeline
+metadata:
+  annotations:
+    description: Application template for JWS applications built using a Jenkins Pipeline
+    iconClass: icon-tomcat
+    tags: tomcat,tomcat8,java,jboss,xpaas,jenkins-ci
+    version: 1.2.0
+  name: generic-java-jenkins-pipeline
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
+      build: ${APPLICATION_NAME}
+    name: "${APPLICATION_NAME}"
+    namespace: "${NAMESPACE}"
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${APPLICATION_NAME}:latest"
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ${IMAGE_STREAM_TAG_NAME}
+          namespace: ${IMAGE_STREAM_NAMESPACE}
+      type: Source
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: "${APPLICATION_NAME}-pipeline"
+    namespace: "${NAMESPACE}"
+  spec:
+    source:
+      type: Git
+      git:
+        uri: ${PIPELINE_REPOSITORY_URL}
+        ref: ${PIPELINE_REPOSITORY_REF}
+      contextDir: ${PIPELINE_REPOSITORY_CONTEXT_DIR}
+    triggers:
+    - type: "GitHub"
+      github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+    - type: "ConfigChange"
+    strategy:
+      type: "JenkinsPipeline"
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: ${PIPELINE_SCRIPT}
+        env:
+        - name: SOURCE_CODE_URL
+          value: ${SOURCE_CODE_URL}
+        - name: SOURCE_CODE_BRANCH
+          value: ${SOURCE_CODE_BRANCH}
+        - name: SKIP_TLS
+          value: "true"
+        - name: SRC_REGISTRY
+          value: ${SRC_REGISTRY}
+        - name: DEST_REGISTRY
+          value: ${DEST_REGISTRY}
+        - name: SRC_API_URL
+          value: ${SRC_API_URL}
+        - name: DEST_API_URL
+          value: ${DEST_API_URL}
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: basic-spring
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true
+- description: Git source URI for application
+  name: PIPELINE_REPOSITORY_URL
+  required: true
+  value: https://github.com/redhat-cop/container-pipelines.git
+- description: Git branch/tag reference
+  name: PIPELINE_REPOSITORY_REF
+  value: "master"
+- description: Path within Git project to build; empty for root project directory.
+  name: PIPELINE_REPOSITORY_CONTEXT_DIR
+  value:
+- description: Path within Git project pointing to the pipeline run script
+  name: PIPELINE_SCRIPT
+  value: Jenkinsfile
+- description: Git source URI for application
+  name: SOURCE_CODE_URL
+  required: true
+  value: https://github.com/redhat-cop/spring-rest.git
+- description: Git branch/tag reference
+  name: SOURCE_CODE_REF
+  value: "master"
+- description: GitHub trigger secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+  required: true
+- description: Generic build trigger secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GENERIC_WEBHOOK_SECRET
+  required: true
+- description: Namespace in which the ImageStreams for Red Hat Middleware images are
+    installed. These ImageStreams are normally installed in the openshift namespace.
+    You should only need to modify this if you've installed the ImageStreams in a
+    different namespace/project.
+  name: IMAGE_STREAM_NAMESPACE
+  required: true
+  value: openshift
+- description: Image stream tag for the image you'd like to use to build the application
+  name: IMAGE_STREAM_TAG_NAME
+  required: true
+  value: redhat-openjdk18-openshift:1.1
+- description: The source docker registry used for image mirror
+  name: SRC_REGISTRY
+  required: true
+- description: The destination docker registry used for image mirror
+  name: DEST_REGISTRY
+  required: true
+- description: Set source code branch
+  name: SOURCE_CODE_BRANCH
+  required: true
+  value: master
+- description: The source docker registry used for the docker registry url
+  name: SRC_API_URL
+  required: true
+- description: The destination docker registry used for the docker registry url
+  name: DEST_API_URL
+  required: true

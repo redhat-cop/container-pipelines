@@ -1,0 +1,164 @@
+openshift.withCluster() {
+  env.NAMESPACE = openshift.project()
+  env.SKOPEO_IMAGE = openshift.selector( 'is/jenkins-slave-image-mgmt' ).object().status.dockerImageRepository
+  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '')
+  echo "Starting Pipeline for ${APP_NAME}..."
+  def projectBase = "${env.NAMESPACE}".replaceAll(/-dev/, '')
+  env.STAGE1 = "${projectBase}-dev"
+  env.STAGE2 = "${projectBase}-stage"
+  env.STAGE3 = "${projectBase}-prod"
+}
+
+
+pipeline {
+
+  agent { label 'maven' }
+
+  stages {
+
+    stage('Code Build') {
+      steps {
+        git url: "${SOURCE_CODE_URL}"
+        sh "mvn clean install -q"
+      }
+    }
+
+    stage('Image Build') {
+      steps {
+        echo 'Building Image from Jar File'
+        sh """
+          set +x
+          rm -rf oc-build && mkdir -p oc-build/deployments
+          for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
+            cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
+          done
+        """
+        script {
+          openshift.withCluster() {
+            openshift.startBuild("${APP_NAME}", "--from-dir=oc-build", "--wait", "--follow")
+          }
+        }
+      }
+    }
+
+    stage ('Verify Deployment to Dev') {
+      steps {
+        script {
+          openshift.withCluster() {
+            def dcObj = openshift.selector('dc', env.APP_NAME).object()
+            def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+            podSelector.untilEach {
+                echo "pod: ${it.name()}"
+                return it.object().status.containerStatuses[0].ready
+            }
+          }
+        }
+      }
+    }
+
+    stage('Promote to Stage') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.tag("${env.STAGE1}/${env.APP_NAME}:latest", "${env.STAGE2}/${env.APP_NAME}:latest")
+          }
+        }
+      }
+    }
+
+    stage ('Verify Deployment to Stage') {
+      steps {
+        script {
+          openshift.withCluster() {
+              openshift.withProject("${STAGE2}") {
+              def dcObj = openshift.selector('dc', env.APP_NAME).object()
+              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+              podSelector.untilEach {
+                  echo "pod: ${it.name()}"
+                  return it.object().status.containerStatuses[0].ready
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stage('Promotion gate') {
+      steps {
+        script {
+          input message: 'Promote application to Production?'
+        }
+      }
+    }
+
+    stage('Promote to Prod') {
+      agent {
+        kubernetes {
+          label 'promotion-slave'
+          cloud 'openshift'
+          serviceAccount 'jenkins'
+          containerTemplate {
+            name 'jnlp'
+            image "docker-registry.default.svc:5000/${NAMESPACE}/jenkins-slave-image-mgmt"
+            alwaysPullImage true
+            workingDir '/tmp'
+            args '${computer.jnlpmac} ${computer.name}'
+            ttyEnabled false
+          }
+        }
+      }
+      steps {
+        script {
+          openshift.withCluster() {
+
+            def localToken = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
+
+            def secretData = openshift.selector('secret/prod-credentials').object().data
+            def encodedRegistry = secretData.registry
+            def encodedToken = secretData.token
+            def registry = sh(script:"set +x; echo ${encodedRegistry} | base64 --decode", returnStdout: true)
+            def token = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
+
+            openshift.withProject("${STAGE2}") {
+              def imageRegistry = openshift.selector( 'is', "${APP_NAME}").object().status.dockerImageRepository
+              echo "Promoting ${imageRegistry} -> ${registry}/${STAGE3}/${APP_NAME}"
+              sh """
+              set +x
+              skopeo copy --remove-signatures \
+                --src-creds openshift:${localToken} --src-cert-dir=/run/secrets/kubernetes.io/serviceaccount/ \
+                --dest-creds openshift:${token}  --dest-tls-verify=false \
+                docker://${imageRegistry} docker://${registry}/${STAGE3}/${APP_NAME}
+              """
+            }
+
+          }
+        }
+      }
+    }
+
+    stage ('Verify Deployment to Prod') {
+      steps {
+        script {
+          openshift.withCluster() {
+            def secretData = openshift.selector('secret/prod-credentials').object().data
+            def encodedAPI = secretData.api
+            def encodedToken = secretData.token
+            env.API = sh(script:"set +x; echo ${encodedAPI} | base64 --decode", returnStdout: true).replaceAll(/https?/, 'insecure')
+            env.TOKEN = sh(script:"set +x; echo ${encodedToken} | base64 --decode", returnStdout: true)
+          }
+          openshift.withCluster( env.API, env.TOKEN ) {
+            openshift.withProject("${STAGE3}") {
+              def dcObj = openshift.selector('dc', env.APP_NAME).object()
+              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+              podSelector.untilEach {
+                  echo "pod: ${it.name()}"
+                  return it.object().status.containerStatuses[0].ready
+              }
+            }
+          }
+        }
+      }
+    }
+
+  }
+}
