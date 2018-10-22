@@ -1,13 +1,20 @@
+library identifier: "pipeline-library@master",
+retriever: modernSCM(
+  [
+    $class: "GitSCMSource",
+    remote: "https://github.com/redhat-cop/pipeline-library.git"
+  ]
+)
+
 openshift.withCluster() {
   env.NAMESPACE = openshift.project()
   env.POM_FILE = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
-  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '').replaceAll("/", '')
+  env.APP_NAME = "${JOB_NAME}".replaceAll(/-build.*/, '')
   echo "Starting Pipeline for ${APP_NAME}..."
-  def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
-  env.STAGE0 = "${projectBase}-build"
-  env.STAGE1 = "${projectBase}-dev"
-  env.STAGE2 = "${projectBase}-stage"
-  env.STAGE3 = "${projectBase}-prod"
+  env.BUILD = "${env.NAMESPACE}"
+  env.DEV = "${APP_NAME}-dev"
+  env.STAGE = "${APP_NAME}-stage"
+  env.PROD = "${APP_NAME}-prod"
 }
 
 pipeline {
@@ -65,95 +72,44 @@ pipeline {
         // Giving all the artifacts to OpenShift Binary Build
         // This places your artifacts into right location inside your S2I image
         // if the S2I image supports it.
-        script {
-          openshift.withCluster() {
-            openshift.withProject("${STAGE0}") {
-              openshift.selector("bc", "${APP_NAME}").startBuild("--from-dir=oc-build").logs("-f")
-            }
-          }
-        }
+        binaryBuild(projectName: env.BUILD, buildConfigName: env.APP_NAME, artifactsDirectoryName: "oc-build")
       }
     }
 
     stage('Promote from Build to Dev') {
       steps {
-        script {
-          openshift.withCluster() {
-            openshift.tag("${env.STAGE0}/${env.APP_NAME}:latest", "${env.STAGE1}/${env.APP_NAME}:latest")
-          }
-        }
+        tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.BUILD, toImagePath: env.DEV)
       }
     }
 
     stage ('Verify Deployment to Dev') {
       steps {
-        script {
-          openshift.withCluster() {
-              openshift.withProject("${STAGE1}") {
-              def dcObj = openshift.selector('dc', env.APP_NAME).object()
-              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
-              podSelector.untilEach {
-                  echo "pod: ${it.name()}"
-                  return it.object().status.containerStatuses[0].ready
-              }
-            }
-          }
-        }
+        verifyDeployment(projectName: env.DEV, targetApp: env.APP_NAME)
       }
     }
 
     stage('Promote from Dev to Stage') {
       steps {
-        script {
-          openshift.withCluster() {
-            openshift.tag("${env.STAGE1}/${env.APP_NAME}:latest", "${env.STAGE2}/${env.APP_NAME}:latest")
-          }
-        }
+        tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.DEV, toImagePath: env.STAGE)
       }
     }
 
     stage ('Verify Deployment to Stage') {
       steps {
-        script {
-          openshift.withCluster() {
-              openshift.withProject("${STAGE2}") {
-              def dcObj = openshift.selector('dc', env.APP_NAME).object()
-              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
-              podSelector.untilEach {
-                  echo "pod: ${it.name()}"
-                  return it.object().status.containerStatuses[0].ready
-              }
-            }
-          }
-        }
+        verifyDeployment(projectName: env.STAGE, targetApp: env.APP_NAME)
       }
     }
+
     stage('Promote from Stage to Prod') {
       steps {
-        script {
-          openshift.withCluster() {
-            openshift.tag("${env.STAGE2}/${env.APP_NAME}:latest", "${env.STAGE3}/${env.APP_NAME}:latest")
-          }
-        }
+        tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.STAGE, toImagePath: env.PROD)
       }
     }
 
     stage ('Verify Deployment to Prod') {
       steps {
-        script {
-          openshift.withCluster() {
-              openshift.withProject("${STAGE3}") {
-              def dcObj = openshift.selector('dc', env.APP_NAME).object()
-              def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
-              podSelector.untilEach {
-                  echo "pod: ${it.name()}"
-                  return it.object().status.containerStatuses[0].ready
-              }
-            }
-          }
-        }
+        verifyDeployment(projectName: env.PROD, targetApp: env.APP_NAME)
       }
     }
-
   }
 }
