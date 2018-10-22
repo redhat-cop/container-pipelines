@@ -1,4 +1,0 @@
-SLAVE_NAME=slave-nodejs
-NAMESPACE=basic-nodejs-express-build
-CONTEXT_DIR=slave-nodejs
-SOURCE_REPOSITORY_REF=slave-nodejs-8
