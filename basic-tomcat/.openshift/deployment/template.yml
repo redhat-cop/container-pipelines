@@ -11,7 +11,7 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
   spec:
@@ -23,7 +23,7 @@ objects:
     template:
       metadata:
         labels:
-          application: ${APPLICATION_NAME}
+          app: ${APPLICATION_NAME}
           deploymentConfig: ${APPLICATION_NAME}
         name: ${APPLICATION_NAME}
       spec:
@@ -65,7 +65,7 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
 - apiVersion: v1
@@ -75,7 +75,7 @@ objects:
     annotations:
       description: Route for application's service.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
   spec:
@@ -89,7 +89,7 @@ objects:
     annotations:
       description: Service for application.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
   spec:
@@ -99,7 +99,7 @@ objects:
       protocol: TCP
       targetPort: 8080
     selector:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
       deploymentConfig: ${APPLICATION_NAME}
 - apiVersion: v1
   kind: Service
@@ -107,7 +107,7 @@ objects:
     annotations:
       description: Service for application.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
   spec:
@@ -117,7 +117,7 @@ objects:
       protocol: TCP
       targetPort: 8080
     selector:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
       deploymentConfig: ${APPLICATION_NAME}
 - apiVersion: v1
   groupNames: null

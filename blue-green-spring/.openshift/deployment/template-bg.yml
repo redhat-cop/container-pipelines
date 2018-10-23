@@ -16,7 +16,7 @@ objects:
     annotations:
       description: The web server's http port.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-green
     namespace: ${NAMESPACE}
   spec:
@@ -31,7 +31,7 @@ objects:
     annotations:
       description: The web server's http port.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-blue
     namespace: ${NAMESPACE}
   spec:
@@ -47,7 +47,7 @@ objects:
     annotations:
       description: Current live route for application's http service.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -61,7 +61,7 @@ objects:
     annotations:
       description: Route for the blue deployment.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-blue
     namespace: ${NAMESPACE}
   spec:
@@ -75,7 +75,7 @@ objects:
     annotations:
       description: Route for green deployment.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-green
     namespace: ${NAMESPACE}
   spec:
@@ -86,21 +86,21 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-green
     namespace: ${NAMESPACE}
 - apiVersion: v1
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-green
     namespace: ${NAMESPACE}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-blue
     namespace: ${NAMESPACE}
   spec:
@@ -112,7 +112,7 @@ objects:
     template:
       metadata:
         labels:
-          application: ${APPLICATION_NAME}
+          app: ${APPLICATION_NAME}
           deploymentConfig: ${APPLICATION_NAME}-blue
         name: ${APPLICATION_NAME}-blue
       spec:
@@ -151,7 +151,7 @@ objects:
   kind: DeploymentConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}-green
     namespace: ${NAMESPACE}
   spec:
@@ -163,7 +163,7 @@ objects:
     template:
       metadata:
         labels:
-          application: ${APPLICATION_NAME}
+          app: ${APPLICATION_NAME}
           deploymentConfig: ${APPLICATION_NAME}-green
         name: ${APPLICATION_NAME}-green
       spec:
