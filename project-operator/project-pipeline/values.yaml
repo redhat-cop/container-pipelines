@@ -1,9 +1,0 @@
-baseName: example-app
-friendlyBaseName: An Example App
-jenkinsServiceAccountName: jenkins
-jenkinsServiceAccountNamespace: jenkins
-environments:
-  - build
-  - dev
-  - stage
-  - prod

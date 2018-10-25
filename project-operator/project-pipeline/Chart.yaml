@@ -1,7 +1,0 @@
-apiVersion: "v1"
-name: project-pipeline
-version: 1.0.0
-description: Creates Build->Dev->State->Prod projects with required permissions for example pipelines
-sources:
-  - https://github.com/redhat-cop/container-pipelines
-engine: gotpl
