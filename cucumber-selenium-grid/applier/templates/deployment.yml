@@ -16,7 +16,7 @@ objects:
     annotations:
       description: The web server's http port.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -32,7 +32,7 @@ objects:
     annotations:
       description: Route for application's http service.
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -43,14 +43,14 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -62,7 +62,7 @@ objects:
     template:
       metadata:
         labels:
-          application: ${APPLICATION_NAME}
+          app: ${APPLICATION_NAME}
           deploymentConfig: ${APPLICATION_NAME}
         name: ${APPLICATION_NAME}
       spec:
