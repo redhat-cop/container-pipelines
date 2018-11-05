@@ -5,7 +5,7 @@ This example demonstrates how to implement a full end-to-end Jenkins Pipeline fo
 * Deploying an integrated Jenkins server inside of OpenShift
 * Running both custom and oob Jenkins slaves as pods in OpenShift
 * "One Click" instantiation of a Jenkins Pipeline using OpenShift's Jenkins Pipeline Strategy feature
-* Promotion of an application's container image within an OpenShift Cluster (using `oc tag`)
+* Building a Jenkins pipeline with library functions from our [pipeline-library](https://github.com/redhat-cop/pipeline-library)
 * Automated rollout using the [openshift-appler](https://github.com/redhat-cop/openshift-applier) project.
 
 ## Automated Deployment
@@ -17,7 +17,6 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
 3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
 2. Log into an OpenShift cluster, then run the following command.
 ```
-$ oc login
 $ ansible-playbook -i ./.applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
