@@ -15,9 +15,9 @@ node('master') {
 
   env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?\/?/, '')
   def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
-  env.STAGE1 = "${projectBase}-dev"
-  env.STAGE2 = "${projectBase}-stage"
-  env.STAGE3 = "${projectBase}-prod"
+  env.STAGE1 = "chris-bolton-sbx"
+  env.STAGE2 = "chris-bolton-sbx"
+  env.STAGE3 = "chris-bolton-sbx"
 
 }
 
