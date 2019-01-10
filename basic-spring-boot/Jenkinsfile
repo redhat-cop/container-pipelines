@@ -44,7 +44,9 @@ pipeline {
     // Run Merge
     stage('Merge Test'){
       steps {
-        sh "cd container-pipelines"
+        sh "pwd"
+        sh "git checkout -t remotes/origin/test"
+        sh "git checkout master"
         sh "git merge test"
         sh "git add --all"
         sh "git commit -m 'merge test'"
