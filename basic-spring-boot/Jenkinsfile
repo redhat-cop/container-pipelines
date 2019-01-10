@@ -42,9 +42,11 @@ pipeline {
       }
     }
     // Run Merge
-    stage('Merge'){
+    stage('Merge Test'){
       steps {
         sh "git merge test"
+        sh "git add --all"
+        sh "git commit -m 'merge test'"
       }
     }
 
@@ -62,6 +64,11 @@ pipeline {
       }
     }
 
+    stage('Merge'){
+      steps {
+        sh "git push origin master"
+      }
+    }
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){
       steps {
