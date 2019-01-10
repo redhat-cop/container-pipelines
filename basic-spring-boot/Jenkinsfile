@@ -41,6 +41,12 @@ pipeline {
         git url: "${APPLICATION_SOURCE_REPO}"
       }
     }
+    // Run Merge
+    stage('Merge'){
+      steps {
+        sh "git merge test"
+      }
+    }
 
     // Run Maven build, skipping tests
     stage('Build'){
