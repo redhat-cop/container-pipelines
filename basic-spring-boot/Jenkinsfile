@@ -47,6 +47,8 @@ pipeline {
         sh "pwd"
         sh "git checkout -t remotes/origin/test"
         sh "git checkout master"
+        sh "git config --global user.name 'loren'"
+        sh "git config --global user.email 'loren@redhat.com'"
         sh "git merge test"
         sh "git add --all"
         sh "git commit -m 'merge test'"
