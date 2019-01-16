@@ -36,6 +36,8 @@ objects:
         env:
         - name: "APPLICATION_SOURCE_REPO"
           value: "${APPLICATION_SOURCE_REPO}"
+        - name: "APPLICATION_SOURCE_REF"
+          value: "${APPLICATION_SOURCE_REF}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -90,6 +92,10 @@ parameters:
   name: APPLICATION_SOURCE_REPO
   required: true
   value: https://github.com/redhat-cop/spring-rest.git
+- description: Source code ref for demo app
+  name: APPLICATION_SOURCE_REF
+  required: true
+  value: master
 - description: GitHub trigger secret
   from: '[a-zA-Z0-9]{8}'
   generate: expression
