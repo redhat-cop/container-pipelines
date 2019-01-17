@@ -48,13 +48,13 @@ pipeline {
     
     stage('Build') {
       steps {
-        sh "mvn clean install -DskipTests=true -f ${pom_file}"
+        sh "mvn -B clean install -DskipTests=true -f ${pom_file}"
       }
     }
 
     stage('Unit Test') {
       steps {
-        sh "mvn test -f ${pom_file}"
+        sh "mvn -B test -f ${pom_file}"
       }
     }
 
