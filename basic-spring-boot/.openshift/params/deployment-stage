@@ -1,6 +1,0 @@
-APPLICATION_NAME=basic-spring-boot
-NAMESPACE=basic-spring-boot-stage
-SA_NAME=jenkins
-SA_NAMESPACE=basic-spring-boot-build
-READINESS_RESPONSE=status.:.UP
-READINESS_PATH=/health
