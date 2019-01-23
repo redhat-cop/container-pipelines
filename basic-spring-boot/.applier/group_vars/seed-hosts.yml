@@ -4,6 +4,7 @@ sb_dev_namespace: basic-spring-boot-dev
 sb_stage_namespace: basic-spring-boot-stage
 sb_prod_namespace: basic-spring-boot-prod
 sb_application_repository_url: "https://github.com/redhat-cop/spring-rest.git"
+sb_application_repository_ref: master
 sb_application_readiness_response: "status.:.UP"
 sb_application_readiness_path: "/health"
 sb_sa_name: "jenkins"
@@ -29,6 +30,7 @@ openshift_cluster_content:
       SOURCE_REPOSITORY_URL: "{{ sb_source_repository_url }}"
       SOURCE_REPOSITORY_REF: "{{ sb_source_repository_ref }}"
       APPLICATION_SOURCE_REPO: "{{ sb_application_repository_url }}"
+      APPLICATION_SOURCE_REF: "{{ sb_application_repository_ref }}"
       PIPELINE_SCRIPT: "{{ sb_pipeline_script }}"
     tags:
       - build
