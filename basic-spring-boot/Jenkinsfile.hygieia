@@ -40,7 +40,7 @@ pipeline {
         // sh 'git config --global http.sslVerify false'
         git url: "${APPLICATION_SOURCE_REPO}"
         script {
-          env.commit = sh(script:"git rev-parse HEAD", returnStdout: true)
+          env.commit = sh(script:"git rev-parse HEAD", returnStdout: true).trim()
           env.version = "${env.commit}-${BUILD_NUMBER}"
         }
         echo "Setting version to ${env.version}"
