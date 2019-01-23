@@ -40,6 +40,8 @@ pipeline {
         // sh 'git config --global http.sslVerify false'
         git url: "${APPLICATION_SOURCE_REPO}"
         env.commit = sh(script:"git rev-parse HEAD", returnStdout: true)
+        env.version = "${env.commit}-${BUILD_NUMBER}"
+        echo "Setting version to ${env.version}"
       }
     }
 
@@ -58,7 +60,7 @@ pipeline {
         }
         success {
           hygieiaBuildPublishStep buildStatus: 'Success'
-          hygieiaArtifactPublishStep artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.commit}-${BUILD_NUMBER}"
+          hygieiaArtifactPublishStep artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}"
         }
       }
     }
@@ -102,7 +104,7 @@ pipeline {
       }
       post {
         success {
-          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.commit}-${BUILD_NUMBER}", buildStatus: 'Success', environmentName: "${env.DEV}"
+          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}", buildStatus: 'Success', environmentName: "${env.DEV}"
         }
       }
     }
@@ -119,7 +121,7 @@ pipeline {
       }
       post {
         success {
-          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.commit}-${BUILD_NUMBER}", buildStatus: 'Success', environmentName: "${env.STAGE}"
+          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}", buildStatus: 'Success', environmentName: "${env.STAGE}"
         }
       }
     }
@@ -144,7 +146,7 @@ pipeline {
       }
       post {
         success {
-          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.commit}-${BUILD_NUMBER}", buildStatus: 'Success', environmentName: "${env.PROD}"
+          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}", buildStatus: 'Success', environmentName: "${env.PROD}"
         }
       }
     }
