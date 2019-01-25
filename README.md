@@ -44,3 +44,6 @@ See our [basic spring boot](./basic-spring-boot) example for a very simple refer
 ## Automated Deployments
 
 These pipeline quickstarts include an Ansible inventory through which they can be automatically deployed and managed using the [OpenShift Applier](https://github.com/redhat-cop/openshift-applier) role.
+
+## Optional: Use a container that contains ansible 
+So you don't have to install ansible on your machine.   Just type `oc run ansible-cli --image=openshift/origin-ansible  -- tail -f /dev/null`
