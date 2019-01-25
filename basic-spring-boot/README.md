@@ -30,7 +30,7 @@ The following breaks down the architecture of the pipeline deployed, as well as 
 
 The components of this pipeline are divided into two templates.
 
-The first template, `applier/templates/build.yml` is what we are calling the "Build" template. It contains:
+The first template, `.openshift/templates/build.yml` is what we are calling the "Build" template. It contains:
 
 * A `jenkinsPipelineStrategy` BuildConfig
 * An `s2i` BuildConfig
@@ -38,7 +38,7 @@ The first template, `applier/templates/build.yml` is what we are calling the "Bu
 
 The build template contains a default source code repo for a java application compatible with this pipelines architecture (https://github.com/redhat-cop/spring-rest).
 
-The second template, `applier/templates/deployment.yml` is the "Deploy" template. It contains:
+The second template, `.openshift/templates/deployment.yml` is the "Deploy" template. It contains:
 
 * A tomcat8 DeploymentConfig
 * A Service definition
@@ -76,7 +76,7 @@ For the purposes of this demo, we are going to create three stages for our appli
 In the spirit of _Infrastructure as Code_ we have a YAML file that defines the `ProjectRequests` for us. This is as an alternative to running `oc new-project`, but will yeild the same result.
 
 ```
-$ oc create -f applier/projects/projects.yml
+$ oc create -f .openshift/projects/projects.yml
 projectrequest "basic-spring-boot-build" created
 projectrequest "basic-spring-boot-dev" created
 projectrequest "basic-spring-boot-stage" created
@@ -99,7 +99,7 @@ service "jenkins" created
 
 ### 4. Instantiate Pipeline
 
-A _deploy template_ is provided at `applier/templates/deployment.yml` that defines all of the resources required to run our Tomcat application. It includes:
+A _deploy template_ is provided at `.openshift/templates/deployment.yml` that defines all of the resources required to run our Tomcat application. It includes:
 
 * A `Service`
 * A `Route`
@@ -111,19 +111,22 @@ This template should be instantiated once in each of the namespaces that our app
 
 Deploy the deployment template to all three projects.
 ```
-$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-dev | oc apply -f-
+$ oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
+ -p NAMESPACE=basic-spring-boot-dev -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" configured
-$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-stage | oc apply -f-
+$ oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
+ -p NAMESPACE=basic-spring-boot-stage -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f- | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" created
-$ oc process -f applier/templates/deployment.yml --param-file=applier/params/deployment-prod | oc apply -f-
+$ oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
+ -p NAMESPACE=basic-spring-boot-prod -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
@@ -138,7 +141,8 @@ A _build template_ is provided at `applier/templates/build.yml` that defines all
 
 Deploy the pipeline template in build only.
 ```
-$ oc process -f applier/templates/build.yml --param-file applier/params/build-dev | oc apply -f-
+$ oc process -f applier/templates/build.yml -p=APPLICATION_NAME=basic-spring-boot
+ -p NAMESPACE=basic-spring-boot-dev -p=SOURCE_REPOSITORY_URL="https://github.com/redhat-cop/container-pipelines.git" -p=APPLICATION_SOURCE_REPO="https://github.com/redhat-cop/spring-rest.git" | oc apply -f-
 buildconfig "spring-rest-pipeline" created
 buildconfig "spring-rest" created
 ```
