@@ -46,4 +46,4 @@ See our [basic spring boot](./basic-spring-boot) example for a very simple refer
 These pipeline quickstarts include an Ansible inventory through which they can be automatically deployed and managed using the [OpenShift Applier](https://github.com/redhat-cop/openshift-applier) role.
 
 ## Optional: Use a container that contains ansible 
-So you don't have to install ansible on your machine.   Just type `oc run ansible-cli --image=openshift/origin-ansible  -- tail -f /dev/null`
+So you don't have to install ansible on your machine.   Just type `oc run -i -t tool-box-test --image=quay.io/redhat-cop/tool-box --rm bash`.  More into on the toolbox container can be found at https://github.com/redhat-cop/containers-quickstarts/tree/master/tool-box.
