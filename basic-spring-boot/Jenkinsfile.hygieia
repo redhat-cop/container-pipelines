@@ -39,20 +39,38 @@ pipeline {
         // Turn off Git's SSL cert check, uncomment if needed
         // sh 'git config --global http.sslVerify false'
         git url: "${APPLICATION_SOURCE_REPO}"
+        script {
+          env.commit = sh(script:"git rev-parse HEAD", returnStdout: true).trim()
+          env.version = "${env.commit}-${BUILD_NUMBER}"
+        }
+        echo "Setting version to ${env.version}"
       }
     }
 
     // Run Maven build, skipping tests
     stage('Build'){
       steps {
-        sh "mvn -B clean install -DskipTests=true -f ${POM_FILE}"
+        hygieiaBuildPublishStep buildStatus: 'InProgress'
+        sh "mvn clean install -DskipTests=true -f ${POM_FILE}"
+      }
+      post {
+        failure {
+          hygieiaBuildPublishStep buildStatus: 'Failure'
+        }
+        aborted {
+          hygieiaBuildPublishStep buildStatus: 'Aborted'
+        }
+        success {
+          hygieiaBuildPublishStep buildStatus: 'Success'
+          hygieiaArtifactPublishStep artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}"
+        }
       }
     }
 
     // Run Maven unit tests
     stage('Unit Test'){
       steps {
-        sh "mvn -B test -f ${POM_FILE}"
+        sh "mvn test -f ${POM_FILE}"
       }
     }
 
@@ -86,6 +104,11 @@ pipeline {
       steps {
         verifyDeployment(projectName: env.DEV, targetApp: env.APP_NAME)
       }
+      post {
+        success {
+          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}", buildStatus: 'Success', environmentName: "${env.DEV}"
+        }
+      }
     }
 
     stage('Promote from Dev to Stage') {
@@ -97,6 +120,11 @@ pipeline {
     stage ('Verify Deployment to Stage') {
       steps {
         verifyDeployment(projectName: env.STAGE, targetApp: env.APP_NAME)
+      }
+      post {
+        success {
+          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}", buildStatus: 'Success', environmentName: "${env.STAGE}"
+        }
       }
     }
 
@@ -117,6 +145,11 @@ pipeline {
     stage ('Verify Deployment to Prod') {
       steps {
         verifyDeployment(projectName: env.PROD, targetApp: env.APP_NAME)
+      }
+      post {
+        success {
+          hygieiaDeployPublishStep applicationName: "${APP_NAME}", artifactDirectory: './target/', artifactGroup: 'org.test', artifactName: "shift-rest-0.1.0.jar", artifactVersion: "${env.version}", buildStatus: 'Success', environmentName: "${env.PROD}"
+        }
       }
     }
   }

@@ -1,138 +1,187 @@
-#!/usr/bin/groovy
+library identifier: "pipeline-library@master",
+retriever: modernSCM(
+  [
+    $class: "GitSCMSource",
+    remote: "https://github.com/redhat-cop/pipeline-library.git"
+  ]
+)
 
-////
-// This pipeline requires the following plugins:
-// Kubernetes Plugin 0.10
-////
+def currentState = 'green'
+def newState = 'blue'
+def pom_file = ''
+def version = ''
 
-String ocpApiServer = env.OCP_API_SERVER ? "${env.OCP_API_SERVER}" : "https://openshift.default.svc.cluster.local"
-
-node('master') {
-
-  env.NAMESPACE = readFile('/var/run/secrets/kubernetes.io/serviceaccount/namespace').trim()
-  env.TOKEN = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
-  env.OC_CMD = "oc --request-timeout='0' --token=${env.TOKEN} --server=${ocpApiServer} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt --namespace=${env.NAMESPACE}"
-
-  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?\/?/, '')
-  def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
-  env.STAGE1 = "chris-bolton-sbx"
-  env.STAGE2 = "chris-bolton-sbx"
-  env.STAGE3 = "chris-bolton-sbx"
-
+openshift.withCluster() {
+  env.TARGET = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/target" : "target"
+  env.APP_NAME = "${JOB_NAME}".replaceAll(/-build.*/, '')
+  env.BUILD = openshift.project()
+  env.DEV = "${APP_NAME}-dev"
+  env.STAGE = "${APP_NAME}-stage"
+  env.PROD = "${APP_NAME}-prod"
+  echo "Starting Pipeline for ${APP_NAME}..."
 }
 
-node('maven') {
-  def mvnHome = env.MAVEN_HOME ? "${env.MAVEN_HOME}" : "/usr/share/maven/"
-  def mvnCmd = "mvn"
-  String pomFileLocation = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
-
-  stage('SCM Checkout') {
-
-    git url: "${APPLICATION_SOURCE_REPO}"
+pipeline {
+  agent {
+    label 'maven'
   }
 
-  stage('Build') {
-
-    sh "${mvnCmd} clean install -DskipTests=true -f ${pomFileLocation}"
-
-  }
-
-  stage('Unit Test') {
-
-    sh "${mvnCmd} test -f ${pomFileLocation}"
-
-  }
-
-  // The following variables need to be defined at the top level and not inside
-  // the scope of a stage - otherwise they would not be accessible from other stages.
-  // Extract version and other properties from the pom.xml
-  def groupId    = getGroupIdFromPom("./pom.xml")
-  def artifactId = getArtifactIdFromPom("./pom.xml")
-  def version    = getVersionFromPom("./pom.xml")
-  println("Artifact ID:" + artifactId + ", Group ID:" + groupId)
-  println("New version tag:" + version)
-
-  stage('Build Image') {
-
-    sh """
-       rm -rf oc-build && mkdir -p oc-build/deployments
-
-       for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
-         cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
-       done
-
-       ${env.OC_CMD} start-build ${env.APP_NAME} --from-dir=oc-build --wait=true --follow=true || exit 1
-     """
-  }
-
-  stage("Promote To ${env.STAGE1}") {
-    sh """
-    ${env.OC_CMD} tag ${env.NAMESPACE}/${env.APP_NAME}:latest ${env.STAGE1}/${env.APP_NAME}:latest
-    """
-  }
-
-  stage("Verify Deployment to ${env.STAGE1}") {
-
-    openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE1}", verifyReplicaCount: true)
-
-    //input "Promote Application to Stage?"
-  }
-
-  stage('Integration Test') {
-
-	//TODO: Add application integration testing, verify db connectivity, rest calls ...
-  }
-
-  stage("Promote To ${env.STAGE2}") {
-   sh """
-    ${env.OC_CMD} tag ${env.STAGE1}/${env.APP_NAME}:latest ${env.STAGE2}/${env.APP_NAME}:${version}
-    """
-    sh "${env.OC_CMD} patch dc ${env.APP_NAME} --patch '{\"spec\": { \"triggers\": [ { \"type\": \"ImageChange\", \"imageChangeParams\": { \"containerNames\": [ \"${env.APP_NAME}\" ], \"from\": { \"kind\": \"ImageStreamTag\", \"namespace\": \"${env.STAGE2}\", \"name\": \"${env.APP_NAME}:${version}\"}}}]}}' -n ${env.STAGE2}"
-    openshiftDeploy (apiURL: "${ocpApiServer}", authToken: "${env.TOKEN}", depCfg: "${env.APP_NAME}", namespace: "${env.STAGE2}",  waitTime: '300', waitUnit: 'sec')
-  }
-
-  stage("Verify Deployment to ${env.STAGE2}") {
-
-    openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}", namespace: "${STAGE2}", verifyReplicaCount: true)
-
-  }
-
-  def newState = "blue"
-  def currentState = "green"
-
-  stage("Promote To ${env.STAGE3}") {
-
-    sh "oc get route ${env.APP_NAME} -n ${env.STAGE3} -o jsonpath='{ .spec.to.name }' --loglevel=4 > activeservice"
-    activeService = readFile('activeservice').trim()
-    println("Current active service:" + activeService)
-    if (activeService == "${env.APP_NAME}-blue") {
-       newState = "green"
-       currentState = "blue"
+  stages {
+    stage('Git Checkout') {
+      steps {
+        git url: "${APPLICATION_SOURCE_REPO}", branch: "${APPLICATION_SOURCE_REF}"
+      }
     }
 
-    sh """
-      ${env.OC_CMD} tag ${env.STAGE1}/${env.APP_NAME}:'latest' ${env.STAGE3}/${env.APP_NAME}-${newState}:${version}
-      """
-    sh "${env.OC_CMD} patch dc ${env.APP_NAME}-${newState} --patch '{\"spec\": { \"triggers\": [ { \"type\": \"ImageChange\", \"imageChangeParams\": { \"containerNames\": [ \"${env.APP_NAME}-${newState}\" ], \"from\": { \"kind\": \"ImageStreamTag\", \"namespace\": \"${env.STAGE3}\", \"name\": \"${env.APP_NAME}-${newState}:${version}\"}}}]}}' -n ${env.STAGE3}"
+    stage('pom information') {
+      steps {
+        script {
+          pom_file = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
+          version = getVersionFromPom(pom_file)
+          def artifactId = getArtifactIdFromPom(pom_file)
+          def groupId = getGroupIdFromPom(pom_file)
+          println("Artifact ID: ${artifactId}, Group ID: ${groupId}")
+          println("New version tag: ${version}")
+        }
+      }
+    }
+    
+    stage('Build') {
+      steps {
+        sh "mvn -B clean install -DskipTests=true -f ${pom_file}"
+      }
+    }
 
-    openshiftDeploy (apiURL: "${ocpApiServer}", authToken: "${env.TOKEN}", depCfg: "${env.APP_NAME}-${newState}", namespace: "${env.STAGE3}",  waitTime: '300', waitUnit: 'sec')
+    stage('Unit Test') {
+      steps {
+        sh "mvn -B test -f ${pom_file}"
+      }
+    }
 
-  }
+    stage('Build Container Image'){
+      steps {
+        sh """
+          ls ${TARGET}/*
+          rm -rf oc-build && mkdir -p oc-build/deployments
+          for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
+            cp -rfv ./${TARGET}/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
+          done
+        """
+        binaryBuild(projectName: BUILD, buildConfigName: APP_NAME, artifactsDirectoryName: "oc-build")
+      }
+    }
 
-  stage("Verify Deployment to ${env.STAGE3}") {
+    stage('Promote from Build to Dev') {
+      steps {
+        tagImage(sourceImageName: APP_NAME, sourceImagePath: BUILD, toImagePath: DEV)
+      }
+    }
 
-    openshiftVerifyDeployment(deploymentConfig: "${env.APP_NAME}-${newState}", namespace: "${STAGE3}", verifyReplicaCount: true)
-    println "Application ${env.APP_NAME}-${newState} is now in Production!"
+    stage('Verify Deployment to Dev') {
+      steps {
+        verifyDeployment(projectName: DEV, targetApp: APP_NAME)
+      }
+    }
 
-    input "Switch ${env.STAGE3} from ${currentState} to ${newState} deployment?"
+    stage('Integration Test') {
+      steps {
+        echo "TODO: Add application integration testing, verify db connectivity, rest calls ..."
+      }
+    }
 
-    // Switch Route to new active c
-    sh "oc patch route ${env.APP_NAME} --patch '{\"spec\": { \"to\": { \"name\": \"${env.APP_NAME}-${newState}\"}}}' -n ${env.STAGE3}"
-    println("Route switched to: " + newState)
+    stage('Promote from Dev to Stage') {
+      steps {
+        tagImage(sourceImageName: APP_NAME, sourceImagePath: DEV, toImagePath: STAGE, toImageTag: version)
+        script {
+          println("New version tag:" + version)
+          openshift.withCluster() {
+            openshift.withProject(STAGE) {
+              def dc = openshift.selector("dc/${APP_NAME}").object()
+              def trigger_patch =  [
+                ["type":"ImageChange",
+                 "imageChangeParams":[
+                   "automatic": true,
+                   "containerNames": [APP_NAME],
+                   "from":[
+                     "kind":"ImageStreamTag",
+                     "namespace":STAGE,
+                     "name":"${APP_NAME}:${version}"
+                   ]
+                 ]
+                ],
+                ["type":"ConfigChange"]
+              ]
+              dc.spec.triggers = trigger_patch
+              openshift.apply(dc)
+            }
+          }
+        }
+      }
+    }
 
+    stage('Verify Deployment to Stage') {
+      steps {
+        verifyDeployment(projectName: STAGE, targetApp: APP_NAME)
+      }
+    }
+
+    stage('Promote from Stage to Prod') {
+      steps {
+        script {
+          println("New version tag:" + version)
+          openshift.withCluster() {
+            openshift.withProject(PROD) {
+              def activeService = openshift.selector("route/${APP_NAME}").object().spec.to.name
+              if (activeService == "${APP_NAME}-blue") {
+                newState = 'green'
+                currentState = 'blue'
+              }
+              def dc = openshift.selector("dc/${APP_NAME}-${newState}").object()
+              def trigger_patch =  [
+                ["type":"ImageChange",
+                 "imageChangeParams":[
+                   "automatic": true,
+                   "containerNames": ["${APP_NAME}-${newState}"],
+                   "from":[
+                     "kind":"ImageStreamTag",
+                     "namespace":PROD,
+                     "name":"${APP_NAME}-${newState}:${version}"
+                   ]
+                 ]
+                ],
+                ["type":"ConfigChange"]
+              ]
+              dc.spec.triggers = trigger_patch
+              openshift.apply(dc)
+            }
+          }
+        }
+        tagImage(sourceImageName: APP_NAME, sourceImagePath: DEV, toImagePath: PROD, toImageName: "${APP_NAME}-${newState}", toImageTag: version)
+      }
+    }
+    
+    stage('Verify Deployment to Prod') {
+      steps {
+        verifyDeployment(projectName: PROD, targetApp: "${APP_NAME}-${newState}")
+      }
+    }
+    
+    stage('Switch route to new version') {
+      steps {
+        script {
+          input "Switch ${PROD} from ${currentState} to ${newState} deployment?"
+          openshift.withCluster() {
+            openshift.withProject(PROD) {
+              def route = openshift.selector("route/${APP_NAME}").object()
+              route.spec.to.name = "${APP_NAME}-${newState}"
+              openshift.apply(route)
+            }
+          }
+        }
+      }
+    }
   }
 }
-
 
 // Convenience Functions to read variables from the pom.xml
 // Do not change anything below this line.

@@ -43,6 +43,8 @@ objects:
         env:
         - name: "APPLICATION_SOURCE_REPO"
           value: "${APPLICATION_SOURCE_REPO}"
+        - name: "APPLICATION_SOURCE_REF"
+          value: "${APPLICATION_SOURCE_REF}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -87,6 +89,9 @@ parameters:
   name: APPLICATION_SOURCE_REPO
   required: true
   value: https://github.com/redhat-cop/spring-rest.git
+- description: Source code branch for demo app
+  name: APPLICATION_SOURCE_REF
+  value: master
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile

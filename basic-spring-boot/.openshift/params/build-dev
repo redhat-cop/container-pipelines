@@ -1,4 +1,0 @@
-APPLICATION_NAME=basic-spring-boot
-NAMESPACE=basic-spring-boot-build
-SOURCE_REPOSITORY_URL=https://github.com/redhat-cop/container-pipelines.git
-SOURCE_REPOSITORY_REF=master
