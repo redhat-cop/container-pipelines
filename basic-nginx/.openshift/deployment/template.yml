@@ -41,7 +41,8 @@ objects:
               command:
               - /bin/bash
               - -c
-              - curl -s -u 'http://localhost:8080'
+              - curl -s 'localhost:8080'
+                | grep "Welcome to your static nginx application on OpenShift"
         terminationGracePeriodSeconds: 60
     triggers:
     - imageChangeParams:
