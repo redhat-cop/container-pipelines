@@ -36,10 +36,10 @@ objects:
         env:
         - name: "SOURCE_REPOSITORY_URL"
           value: "${SOURCE_REPOSITORY_URL}"
-        - name: "APPLICATION_SOURCE_REF"
+        - name: "SOURCE_REPOSITORY_REF"
           value: "${SOURCE_REPOSITORY_REF}"
-        - name: "BUILD_CONTEXT_DIR"
-          value: "${SOURCE_REPOSITORY_REF}"
+        - name: "CONTEXT_DIR"
+          value: "${CONTEXT_DIR}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -92,10 +92,6 @@ parameters:
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile
-- description: Directory where POM file will be
-  name: APPLICATION_CONTEXT_DIR
-  required: true
-  value: demo
 - description: GitHub trigger secret
   from: '[a-zA-Z0-9]{8}'
   generate: expression
