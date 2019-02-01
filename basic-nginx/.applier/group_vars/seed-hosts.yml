@@ -8,16 +8,16 @@ openshift_cluster_content:
 - object: deployments
   content:
   - name: jenkins
-    namespace: basic-tomcat-build
+    namespace: basic-nginx-build
     template: openshift//jenkins-ephemeral
     params: "{{ inventory_dir }}/../.openshift/deployment/build/params"
-  - name: basic-tomcat-dev
+  - name: basic-nginx-dev
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/dev/params"
-  - name: basic-tomcat-stage
+  - name: basic-nginx-stage
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/stage/params"
-  - name: basic-tomcat-prod
+  - name: basic-nginx-prod
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/prod/params"
 - object: builds

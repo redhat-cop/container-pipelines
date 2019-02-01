@@ -4,9 +4,9 @@ labels:
   template: generic-java-jenkins-pipeline
 metadata:
   annotations:
-    description: Application template for JWS applications built using a Jenkins Pipeline
-    iconClass: icon-tomcat
-    tags: tomcat,tomcat8,java,jboss,xpaas,jenkins-ci
+    description: Application template for nginx applications built using a Jenkins Pipeline
+    iconClass: icon-nginx
+    tags: nginx,xpaas,jenkins-ci
     version: 1.2.0
   name: generic-java-jenkins-pipeline
 objects:
@@ -34,12 +34,12 @@ objects:
       jenkinsPipelineStrategy:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
         env:
-        - name: "APPLICATION_SOURCE_REPO"
-          value: "${APPLICATION_SOURCE_REPO}"
+        - name: "SOURCE_REPOSITORY_URL"
+          value: "${SOURCE_REPOSITORY_URL}"
         - name: "APPLICATION_SOURCE_REF"
-          value: "${APPLICATION_SOURCE_REF}"
+          value: "${SOURCE_REPOSITORY_REF}"
         - name: "BUILD_CONTEXT_DIR"
-          value: "${APPLICATION_CONTEXT_DIR}"
+          value: "${SOURCE_REPOSITORY_REF}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -82,24 +82,16 @@ parameters:
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/redhat-cop/container-pipelines.git
+  value: https://github.com/Gl4di4torRr/container-pipelines.git
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
-  value: "master"
+  value: "add-nginx-pipeline"
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
   value: "basic-nginx"
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile
-- description: Source code repo for demo app
-  name: APPLICATION_SOURCE_REPO
-  required: true
-  value: https://github.com/jboss-developer/ticket-monster.git
-- description: Source code branch/tag
-  name: APPLICATION_SOURCE_REF
-  required: true
-  value: 2.7.0.Final-with-tutorials
 - description: Directory where POM file will be
   name: APPLICATION_CONTEXT_DIR
   required: true
@@ -124,4 +116,4 @@ parameters:
 - description: Image stream tag for the image you'd like to use to build the application
   name: IMAGE_STREAM_TAG_NAME
   required: true
-  value: jboss-webserver31-tomcat8-openshift:1.0
+  value: nginx:1.12
