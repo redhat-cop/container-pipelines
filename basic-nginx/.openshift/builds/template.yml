@@ -82,10 +82,10 @@ parameters:
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/Gl4di4torRr/container-pipelines.git
+  value: https://github.com/redhat-cop/container-pipelines.git
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
-  value: "add-nginx-pipeline"
+  value: "master"
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
   value: "basic-nginx"
