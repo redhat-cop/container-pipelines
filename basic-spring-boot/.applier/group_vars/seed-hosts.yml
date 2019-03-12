@@ -4,7 +4,7 @@ sb_dev_namespace: basic-spring-boot-dev
 sb_stage_namespace: basic-spring-boot-stage
 sb_prod_namespace: basic-spring-boot-prod
 sb_application_repository_url: "https://github.com/redhat-cop/spring-rest.git"
-sb_application_repository_ref: master
+sb_application_repository_ref: 1.5.8.Final-redhat-1.1
 sb_application_readiness_response: "status.:.UP"
 sb_application_readiness_path: "/health"
 sb_sa_name: "jenkins"
