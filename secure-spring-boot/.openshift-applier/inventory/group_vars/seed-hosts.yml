@@ -1,0 +1,47 @@
+---
+
+app_name: secure-spring-boot-app
+
+build:
+  APPLICATION_NAME: "{{app_name}}"
+  NAMESPACE: "{{ci_cd_namespace}}"
+  SOURCE_REPOSITORY_URL: https://github.com/haithamshahin333/container-pipelines.git
+  SOURCE_REPOSITORY_REF: master
+  CONTEXT_DIR: secure-spring-boot
+  APPLICATION_SOURCE_REPO: https://github.com/haithamshahin333/spring-rest.git
+  APPLICATION_SOURCE_REF: master
+  PIPELINE_SCRIPT: Jenkinsfile
+
+dev_deploy:
+  APPLICATION_NAME: "{{app_name}}"
+  NAMESPACE: "{{dev_namespace}}"
+  SA_NAME: jenkins
+  SA_NAMESPACE: "{{ci_cd_namespace}}"
+
+test_deploy:
+  APPLICATION_NAME: "{{app_name}}"
+  NAMESPACE: "{{test_namespace}}"
+  SA_NAME: jenkins
+  SA_NAMESPACE: "{{ci_cd_namespace}}"
+
+openshift_cluster_content:
+- object: builds
+  content:
+  - name: "create application build pipeline"
+    template: "{{ inventory_dir }}/../templates/build.yml"
+    params_from_vars: "{{ build }}"
+    tags:
+      - build
+- object: deployments
+  content:
+  - name: "deploy application to dev environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params_from_vars: "{{ dev_deploy }}"
+    tags:
+      - deployment
+  - name: "deploy application to test environment"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
+    params_from_vars: "{{ test_deploy }}"
+    tags:
+      - deployment
+

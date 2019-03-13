@@ -1,0 +1,7 @@
+APPLICATION_NAME: sample-spring-boot-application
+NAMESPACE: sandbox-pd-dev
+SA_NAME: jenkins
+SA_NAMESPACE: puckboard-hs-ci-cd
+READINESS_PORT: 8081
+READINESS_RESPONSE: "{"status":"UP"}"
+READINESS_PATH: "/actuator/health"

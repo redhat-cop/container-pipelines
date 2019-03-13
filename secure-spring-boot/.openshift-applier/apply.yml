@@ -1,0 +1,10 @@
+---
+- name: Deploy Spring Boot Application
+  hosts: seed-hosts
+  vars:
+    ci_cd_namespace: sandbox-pd-ci-cd
+    dev_namespace: sandbox-pd-dev
+    test_namespace: sandbox-pd-test
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier

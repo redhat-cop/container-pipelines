@@ -1,0 +1,1 @@
+# base-openshift-applier
