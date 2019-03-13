@@ -2,7 +2,7 @@ library identifier: "pipeline-library@master",
 retriever: modernSCM(
   [
     $class: "GitSCMSource",
-    remote: "https://github.com/dwasinge/pipeline-library.git"
+    remote: "https://github.com/redhat-cop/pipeline-library.git"
   ]
 )
 
@@ -58,7 +58,7 @@ pipeline {
     }
 
     // Run Maven build, skipping tests
-    stage('Build and Unit Test'){
+    stage('Build, Unit Test, Dependency Scan'){
       steps {
 
         // run build
