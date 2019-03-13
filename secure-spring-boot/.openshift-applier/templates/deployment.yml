@@ -88,7 +88,7 @@ objects:
               - /bin/bash
               - -c
               - curl -s 'http://localhost:8080${READINESS_PATH}'
-                |grep -iq '${READINESS_RESPONSE}'
+                |grep -i -q '${READINESS_RESPONSE}'
         terminationGracePeriodSeconds: 60
     triggers:
     - imageChangeParams:
