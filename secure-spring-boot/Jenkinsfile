@@ -57,25 +57,6 @@ pipeline {
       }
     }
 
-    stage('Check Dependencies'){
-      steps {
-
-        // run dependency check
-        sh "mvn dependency-check:aggregate -q -f ${POM_FILE}"
-
-        // publish dependency check report
-        publishHTML(target: [
-            reportDir            : "${env.BUILD_OUTPUT_DIR}",
-            reportFiles          : 'dependency-check-report.html',
-            reportName           : 'OWASP Dependency Check Report',
-            keepAll              : true,
-            alwaysLinkToLastBuild: true,
-            allowMissing         : false
-        ])
-
-      }
-    }
-
     // Run Maven build, skipping tests
     stage('Build and Unit Test'){
       steps {
@@ -91,6 +72,16 @@ pipeline {
             keepAll              : true,
             alwaysLinkToLastBuild: false,
             allowMissing         : true
+        ])
+
+        // publish dependency check report
+        publishHTML(target: [
+            reportDir            : "${env.BUILD_OUTPUT_DIR}",
+            reportFiles          : 'dependency-check-report.html',
+            reportName           : 'OWASP Dependency Check Report',
+            keepAll              : true,
+            alwaysLinkToLastBuild: true,
+            allowMissing         : false
         ])
 
       }
