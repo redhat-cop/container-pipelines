@@ -142,4 +142,4 @@ parameters:
 - description: 'String value expected back from readiness check'
   name: READINESS_RESPONSE
   required: true
-  value: '{"status": "UP"}'
+  value: '{"status":"UP"}'
