@@ -9,11 +9,16 @@ retriever: modernSCM(
 openshift.withCluster() {
 
   env.NAMESPACE = openshift.project()
-  env.POM_FILE = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
-  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?${env.PROJECT_NAME}-?/, '').replaceAll(/-?pipeline-?/, '').replaceAll('/','')
+
   env.BUILD = "${env.NAMESPACE}"
   env.DEV = env.BUILD.replace('ci-cd', 'dev')
   env.TEST = env.BUILD.replace('ci-cd', 'test')
+
+  env.MVN_SNAPSHOT_DEPLOYMENT_REPOSITORY = "nexus::default::http://nexus:8081/repository/maven-snapshots"
+
+  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?${env.PROJECT_NAME}-?/, '').replaceAll(/-?pipeline-?/, '').replaceAll('/','')
+  env.POM_FILE = env.PIPELINE_CONTEXT_DIR ? "${env.PIPELINE_CONTEXT_DIR}/pom.xml" : "pom.xml"
+  env.BUILD_OUTPUT_DIR = env.PIPELINE_CONTEXT_DIR ? "${env.PIPELINE_CONTEXT_DIR}/target" : "target"
 
   echo "Starting Pipeline for ${APP_NAME}..."
 
@@ -52,57 +57,59 @@ pipeline {
       }
     }
 
+    stage('Check Dependencies'){
+      steps {
+
+        // run dependency check
+        sh "mvn dependency-check:aggregate -q -f ${POM_FILE}"
+
+        // publish dependency check report
+        publishHTML(target: [
+            reportDir            : "${env.BUILD_OUTPUT_DIR}",
+            reportFiles          : 'dependency-check-report.html',
+            reportName           : 'OWASP Dependency Check Report',
+            keepAll              : true,
+            alwaysLinkToLastBuild: true,
+            allowMissing         : false
+        ])
+
+      }
+    }
+
     // Run Maven build, skipping tests
-    stage('Build'){
+    stage('Build and Unit Test'){
       steps {
-        sh "mvn -B clean install -DskipTests=true -f ${POM_FILE}"
+
+        // run build
+        sh "mvn -B clean deploy -f ${POM_FILE} -DaltDeploymentRepository=${MVN_SNAPSHOT_DEPLOYMENT_REPOSITORY}"
+
+        // publish unit test report
+        publishHTML(target: [
+            reportDir            : "${env.BUILD_OUTPUT_DIR}/site/jacoco",
+            reportFiles          : 'index.html',
+            reportName           : 'Jacoco Unit Test Report',
+            keepAll              : true,
+            alwaysLinkToLastBuild: false,
+            allowMissing         : true
+        ])
+
       }
     }
 
-    // Run Maven unit tests
-    stage('Unit Test'){
-      steps {
-        sh "mvn -B test -f ${POM_FILE}"
-      }
+    // Perform Static Code Analysis using SonarQube
+    stage ('Code Analysis') {
+        steps {
+          sonarqubeStaticAnalysis(
+            pomFile: "${POM_FILE}",
+            buildServerWebHookName: "jenkins"
+          )
+        }
     }
-
-    // stage ('Code Analysis') {
-    //     steps {
-    //       sonarqubeStaticAnalysis(
-    //         buildServerWebHookName: "jenkins",
-    //         buildServerWebHookUrl: "${JENKINS_URL}sonarqube-webhook/",
-    //         dependencyCheckReportDir: "target",
-    //         dependencyCheckReportFiles: "dependency-check-report.html",
-    //         dependencyCheckReportName: "OWASP Dependency Check Report",
-    //         dependencyCheckKeepAll: true,
-    //         dependencyCheckAlwaysLinkToLastBuild: true,
-    //         dependencyCheckAllowMissing: true,
-    //         unitTestReportDir: "target/site/jacoco/",
-    //         unitTestReportFiles: "index.html",
-    //         unitTestReportName: "Jacoco Unit Test Report",
-    //         unitTestKeepAll: true,
-    //         unitTestAlwaysLinkToLastBuild: false,
-    //         unitTestAllowMissing: true)
-    //     }
-    // }
 
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){
       steps {
-        // Copy the resulting artifacts into common directory
-        sh """
-          ls target/*
-          rm -rf oc-build && mkdir -p oc-build/deployments
-          for t in \$(echo "jar;war;ear" | tr ";" "\\n"); do
-            cp -rfv ./target/*.\$t oc-build/deployments/ 2> /dev/null || echo "No \$t files"
-          done
-        """
-
-        // Build container image using local Openshift cluster
-        // Giving all the artifacts to OpenShift Binary Build
-        // This places your artifacts into right location inside your S2I image
-        // if the S2I image supports it.
-        binaryBuild(projectName: env.BUILD, buildConfigName: env.APP_NAME, artifactsDirectoryName: "oc-build")
+        binaryBuild(projectName: env.BUILD, buildConfigName: env.APP_NAME, artifactsDirectoryName: "${env.BUILD_OUTPUT_DIR}");
       }
     }
 
@@ -118,40 +125,6 @@ pipeline {
       }
     }
 
-/*
-    stage('Scan Web Application') {
-      agent {
-        label 'zap'
-      } 
-      steps {
-
-        // run zap scanner
-        sh "/zap/zap-baseline.py -d -m 5 -x zaprpt.xml -t ${env.APP_DEV_HOST}"
-
-        // publish report to jenkins
-        publishHTML([
-          allowMissing: false, 
-          alwaysLinkToLastBuild: false, 
-          keepAll: true, 
-          reportDir: '/zap/wrk', 
-          reportFiles: 'baseline.html', 
-          reportName: 'ZAP Baseline Scan', 
-          reportTitles: 'ZAP Baseline Scan'
-        ])
-
-        //no mvn, so stash it and unstash later in pipeline on a maven node instead of ZAP node... 
-        //sh "mvn sonar:sonar -Dsonar.zaproxy.reportPath=/zap/wrk/zaprpt.xml"
-        stash name: "zaproxyreport", includes: "/zap/wrk/zaprpt.xml"
-      }
-    }
-
-    stage('Publish ZAP Report') {
-      steps {
-        unstash "zaproxyreport" 
-        sh "mvn sonar:sonar -Dsonar.zaproxy.reportPath=/zap/wrk/zaprpt.xml"
-      }
-    }
-*/
 
     stage('Promotion gate') {
       steps {
