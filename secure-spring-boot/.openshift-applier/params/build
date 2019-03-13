@@ -1,8 +1,0 @@
-APPLICATION_NAME: sample-spring-boot-application
-NAMESPACE: sandbox-pd-ci-cd
-SOURCE_REPOSITORY_URL: https://github.com/haithamshahin333/base-openshift-applier.git
-SOURCE_REPOSITORY_REF: master
-CONTEXT_DIR:
-APPLICATION_SOURCE_REPO: https://github.com/haithamshahin333/sample-spring-boot-application.git
-APPLICATION_SOURCE_REF: master
-PIPELINE_SCRIPT: Jenkinsfile
