@@ -1,0 +1,3 @@
+ci_cd_namespace: secure-spring-boot-ci-cd
+dev_namespace: secure-spring-boot-dev
+test_namespace: secure-spring-boot-test

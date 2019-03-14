@@ -8,10 +8,11 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 
 1. `git clone https://github.com/redhat-cop/container-pipelines`
 2. `cd container-pipelines/secure-spring-boot`
-3. `ansible-galaxy install -r requirements.yml --roles-path=roles` 
-4. `oc login`
-5. `ansible-playbook ci-cd-tooling.yml -i roles/labs-ci-cd/inventory/`
-6. `ansible-playbook spring-boot-app.yml -i .openshift-applier/inventory/`
+3. Update the namespaces in group_vars/all.yml
+4. `ansible-galaxy install -r requirements.yml --roles-path=roles` 
+5. `oc login`
+6. `ansible-playbook ci-cd-tooling.yml -i roles/labs-ci-cd/inventory/`
+7. `ansible-playbook spring-boot-app.yml -i .openshift-applier/inventory/`
 
 ## WIP 
 
