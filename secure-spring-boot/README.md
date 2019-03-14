@@ -13,3 +13,11 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 5. `oc login`
 6. `ansible-playbook ci-cd-tooling.yml -i roles/labs-ci-cd/inventory/`
 7. `ansible-playbook spring-boot-app.yml -i .openshift-applier/inventory/`
+8. Navigate to the OpenShift Web console for your CI/CD project. You should see a pipeline build running automatically (once everything spins up).
+
+## TODO Screen Shots of the pipeline to explain what's in the box
+See https://github.com/redhat-cop/container-pipelines/issues/72
+
+## Advisories
+
+- Running the pipeline for the first time will take ~10 minutes because all maven depedencies and NIST DB need to be downloaded. Subsequent builds will be faster. Also see https://github.com/redhat-cop/container-pipelines/issues/71
