@@ -15,6 +15,10 @@
   vars_files:
   - project-names.yml
   tasks:
+    # https://github.com/redhat-cop/openshift-applier/issues/113
+    - copy:
+        src: roles/labs-ci-cd/pre_post_requirements.yml
+        dest: pre_post_requirements.yml
     - include_role:
         name: openshift-applier/roles/openshift-applier
       tags:

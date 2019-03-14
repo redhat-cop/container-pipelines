@@ -1,13 +1,9 @@
 # This is the Ansible Galaxy requirements file to pull in the correct roles
-- src: https://github.com/sherl0cks/labs-ci-cd
+- src: https://github.com/rht-labs/labs-ci-cd
   scm: git
-  version: inventory-dir
+  version: v3.11.2
   name: labs-ci-cd
 - src: https://github.com/redhat-cop/openshift-applier
   scm: git
   version: v2.0.9
   name: openshift-applier
-- src: https://github.com/redhat-cop/infra-ansible
-  scm: git
-  version: v1.0.9
-  name: infra-ansible  

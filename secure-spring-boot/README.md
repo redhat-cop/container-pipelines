@@ -13,7 +13,3 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 5. `oc login`
 6. `ansible-playbook ci-cd-tooling.yml -i roles/labs-ci-cd/inventory/`
 7. `ansible-playbook spring-boot-app.yml -i .openshift-applier/inventory/`
-
-## WIP 
-
-- https://github.com/rht-labs/labs-ci-cd/issues/261 
