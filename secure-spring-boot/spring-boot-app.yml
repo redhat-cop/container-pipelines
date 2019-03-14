@@ -2,9 +2,9 @@
 - name: Deploy Spring Boot Application
   hosts: seed-hosts
   vars:
-    ci_cd_namespace: labs-ci-cd
-    dev_namespace: labs-dev
-    test_namespace: labs-test
+    ci_cd_namespace: secure-spring-boot-ci-cd
+    dev_namespace: secure-spring-boot-dev
+    test_namespace: secure-spring-boot-test
   tasks:
     - include_role:
         name: openshift-applier/roles/openshift-applier

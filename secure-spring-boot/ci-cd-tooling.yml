@@ -1,0 +1,24 @@
+# This is the playbook will install a targeted set of 
+- name: Create Projects and Policies
+  hosts: bootstrap
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier
+      vars:
+        ci_cd_namespace: secure-spring-boot-ci-cd
+        dev_namespace: secure-spring-boot-dev
+        test_namespace: secure-spring-boot-test
+        filter_tags: projects,rolebinding-jenkins
+        
+- name: Create CI/CD tools
+  hosts: tools
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier
+      tags:
+        - openshift-applier
+      vars:
+        ci_cd_namespace: secure-spring-boot-ci-cd
+        dev_namespace: secure-spring-boot-dev
+        test_namespace: secure-spring-boot-test
+        filter_tags: sonarqube,mvn-slave,nexus,jenkins 
