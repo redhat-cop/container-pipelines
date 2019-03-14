@@ -17,3 +17,4 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 
 - https://github.com/rht-labs/labs-ci-cd/issues/261 
 - reuse app templates
+- move namespaces to a shared vars file and add docs so folks know how to change them.
