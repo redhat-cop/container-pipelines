@@ -1,8 +1,9 @@
-# This is the playbook will install a targeted set of 
+# This playbook will install a targeted set of CI/CD tools for the spring boot pipeline by reusing https://github.com/rht-labs/labs-ci-cd
+---
 - name: Create Projects and Policies
   hosts: bootstrap
   vars_files:
-  - group_vars/all.yml
+  - project-names.yml
   tasks:
     - include_role:
         name: openshift-applier/roles/openshift-applier
@@ -12,7 +13,7 @@
 - name: Create CI/CD tools
   hosts: tools
   vars_files:
-  - group_vars/all.yml
+  - project-names.yml
   tasks:
     - include_role:
         name: openshift-applier/roles/openshift-applier

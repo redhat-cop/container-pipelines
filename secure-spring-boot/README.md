@@ -8,7 +8,7 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 
 1. `git clone https://github.com/redhat-cop/container-pipelines`
 2. `cd container-pipelines/secure-spring-boot`
-3. Update the namespaces in group_vars/all.yml
+3. If you would like to customize the names of OpenShift projects created, edit `project-names.uml`
 4. `ansible-galaxy install -r requirements.yml --roles-path=roles` 
 5. `oc login`
 6. `ansible-playbook ci-cd-tooling.yml -i roles/labs-ci-cd/inventory/`
@@ -17,5 +17,3 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 ## WIP 
 
 - https://github.com/rht-labs/labs-ci-cd/issues/261 
-- reuse app templates
-- move namespaces to a shared vars file and add docs so folks know how to change them.
