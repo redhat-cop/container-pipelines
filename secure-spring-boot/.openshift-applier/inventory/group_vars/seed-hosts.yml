@@ -5,11 +5,11 @@ app_name: secure-spring-boot-app
 build:
   APPLICATION_NAME: "{{app_name}}"
   NAMESPACE: "{{ci_cd_namespace}}"
-  SOURCE_REPOSITORY_URL: https://github.com/haithamshahin333/container-pipelines.git
+  SOURCE_REPOSITORY_URL: https://github.com/redhat-cop/container-pipelines.git
   SOURCE_REPOSITORY_REF: master
   CONTEXT_DIR: secure-spring-boot
   APPLICATION_SOURCE_REPO: https://github.com/redhat-cop/spring-rest.git
-  APPLICATION_SOURCE_REF: master
+  APPLICATION_SOURCE_REF: 2.1.2.Final-redhat-00003.1
   PIPELINE_SCRIPT: Jenkinsfile
 
 dev_deploy:
