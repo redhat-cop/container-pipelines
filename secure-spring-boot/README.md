@@ -21,4 +21,4 @@ See https://github.com/redhat-cop/container-pipelines/issues/72
 ## Advisories
 
 - Running the pipeline for the first time will take ~10 minutes because all maven dependencies and NIST DB need to be downloaded. Subsequent builds will be faster. Also see https://github.com/redhat-cop/container-pipelines/issues/71
-- If you have issues with Nexus certificate like seen [here](https://github.com/redhat-cop/infra-ansible/issues/342), then you can set the ansible var `nexus_validate_certs: false` as a work around.
+- If you have issues with Nexus certificate like seen [here](https://github.com/redhat-cop/infra-ansible/issues/342), then you can add the following ansible flag as a workaround: `-e nexus_validate_certs=false`.
