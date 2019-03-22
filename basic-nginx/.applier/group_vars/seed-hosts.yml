@@ -1,4 +1,6 @@
----
+source_code_url: https://github.com/redhat-cop/container-pipelines.git
+source_code_ref: master
+
 openshift_cluster_content:
 - object: projectrequest
   content:
@@ -11,6 +13,9 @@ openshift_cluster_content:
     namespace: basic-nginx-build
     template: openshift//jenkins-ephemeral
     params: "{{ inventory_dir }}/../.openshift/deployment/build/params"
+    params_from_vars:
+      SOURCE_REPOSITORY_URL: "{{ source_code_url }}"
+      SOURCE_REPOSITORY_REF: "{{ source_code_ref }}"
   - name: basic-nginx-dev
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/dev/params"
