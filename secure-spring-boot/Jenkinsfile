@@ -1,0 +1,141 @@
+library identifier: "pipeline-library@master",
+retriever: modernSCM(
+  [
+    $class: "GitSCMSource",
+    remote: "https://github.com/redhat-cop/pipeline-library.git"
+  ]
+)
+
+openshift.withCluster() {
+
+  env.NAMESPACE = openshift.project()
+
+  env.BUILD = "${env.NAMESPACE}"
+  env.DEV = env.BUILD.replace('ci-cd', 'dev')
+  env.TEST = env.BUILD.replace('ci-cd', 'test')
+
+  env.MVN_SNAPSHOT_DEPLOYMENT_REPOSITORY = "nexus::default::http://nexus:8081/repository/maven-snapshots"
+
+  env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?${env.PROJECT_NAME}-?/, '').replaceAll(/-?pipeline-?/, '').replaceAll('/','')
+  env.POM_FILE = env.PIPELINE_CONTEXT_DIR ? "${env.PIPELINE_CONTEXT_DIR}/pom.xml" : "pom.xml"
+  env.BUILD_OUTPUT_DIR = env.PIPELINE_CONTEXT_DIR ? "${env.PIPELINE_CONTEXT_DIR}/target" : "target"
+
+  echo "Starting Pipeline for ${APP_NAME}..."
+
+}
+
+pipeline {
+  // Use Jenkins Maven slave
+  // Jenkins will dynamically provision this as OpenShift Pod
+  // All the stages and steps of this Pipeline will be executed on this Pod
+  // After Pipeline completes the Pod is killed so every run will have clean
+  // workspace
+  agent {
+    label 'jenkins-slave-mvn'
+  }
+
+  // Pipeline Stages start here
+  // Requeres at least one stage
+  stages {
+
+    // Checkout source code
+    // This is required as Pipeline code is originally checked out
+    // so this will pull the application source code to this slave
+    stage('Git Checkout Application') {
+      steps {
+        // Turn off Git's SSL cert check, uncomment if needed
+        // sh 'git config --global http.sslVerify false'
+        git url: "${APPLICATION_SOURCE_REPO}"
+      }
+    }
+
+    //verify nexus is up
+
+    stage('Wait for Nexus') {
+      steps {
+        verifyDeployment(targetApp: "nexus", projectName: env.BUILD)
+      }
+    }
+
+    // Run Maven build, skipping tests
+    stage('Build, Unit Test, Dependency Scan'){
+      steps {
+
+        // run build
+        sh "mvn -B clean deploy -f ${POM_FILE} -DaltDeploymentRepository=${MVN_SNAPSHOT_DEPLOYMENT_REPOSITORY}"
+
+        // publish unit test report
+        publishHTML(target: [
+            reportDir            : "${env.BUILD_OUTPUT_DIR}/site/jacoco",
+            reportFiles          : 'index.html',
+            reportName           : 'Jacoco Unit Test Report',
+            keepAll              : true,
+            alwaysLinkToLastBuild: false,
+            allowMissing         : true
+        ])
+
+        // publish dependency check report
+        publishHTML(target: [
+            reportDir            : "${env.BUILD_OUTPUT_DIR}",
+            reportFiles          : 'dependency-check-report.html',
+            reportName           : 'OWASP Dependency Check Report',
+            keepAll              : true,
+            alwaysLinkToLastBuild: true,
+            allowMissing         : false
+        ])
+
+      }
+    }
+
+    // Perform Static Code Analysis using SonarQube
+    stage ('Code Analysis') {
+        steps {
+          sonarqubeStaticAnalysis(
+            pomFile: "${POM_FILE}",
+            buildServerWebHookName: "jenkins"
+          )
+        }
+    }
+
+    // Build Container Image using the artifacts produced in previous stages
+    stage('Build Container Image'){
+      steps {
+        binaryBuild(projectName: env.BUILD, buildConfigName: env.APP_NAME, artifactsDirectoryName: "${env.BUILD_OUTPUT_DIR}");
+      }
+    }
+
+    stage('Promote from Build to Dev') {
+      steps {
+        tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.BUILD, toImagePath: env.DEV)
+      }
+    }
+
+    stage ('Verify Deployment to Dev') {
+      steps {
+        verifyDeployment(projectName: env.DEV, targetApp: env.APP_NAME)
+      }
+    }
+
+
+    stage('Promotion gate') {
+      steps {
+        script {
+          input message: 'Promote application to Test?'
+        }
+      }
+    }
+
+    stage('Promote from Dev to Test') {
+      steps {
+        tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.DEV, toImagePath: env.TEST)
+      }
+    }
+
+    stage ('Verify Deployment to Test') {
+      steps {
+        verifyDeployment(projectName: env.TEST, targetApp: env.APP_NAME)
+      }
+    }
+
+  }
+}

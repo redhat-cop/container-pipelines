@@ -1,0 +1,9 @@
+# This playbook will install a targeted the spring book app using the configurations in this repo
+---
+- name: Deploy Spring Boot Application
+  hosts: seed-hosts
+  vars_files:
+  - project-names.yml
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier
