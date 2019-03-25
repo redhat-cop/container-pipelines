@@ -71,10 +71,6 @@ pipeline {
                         }
                     }
                 }
-
-
-                //run e2e pointing to dev route
-                //sh "npm run test:e2e -- --url "
             }
         }
         stage('Promotion gate') {

@@ -1,14 +1,12 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: generic-java-jenkins-pipeline
+  template: generic-pipeline
 metadata:
   annotations:
-    description: Application template for JWS applications built using a Jenkins Pipeline
-    iconClass: icon-tomcat
-    tags: tomcat,tomcat8,java,jboss,xpaas,jenkins-ci
+    description: Application template
     version: 1.2.0
-  name: generic-java-jenkins-pipeline
+  name: generic-jenkins-pipeline
 objects:
 - apiVersion: v1
   kind: ImageStream
