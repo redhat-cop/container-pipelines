@@ -1,0 +1,8 @@
+openshift-applier
+roles/*
+*.pyc
+.idea
+*.iml
+gdsl
+*.retry
+pre_post_requirements.yml

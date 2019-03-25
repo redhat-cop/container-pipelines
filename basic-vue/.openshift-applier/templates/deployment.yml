@@ -1,0 +1,117 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: frontend-deploy
+  annotations:
+    openshift.io/display-name: HTTP App Deploy Template
+    description: A template to deploy your an App with a HTTP endpoint
+    iconClass: icon-cube
+    tags: http
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: "${NAME}" 
+      build: "${NAME}"
+    name: "${NAME}"
+  spec: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: "${NAME}"
+    labels:
+      app: "${NAME}"
+  spec:
+    replicas: 1
+    selector:
+      name: "${NAME}"
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: 
+        labels:
+          name: "${NAME}"
+      spec:
+        containers:
+        - image: "${NAME}"
+          imagePullPolicy: Always
+          name: "${NAME}"
+          ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: "/dev/termination-log"
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${NAME}"
+        from:
+          kind: ImageStreamTag
+          name: "${NAME}:${DEPLOY_IMAGE_STREAM_TAG_NAME}"
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: "${NAME}"
+      app: "${NAME}" 
+    name: "${NAME}"
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: "${NAME}"
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      name: "${NAME}"
+      app: "${NAME}" 
+    name: "${NAME}"
+  spec:
+    port:
+      targetPort: 8080-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: "${NAME}"
+      weight: 100
+    wildcardPolicy: None
+parameters:
+- name: NAME
+  displayName: Name
+  description: The name assigned to all objects and the related imagestream.
+  required: true
+- name: DEPLOY_IMAGE_STREAM_TAG_NAME
+  displayName: The ImageStreamTag name to use for deployment
+  description: The ImageStreamTag name to use for deployment
+  required: true
+  value: deployed
+labels:
+  template: frontend-deploy-template

@@ -1,0 +1,73 @@
+library identifier: "pipeline-library@master", retriever: modernSCM(
+  [$class: "GitSCMSource",
+   remote: "https://github.com/redhat-cop/pipeline-library.git"])
+
+pipeline { 
+        agent {
+            label "jenkins-slave-npm"
+        }
+
+    environment {
+        CI_CD_PROJECT = "${OPENSHIFT_BUILD_NAMESPACE}"
+        //root of source code
+        SOURCE_CONTEXT_DIR = "vue-frontend-pipeline"
+
+        //location of distribution files
+        DIST_CONTEXT_DIR = "dist/"
+        APP_NAME = "vue-frontend-scaffold"
+        DEV_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'dev')
+        DEMO_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'test')
+
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                dir (SOURCE_CONTEXT_DIR) { 
+                    sh "npm install"
+                    sh "npm run build"
+                    sh "cp -R httpd-cfg ${DIST_CONTEXT_DIR}"
+                }
+            }
+        }
+        stage('Unit Test') {
+            steps {
+                dir (SOURCE_CONTEXT_DIR) {
+                    sh "npm run test:unit"
+                }
+            }
+        }
+        stage('Build Image') {
+            steps {
+                binaryBuild(projectName: "${CI_CD_PROJECT}", buildConfigName: "${APP_NAME}", artifactsDirectoryName: "${SOURCE_CONTEXT_DIR}/${DIST_CONTEXT_DIR}")
+            }
+        }
+        stage('Deploy to Dev') {
+            steps {
+                tagImage(sourceImageName: "${APP_NAME}", sourceImagePath: "${CI_CD_PROJECT}", toImagePath: "${DEV_PROJECT}", toImageTag: "deployed")
+                verifyDeployment(targetApp: "${APP_NAME}", projectName: "${DEV_PROJECT}")
+            }
+        }
+        stage('E2E Testing') {
+            steps {
+                dir (SOURCE_CONTEXT_DIR) {
+                    sh "npm run pipeline:e2e"
+                }
+            }
+        }
+        stage('Promotion gate') {
+            steps {
+                script {
+                input message: 'Promote application to Test?'
+                }
+            }  
+        }
+        stage('Deploy to Demo') {
+            steps {
+                tagImage(sourceImageName: "${APP_NAME}", sourceImagePath: "${DEV_PROJECT}", sourceImageTag: "deployed", toImagePath: "${DEMO_PROJECT}", toImageTag: "deployed")
+                verifyDeployment(targetApp: "${APP_NAME}", projectName: "${DEMO_PROJECT}")
+            }
+        }
+
+    }
+}

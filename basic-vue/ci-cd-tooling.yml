@@ -1,0 +1,27 @@
+# This playbook will install a targeted set of CI/CD tools for the spring boot pipeline by reusing https://github.com/rht-labs/labs-ci-cd
+---
+- name: Create Projects and Policies
+  hosts: bootstrap
+  vars_files:
+  - project-names.yml
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier
+      vars:
+        filter_tags: projects,rolebinding-jenkins
+        
+- name: Create CI/CD tools
+  hosts: tools
+  vars_files:
+  - project-names.yml
+  tasks:
+    # https://github.com/redhat-cop/openshift-applier/issues/113
+    - copy:
+        src: roles/labs-ci-cd/pre_post_requirements.yml
+        dest: pre_post_requirements.yml
+    - include_role:
+        name: openshift-applier/roles/openshift-applier
+      tags:
+        - openshift-applier
+      vars:
+        filter_tags: npm-slave,jenkins

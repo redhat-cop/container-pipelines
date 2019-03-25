@@ -1,0 +1,46 @@
+---
+app_name: vue-frontend-scaffold
+
+build:
+  APPLICATION_NAME: "{{app_name}}"
+  NAMESPACE: "{{ci_cd_namespace}}"
+  SOURCE_REPOSITORY_URL: https://github.com/redhat-cop/container-pipelines.git
+  SOURCE_REPOSITORY_REF: master
+  CONTEXT_DIR: basic-vue
+  APPLICATION_SOURCE_REPO: https://github.com/rht-labs/vue-app-scaffold.git
+  APPLICATION_SOURCE_REF: v1.0
+  PIPELINE_SCRIPT: Jenkinsfile
+  IMAGE_STREAM_TAG_NAME: httpd:2.4
+
+deploy:
+  NAME: "{{ app_name }}"
+  PIPELINES_NAMESPACE: "{{ci_cd_namespace}}"
+
+openshift_cluster_content:
+- object: app-builds
+  content:
+  - name: vue-frontend-scaffold-build
+    template: "{{ playbook_dir }}/openshift-templates/build.yml"
+    params_from_vars: "{{ build }}"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - build
+- object: dev-stage
+  content:
+  - name: vue-frontend-scaffold-dev-deploy
+    template: "{{ playbook_dir }}/openshift-templates/deployment.yml"
+    params_from_vars: "{{ deploy }}"
+    namespace: "{{ dev_namespace }}"
+    tags:
+    - deploy
+    - dev-deploy
+- object: test-stage
+  content:
+  - name: vue-frontend-scaffold-test-deploy
+    template: "{{ playbook_dir }}/openshift-templates/deployment.yml"
+    params_from_vars: "{{ deploy }}"
+    namespace: "{{ test_namespace }}"
+    tags:
+    - deploy
+    - test-deploy
+

@@ -1,0 +1,9 @@
+# This is a variable file that declares the names of the OpenShift projects that will be created
+---
+# this the variable you can change
+project_name_root: vue-pipeline
+
+# do not touch these variables or things will break
+ci_cd_namespace: "{{ project_name_root }}-ci-cd"
+dev_namespace: "{{ project_name_root }}-dev"
+test_namespace: "{{ project_name_root }}-test"
