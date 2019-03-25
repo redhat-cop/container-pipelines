@@ -4,8 +4,8 @@ app_name: vue-frontend-scaffold
 build:
   APPLICATION_NAME: "{{app_name}}"
   NAMESPACE: "{{ci_cd_namespace}}"
-  SOURCE_REPOSITORY_URL: https://github.com/redhat-cop/container-pipelines.git
-  SOURCE_REPOSITORY_REF: master
+  SOURCE_REPOSITORY_URL: https://github.com/haithamshahin333/container-pipelines.git
+  SOURCE_REPOSITORY_REF: vue-basic-pipeline
   CONTEXT_DIR: basic-vue
   APPLICATION_SOURCE_REPO: https://github.com/rht-labs/vue-app-scaffold.git
   APPLICATION_SOURCE_REF: v1.0
