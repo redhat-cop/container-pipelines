@@ -28,28 +28,24 @@ pipeline {
         // This is required as Pipeline code is originally checked out
         // so this will pull the application source code to this slave
         stage('Git Checkout Application') {
-        steps {
-            // Turn off Git's SSL cert check, uncomment if needed
-            // sh 'git config --global http.sslVerify false'
-            git url: "${APPLICATION_SOURCE_REPO}"
-        }
+            steps {
+                // Turn off Git's SSL cert check, uncomment if needed
+                // sh 'git config --global http.sslVerify false'
+                git url: "${APPLICATION_SOURCE_REPO}"
+            }
         }
 
         stage('Build') {
             steps {
-                dir (SOURCE_CONTEXT_DIR) { 
-                    sh "npm install"
-                    sh "npm run build"
-                    sh "cp -R httpd-cfg ${DIST_CONTEXT_DIR}"
-                }
+                sh "npm install"
+                sh "npm run build"
+                sh "cp -R httpd-cfg ${DIST_CONTEXT_DIR}"
             }
         }
-        
+
         stage('Unit Test') {
             steps {
-                dir (SOURCE_CONTEXT_DIR) {
-                    sh "npm run test:unit"
-                }
+                sh "npm run test:unit"
             }
         }
         stage('Build Image') {
@@ -65,9 +61,7 @@ pipeline {
         }
         stage('E2E Testing') {
             steps {
-                dir (SOURCE_CONTEXT_DIR) {
-                    sh "npm run pipeline:e2e"
-                }
+                sh "npm run pipeline:e2e"
             }
         }
         stage('Promotion gate') {
@@ -77,7 +71,7 @@ pipeline {
                 }
             }  
         }
-        stage('Deploy to Demo') {
+        stage('Deploy to Test') {
             steps {
                 tagImage(sourceImageName: "${APP_NAME}", sourceImagePath: "${DEV_PROJECT}", sourceImageTag: "deployed", toImagePath: "${DEMO_PROJECT}", toImageTag: "deployed")
                 verifyDeployment(targetApp: "${APP_NAME}", projectName: "${DEMO_PROJECT}")
