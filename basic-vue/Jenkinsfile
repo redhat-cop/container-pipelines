@@ -86,8 +86,8 @@ pipeline {
         }
         stage('Deploy to Test') {
             steps {
-                tagImage(sourceImageName: "${APP_NAME}", sourceImagePath: "${DEV_PROJECT}", sourceImageTag: "deployed", toImagePath: "${DEMO_PROJECT}", toImageTag: "deployed")
-                verifyDeployment(targetApp: "${APP_NAME}", projectName: "${DEMO_PROJECT}")
+                tagImage(sourceImageName: "${APP_NAME}", sourceImagePath: "${DEV_PROJECT}", sourceImageTag: "deployed", toImagePath: "${TEST_PROJECT}", toImageTag: "deployed")
+                verifyDeployment(targetApp: "${APP_NAME}", projectName: "${TEST_PROJECT}")
             }
         }
 
