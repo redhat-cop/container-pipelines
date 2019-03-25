@@ -14,21 +14,19 @@ build:
 
 deploy:
   NAME: "{{ app_name }}"
-  PIPELINES_NAMESPACE: "{{ci_cd_namespace}}"
 
 openshift_cluster_content:
 - object: app-builds
   content:
   - name: vue-frontend-scaffold-build
-    template: "{{ playbook_dir }}/openshift-templates/build.yml"
+    template: "{{ inventory_dir }}/../templates/build.yml"
     params_from_vars: "{{ build }}"
-    namespace: "{{ ci_cd_namespace }}"
     tags:
     - build
 - object: dev-stage
   content:
   - name: vue-frontend-scaffold-dev-deploy
-    template: "{{ playbook_dir }}/openshift-templates/deployment.yml"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
     params_from_vars: "{{ deploy }}"
     namespace: "{{ dev_namespace }}"
     tags:
@@ -37,7 +35,7 @@ openshift_cluster_content:
 - object: test-stage
   content:
   - name: vue-frontend-scaffold-test-deploy
-    template: "{{ playbook_dir }}/openshift-templates/deployment.yml"
+    template: "{{ inventory_dir }}/../templates/deployment.yml"
     params_from_vars: "{{ deploy }}"
     namespace: "{{ test_namespace }}"
     tags:

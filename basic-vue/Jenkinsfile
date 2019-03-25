@@ -2,25 +2,39 @@ library identifier: "pipeline-library@master", retriever: modernSCM(
   [$class: "GitSCMSource",
    remote: "https://github.com/redhat-cop/pipeline-library.git"])
 
-pipeline { 
-        agent {
-            label "jenkins-slave-npm"
-        }
+openshift.withCluster() {
 
-    environment {
-        CI_CD_PROJECT = "${OPENSHIFT_BUILD_NAMESPACE}"
-        //root of source code
-        SOURCE_CONTEXT_DIR = "vue-frontend-pipeline"
+    CI_CD_PROJECT = "${OPENSHIFT_BUILD_NAMESPACE}"
+    APP_NAME = "${JOB_NAME}".replaceAll(/-?${env.PROJECT_NAME}-?/, '').replaceAll(/-?pipeline-?/, '').replaceAll('/','')
 
-        //location of distribution files
-        DIST_CONTEXT_DIR = "dist/"
-        APP_NAME = "vue-frontend-scaffold"
-        DEV_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'dev')
-        DEMO_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'test')
+    //location of distribution files
+    DIST_CONTEXT_DIR = "dist/"
+    DEV_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'dev')
+    TEST_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'test')
 
+    echo "Starting Pipeline for ${APP_NAME}..."
+
+}
+
+pipeline {
+
+    agent {
+        label "jenkins-slave-npm"
     }
 
     stages {
+
+        // Checkout source code
+        // This is required as Pipeline code is originally checked out
+        // so this will pull the application source code to this slave
+        stage('Git Checkout Application') {
+        steps {
+            // Turn off Git's SSL cert check, uncomment if needed
+            // sh 'git config --global http.sslVerify false'
+            git url: "${APPLICATION_SOURCE_REPO}"
+        }
+        }
+
         stage('Build') {
             steps {
                 dir (SOURCE_CONTEXT_DIR) { 
@@ -30,6 +44,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Unit Test') {
             steps {
                 dir (SOURCE_CONTEXT_DIR) {
