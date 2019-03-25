@@ -61,7 +61,20 @@ pipeline {
         }
         stage('E2E Testing') {
             steps {
-                sh "npm run test:e2e"
+                //get route from dev namespace
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject("${DEV_PROJECT}") {
+                            def route = openshift.selector("route/${APP_NAME}").object()
+                            echo "${route.spec.host}"
+                            sh "npm run test:e2e -- --url 'https://${route.spec.host}'"
+                        }
+                    }
+                }
+
+
+                //run e2e pointing to dev route
+                //sh "npm run test:e2e -- --url "
             }
         }
         stage('Promotion gate') {
