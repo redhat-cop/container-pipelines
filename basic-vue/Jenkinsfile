@@ -50,7 +50,7 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                binaryBuild(projectName: "${CI_CD_PROJECT}", buildConfigName: "${APP_NAME}", artifactsDirectoryName: "${SOURCE_CONTEXT_DIR}/${DIST_CONTEXT_DIR}")
+                binaryBuild(projectName: "${CI_CD_PROJECT}", buildConfigName: "${APP_NAME}", artifactsDirectoryName: "${DIST_CONTEXT_DIR}")
             }
         }
         stage('Deploy to Dev') {
