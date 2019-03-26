@@ -12,6 +12,8 @@ openshift.withCluster() {
     DEV_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'dev')
     TEST_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'test')
 
+
+
     echo "Starting Pipeline for ${APP_NAME}..."
 
 }
@@ -23,7 +25,13 @@ pipeline {
     }
 
     stages {
-
+        stage('Config') {
+            steps {
+                sh "npm config set registry http://nexus:8081/repository/npm-group/"
+                sh "npm config set _auth YWRtaW46YWRtaW4xMjM="
+                sh "npm config set email email@email.com"
+            }
+        }
         // Checkout source code
         // This is required as Pipeline code is originally checked out
         // so this will pull the application source code to this slave
@@ -34,7 +42,6 @@ pipeline {
                 git url: "${APPLICATION_SOURCE_REPO}"
             }
         }
-
         stage('Build') {
             steps {
                 sh "npm install"
@@ -42,10 +49,23 @@ pipeline {
                 sh "cp -R httpd-cfg ${DIST_CONTEXT_DIR}"
             }
         }
-
         stage('Unit Test') {
             steps {
                 sh "npm run test:unit"
+            }
+        }
+        stage('SonarQube Analyis') {
+            steps {
+                script {
+                    withSonarQubeEnv('sonar') {
+                       sh 'sonar-scanner'
+                    }
+                }
+            }
+        }
+        stage('Publish to Nexus') {
+            steps {
+                sh 'npm publish --registry http://nexus:8081/repository/npm-all/'
             }
         }
         stage('Build Image') {
