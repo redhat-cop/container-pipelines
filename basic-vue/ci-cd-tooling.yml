@@ -24,4 +24,4 @@
       tags:
         - openshift-applier
       vars:
-        filter_tags: npm-slave,jenkins
+        filter_tags: sonarqube, nexus, jenkins, npm-slave
