@@ -1,3 +1,6 @@
+
+import groovy.json.JsonSlurper
+
 library identifier: "pipeline-library@master", retriever: modernSCM(
   [$class: "GitSCMSource",
    remote: "https://github.com/redhat-cop/pipeline-library.git"])
@@ -12,7 +15,9 @@ openshift.withCluster() {
     DEV_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'dev')
     TEST_PROJECT = CI_CD_PROJECT.replace('ci-cd', 'test')
 
-
+    //owasp zap parameters
+    ZAP_TEMPLATE_NAME = "zap"
+    env.ZAP_APP_NAME = "zap-${BUILD_ID}"
 
     echo "Starting Pipeline for ${APP_NAME}..."
 
@@ -79,18 +84,133 @@ pipeline {
                 verifyDeployment(targetApp: "${APP_NAME}", projectName: "${DEV_PROJECT}")
             }
         }
+        stage('Start Zap') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject("${CI_CD_PROJECT}") {
+                            def template = openshift.selector('template', "${ZAP_TEMPLATE_NAME}").object()
+                            openshift.create(openshift.process(template, "-p", "NAME=${ZAP_APP_NAME}"))
+                        }   
+                    }
+                }
+                echo "${ZAP_APP_NAME} has been deployed"
+                sh "sleep 10"
+            }
+        }
+        stage('Verify Zap Deployment') {
+            steps {
+                echo "Verifying the zap deployment"
+                verifyDeployment(targetApp: "${ZAP_APP_NAME}", projectName: "${CI_CD_PROJECT}")
+                echo "${ZAP_APP_NAME} has been deployed and is ready"
+            }
+        }
         stage('E2E Testing') {
             steps {
-                //get route from dev namespace
                 script {
                     openshift.withCluster() {
                         openshift.withProject("${DEV_PROJECT}") {
+                            //proxy through the zap service that has been deployed
+                            sh "sed -i 's/ZAP_SERVICE_TO_BE_SUBSTITUTED/${ZAP_APP_NAME}/' tests/e2e/nightwatch.conf.js"
+
+                            //dynamically grab route to run e2e tests against
                             def route = openshift.selector("route/${APP_NAME}").object()
-                            echo "${route.spec.host}"
                             sh "npm run test:e2e -- --url 'https://${route.spec.host}' --config tests/e2e/nightwatch.conf.js"
                         }
                     }
                 }
+            }
+        }
+        stage('Wait for Passive Scan to Complete and Publish Results') {
+            steps {
+                script {
+                    def pscanStatus = 1
+                    while(pscanStatus > 0) {
+                        def jsonReport = sh(returnStdout: true, script: "curl http://${ZAP_APP_NAME}:8080/JSON/pscan/view/recordsToScan")
+                        pscanStatus = new JsonSlurper().parseText(jsonReport).recordsToScan.toInteger()
+                        echo "${pscanStatus}"
+                    }
+                }
+
+                sh "curl http://${ZAP_APP_NAME}:8080/OTHER/core/other/htmlreport -o reports/zap-passive-report.html"
+
+                publishHTML(target: [
+                    reportDir             : 'reports',
+                    reportFiles           : 'zap-passive-report.html',
+                    reportName            : 'ZAProxy Passive Report',
+                    keepAll               : true,
+                    alwaysLinkToLastBuild : true,
+                    allowMissing          : true
+                ])
+
+                script {
+                    // fail build if report shows high/critical risks
+                    def jsonReport = sh(returnStdout: true, script: "curl http://${ZAP_APP_NAME}:8080/OTHER/core/other/jsonreport")
+                    def jsonData = new JsonSlurper().parseText(jsonReport)
+                    def highCriticalRisks = jsonData.site.each { site ->
+                        site.alerts.each { alert ->
+                            def alertValue = alert.riskcode as Integer
+                            if (alertValue >= 3) {
+                                error 'High/Critical Risks Detected By Zed Attack Proxy'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Start Active Scan') {
+            steps {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject("${DEV_PROJECT}") {
+                            def route = openshift.selector("route/${APP_NAME}").object()
+                            sh "curl http://${ZAP_APP_NAME}:8080/JSON/ascan/action/scan/?url=https://${route.spec.host}"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Publish Active Scan Report') {
+            steps {
+
+                script {
+                    def ascanStatus = 0
+                    while(ascanStatus < 100) {
+                        def jsonReport = sh(returnStdout: true, script: "curl http://${ZAP_APP_NAME}:8080/JSON/ascan/view/status/?scanId=0")
+                        ascanStatus = new JsonSlurper().parseText(jsonReport).status.toInteger()
+                        echo "${ascanStatus}"
+                    }
+                }
+
+                sh "curl http://${ZAP_APP_NAME}:8080/OTHER/core/other/htmlreport -o reports/zap-active-report.html"
+
+                publishHTML(target: [
+                    reportDir             : 'reports',
+                    reportFiles           : 'zap-active-report.html',
+                    reportName            : 'ZAProxy Active Report',
+                    keepAll               : true,
+                    alwaysLinkToLastBuild : true,
+                    allowMissing          : true
+                ])
+
+                script {
+                    // fail build if report shows high/critical risks
+                    def jsonReport = sh(returnStdout: true, script: "curl http://${ZAP_APP_NAME}:8080/OTHER/core/other/jsonreport")
+                    def jsonData = new JsonSlurper().parseText(jsonReport)
+                    def highCriticalRisks = jsonData.site.each { site ->
+                        site.alerts.each { alert ->
+                            def alertValue = alert.riskcode as Integer
+                            if (alertValue >= 3) {
+                                error 'High/Critical Risks Detected By Zed Attack Proxy'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Bring Down Zap') {
+            steps {
+                sh "oc delete all -l app=${ZAP_APP_NAME}"
             }
         }
         stage('Promotion gate') {
@@ -106,6 +226,5 @@ pipeline {
                 verifyDeployment(targetApp: "${APP_NAME}", projectName: "${TEST_PROJECT}")
             }
         }
-
     }
 }

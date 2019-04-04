@@ -14,3 +14,6 @@ This repo assumes knowledge of the OpenShift Applier and ansible in general. If 
 6. `ansible-playbook ci-cd-tooling.yml -i roles/labs-ci-cd/inventory/`
 7. `ansible-playbook vue-app.yml -i .openshift-applier/inventory/`
 8. Navigate to the OpenShift Web console for your CI/CD project. You should see a pipeline build running automatically (once everything spins up).
+
+## Helpful Links
+- https://www.owasp.org/images/2/27/OWASPLondon-OWASP-ZAP-Selenium-20180830-PDF.pdf
