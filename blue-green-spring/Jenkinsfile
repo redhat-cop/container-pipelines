@@ -44,7 +44,7 @@ pipeline {
           println("New version tag: ${version}")
         }
       }
-    }
+              }
     
     stage('Build') {
       steps {
