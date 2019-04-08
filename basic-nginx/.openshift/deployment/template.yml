@@ -75,25 +75,6 @@ objects:
     host: ${HOSTNAME_HTTP}
     to:
       name: ${APPLICATION_NAME}
-- apiVersion: v1
-  kind: Service
-  metadata:
-    annotations:
-      description: Service for application.
-    labels:
-      app: ${APPLICATION_NAME}
-    name: ${APPLICATION_NAME}
-    namespace: ${APPLICATION_NAME}${ENV}
-  spec:
-    ports:
-    - name: 8080-tcp
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-    selector:
-      app: ${APPLICATION_NAME}
-      deploymentConfig: ${APPLICATION_NAME}
-- apiVersion: v1
   kind: Service
   metadata:
     annotations:
