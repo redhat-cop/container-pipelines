@@ -12,10 +12,6 @@ openshift_cluster_content:
   - name: jenkins
     namespace: basic-nginx-build
     template: openshift//jenkins-ephemeral
-    params: "{{ inventory_dir }}/../.openshift/deployment/build/params"
-    params_from_vars:
-      SOURCE_REPOSITORY_URL: "{{ source_code_url }}"
-      SOURCE_REPOSITORY_REF: "{{ source_code_ref }}"
   - name: basic-nginx-dev
     template: "{{ inventory_dir }}/../.openshift/deployment/template.yml"
     params: "{{ inventory_dir }}/../.openshift/deployment/dev/params"
@@ -30,3 +26,6 @@ openshift_cluster_content:
   - name: jenkins
     template: "{{ inventory_dir }}/../.openshift/builds/template.yml"
     params: "{{ inventory_dir }}/../.openshift/builds/params"
+    params_from_vars:
+      SOURCE_REPOSITORY_URL: "{{ source_code_url }}"
+      SOURCE_REPOSITORY_REF: "{{ source_code_ref }}"

@@ -75,6 +75,7 @@ objects:
     host: ${HOSTNAME_HTTP}
     to:
       name: ${APPLICATION_NAME}
+- apiVersion: v1
   kind: Service
   metadata:
     annotations:
