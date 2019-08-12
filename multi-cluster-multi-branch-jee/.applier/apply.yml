@@ -1,0 +1,6 @@
+---
+- name: Run OpenShift applier
+  hosts: "{{ app_env }}"
+  tasks:
+    - include_role:
+        name: openshift-applier/roles/openshift-applier

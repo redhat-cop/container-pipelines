@@ -1,0 +1,164 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: ${NAME}-deploy-jboss-eap
+  annotations:
+    openshift.io/display-name: Sample JBoss EAP JEE template
+    description: A sample template to deploy your JBoss EAP JEE App with a HTTPS route
+    iconClass: icon-cube
+    tags: jee,eap
+labels:
+  template: ${NAME}-deploy-template
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: "${NAME}"
+    labels:
+      app: "${NAME}"
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      name: "${NAME}"
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources: {}
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          name: "${NAME}"
+      spec:
+        containers:
+        - image: "${IMAGE_REPO}/${NAMESPACE}/${NAME}:${APP_TAG}"
+          imagePullPolicy: Always
+          name: "${NAME}"
+          - name: JAVA_OPTS_APPEND
+            value: "${JAVA_OPTS_APPEND}"
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - '-c'
+                - /opt/eap/bin/livenessProbe.sh
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: eap-app
+          ports:
+            - containerPort: 8778
+              name: jolokia
+              protocol: TCP
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 8888
+              name: ping
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - '-c'
+                - /opt/eap/bin/readinessProbe.sh
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 75
+    test: false
+    triggers: []
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: "${NAME}"
+    name: "${NAME}"
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: "${NAME}"
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      name: "${NAME}-ping"
+    name: "${NAME}-ping"
+  spec:
+    ports:
+    - name: ping
+      port: 8888
+      protocol: TCP
+      targetPort: 8888
+    publishNotReadyAddresses: true
+    selector:
+      name: "${NAME}"
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      name: "${NAME}"
+    name: "${NAME}"
+  spec:
+    port:
+      targetPort: 8080
+    path: /
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: "${NAME}"
+      weight: 100
+    wildcardPolicy: None
+parameters:
+- name: NAME
+  displayName: Name
+  description: The name assigned to all objects and the related imagestream.
+  required: true
+- name: APP_TAG
+  displayName: App Tag
+  description: The tag of the image to use eg latest.
+  value: latest
+  required: true
+- name: NAMESPACE
+  displayName: Docker image namespace
+  description: The namespace of the image to use eg js-apps.
+  required: true
+- name: IMAGE_REPO
+  displayName: Docker image repository
+  description: The docker repository containing the image to use
+  required: true
+  value: docker-registry.default.svc:5000
+- name: IMAGE_PULL_SECRET
+  displayName: Docker image repository pull secret
+  description: The secret used to pull images from the docker repository
+  required: true
+- name: JAVA_OPTS_APPEND
+  displayName: Java Options Append
+  description: Additional Java options to append to the JEE runtime

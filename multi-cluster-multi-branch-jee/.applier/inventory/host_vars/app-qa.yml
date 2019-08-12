@@ -1,0 +1,51 @@
+---
+create_project:
+  NAMESPACE: '{{ namespace }}'
+  NAMESPACE_DISPLAY_NAME: '{{ namespace }}'
+
+jenkins_rolebinding:
+  JENKINS_NAMESPACE: '{{ ci_cd_namespace }}'
+
+group_rolebinding:
+  ROLE: 'admin'
+  GROUP: "{{ app_owner_group_name }}"
+
+app_deploy:
+  NAME: '{{ app_name }}'
+  APP_TAG: '{{ app_image_tag }}'
+  NAMESPACE: '{{ app_image_namespace }}'
+  IMAGE_REPO: '{{ repo_name }}'
+  IMAGE_PULL_SECRET: '{{ image_pull_secret }}'                                                    
+
+openshift_cluster_content:
+- object: deploy-qa
+  content:
+  - name: '{{ app_name }}-{{ namespace }}-create'
+    template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/project-requests/create-project.yml'
+    action: create
+    params_from_vars: '{{ create_project }}'
+    namespace: '{{ namespace }}'
+    tags:
+      - deploy
+      - qa
+  - name: '{{ app_name }}-{{ namespace }}-jenkins-role-binding'
+    template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/role-bindings/jenkins-rolebinding-template.yml'
+    params_from_vars: '{{ jenkins_rolebinding }}'
+    namespace: '{{ namespace }}'
+    tags:
+      - deploy
+      - qa
+  - name: '{{ app_name }}-{{ namespace }}-owner-role-binding'
+    template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/role-bindings/group-rolebinding-template.yml'
+    params_from_vars: '{{ group_rolebinding }}'
+    namespace: '{{ namespace }}'
+    tags:
+      - deploy
+      - qa
+  - name: '{{ app_name }}-{{ namespace }}-deploy'
+    template: '{{ inventory_dir }}/../.openshift/app-deploy-jboss-eap.yml'
+    params_from_vars: '{{ app_deploy }}'
+    namespace: '{{ namespace }}'
+    tags:
+      - deploy
+      - qa
