@@ -100,7 +100,7 @@ pipeline {
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){
       steps {
-        binaryBuild(projectName: env.BUILD, buildConfigName: env.APP_NAME, artifactsDirectoryName: "${env.BUILD_OUTPUT_DIR}");
+        binaryBuild(projectName: env.BUILD, buildConfigName: env.APP_NAME, buildFromPath: "${env.BUILD_OUTPUT_DIR}")
       }
     }
 
