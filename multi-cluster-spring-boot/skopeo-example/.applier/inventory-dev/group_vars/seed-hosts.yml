@@ -3,7 +3,7 @@ openshift_cluster_content:
   content:
   - name: "create environments"
     file: "{{ inventory_dir }}/../projects/projects.yml"
-    file_action: create
+    action: create
 - object: deployments
   content:
   - name: "deploy jenkins"
