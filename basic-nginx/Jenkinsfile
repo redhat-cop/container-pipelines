@@ -45,7 +45,7 @@ pipeline {
 
     stage('Image Build') {
       steps {
-        binaryBuild(projectName: "${BUILD}", buildConfigName: "${APP_NAME}", artifactsDirectoryName: "${ARTIFACT_DIRECTORY}")
+        binaryBuild(projectName: "${BUILD}", buildConfigName: "${APP_NAME}", buildFromPath: "${ARTIFACT_DIRECTORY}")
       }
     }
 
