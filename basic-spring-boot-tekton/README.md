@@ -5,12 +5,23 @@ This example demonstrates how to implement a full end-to-end [Tekton](https://te
 * Deploying a Tekton pipeline via applier
 * Building an promoting an application with a tekton pipeline
 
+## Prerequisites
+
+
+* One OpenShift Container Platform Clusters
+  * OpenShift 4.1+ is required
+  * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
+* Access to GitHub
+* [Tekton Operator]() In order to use Tekton pipelines you need to install the Tekton operator. To do that go to ***Catalog***-> ***Operator Hub*** page of you admin console. Look for ***OpenShift Pipelines Operator*** and install it. The default settings are fine for this demo. You can also automate the installation of the Tekton operator, but this is outside the scope of this demo.
+* [Tekton CLI](https://github.com/tektoncd/cli)
+* *Highly recommended*: [tekton dashboard](https://github.com/tektoncd/dashboard)
+
 ## Automated Deployment
 
 This quickstart can be deployed quickly using Ansible. Here are the steps.
 
 1. Clone [this repo](https://github.com/redhat-cop/container-pipelines)
-2. `cd container-pipelines/basic-spring-boot`
+2. `cd container-pipelines/basic-spring-boot-tekton`
 3. Run `ansible-galaxy install -r requirements.yml --roles-path=galaxy`
 4. Log into an OpenShift cluster, then run the following command.
 
@@ -52,15 +63,6 @@ This project includes a sample `Tekton` pipeline script that could be included w
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
 This pipeline defaults to use our [Spring Boot Demo App](https://github.com/redhat-cop/spring-rest).
-
-## Bill of Materials
-
-* One or Two OpenShift Container Platform Clusters
-  * OpenShift 4.1+ is required
-  * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
-* Access to GitHub
-* [Tekton CLI](https://github.com/tektoncd/cli)
-* *Highly recommended*: [tekton dashboard](https://github.com/tektoncd/dashboard)
 
 ## Manual Deployment Instructions
 
@@ -135,10 +137,12 @@ buildconfig "spring-rest-pipeline" created
 buildconfig "spring-rest" created
 ```
 
-At this point you should you can run the pipeline by issuing the followinf command:
+## Running the pipelines
+
+Once you have deployed the needed infrastructure either with applier or manually, you should you can run the pipeline by issuing the following command:
 
 ```shell
-tkn pipeline start basic-spring-boot-pipeline -r source=basic-spring-boot-git -s tekton
+tkn pipeline start basic-spring-boot-pipeline -r basic-spring-boot=basic-spring-boot-git -s tekton
 ```
 
 ## Cleanup
