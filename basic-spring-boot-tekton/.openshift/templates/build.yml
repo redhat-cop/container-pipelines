@@ -1,0 +1,271 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: generic-java-jenkins-pipeline
+metadata:
+  annotations:
+    description: Application template for JWS applications built using a Jenkins Pipeline
+    iconClass: icon-tomcat
+    tags: tomcat,tomcat8,java,jboss,xpaas,jenkins-ci
+    version: 1.2.0
+  name: generic-java-jenkins-pipeline
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${SA_NAME}
+    namespace: ${NAMESPACE}
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: ${SA_NAME}_edit
+    namespace: ${NAMESPACE}
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: ${SA_NAME}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${NAMESPACE}
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: ${APPLICATION_NAME}-image
+    namespace: ${NAMESPACE}
+  spec:
+    type: image
+    params:
+    - name: url
+      value: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${APPLICATION_NAME}
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: ${APPLICATION_NAME}-git
+    namespace: ${NAMESPACE}
+  spec:
+    type: git
+    params:
+    - name: url
+      value: ${APPLICATION_SOURCE_REPO}
+    - name: revision
+      value: ${APPLICATION_SOURCE_REF}
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: maven-build-binary-build
+    namespace: ${NAMESPACE}
+  spec:
+    inputs:
+      resources:
+      - name: source
+        type: git
+    steps:   
+    - name: package
+      image: maven:3.6.0-jdk-8-slim
+      workingDir: /workspace/source
+      command:
+      - /usr/bin/mvn
+      args:
+      - package
+    - name: make-upload-dir 
+      image: quay.io/openshift-pipeline/openshift-cli:latest
+      command: ["mkdir"]
+      args:
+        - -p
+        - /workspace/source/upload
+    - name: copy-assets 
+      image: quay.io/openshift-pipeline/openshift-cli:latest
+      command: ["cp"]
+      args:
+        - /workspace/source/target/shift-rest-1.0.0-SNAPSHOT.jar
+        - /workspace/source/upload 
+    - name: oc-binary-build 
+      image: quay.io/openshift-pipeline/openshift-cli:latest
+      command: ["/usr/local/bin/oc"]
+      workingDir: /workspace/source/upload
+      args:
+        - start-build
+        - -w
+        - -F
+        - ${APPLICATION_NAME}
+        - --from-dir
+        - "."
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: deploy
+    namespace: ${NAMESPACE}
+  spec:
+    inputs:
+      params:
+        - name: fromNamespace
+          description: The namespace we are tagging from
+        - name: toNamespace
+          description: The namespace we are tagging to  
+        - name: tag
+          description: The image tag
+        - name: imageStream
+          description: The imageStream
+        - name: deployment
+          description: the deployment                  
+    steps:
+      - name: tag-image
+        image: quay.io/openshift-pipeline/openshift-cli:latest
+        command: ["/usr/local/bin/oc"]
+        args:
+          - tag
+          - "${inputs.params.fromNamespace}/${inputs.params.imageStream}:${inputs.params.tag}"
+          - "${inputs.params.toNamespace}/${inputs.params.imageStream}:${inputs.params.tag}"
+      # not sure what to do here
+      - name: verify-deployment
+        image: quay.io/openshift-pipeline/openshift-cli:latest
+        command: ["sleep"]
+        args:
+          - "1"                             
+- apiVersion: tekton.dev/v1alpha1
+  kind: Pipeline
+  metadata:
+    name: ${APPLICATION_NAME}-pipeline
+    namespace: ${NAMESPACE}
+  spec:
+    resources:
+    - name: ${APPLICATION_NAME}-git
+      type: git
+    tasks:
+    - name: maven-build-binary-build
+      taskRef: 
+        name: maven-build-binary-build
+      resources:
+        inputs:
+        - name: source
+          resource: ${APPLICATION_NAME}-git                 
+    - name: deploy-to-dev
+      taskRef:
+        name: deploy
+      runAfter:
+        - maven-build-binary-build
+      params:
+      - name: fromNamespace
+        value: ${APPLICATION_NAME}-build
+      - name: toNamespace
+        value: ${APPLICATION_NAME}-dev  
+      - name: tag
+        value: latest 
+      - name: imageStream
+        value: ${APPLICATION_NAME} 
+      - name: deployment
+        value: ${APPLICATION_NAME}
+    - name: deploy-to-stage
+      taskRef:
+        name: deploy
+      runAfter:
+        - deploy-to-dev
+      params:
+      - name: fromNamespace
+        value: ${APPLICATION_NAME}-dev
+      - name: toNamespace
+        value: ${APPLICATION_NAME}-stage  
+      - name: tag
+        value: latest 
+      - name: imageStream
+        value: ${APPLICATION_NAME} 
+      - name: deployment
+        value: ${APPLICATION_NAME}
+    - name: deploy-to-prod
+      taskRef:
+        name: deploy
+      runAfter:
+        - deploy-to-stage
+      params:
+      - name: fromNamespace
+        value: ${APPLICATION_NAME}-stage
+      - name: toNamespace
+        value: ${APPLICATION_NAME}-prod  
+      - name: tag
+        value: latest 
+      - name: imageStream
+        value: ${APPLICATION_NAME} 
+      - name: deployment
+        value: ${APPLICATION_NAME}                                           
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: "${NAMESPACE}"
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ${IMAGE_STREAM_TAG_NAME}
+          namespace: ${IMAGE_STREAM_NAMESPACE}
+      type: Source
+parameters:
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: basic-spring
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true
+- description: Git source URI for application
+  name: SOURCE_REPOSITORY_URL
+  required: true
+  value: https://github.com/redhat-cop/container-pipelines.git
+- description: Git branch/tag reference
+  name: SOURCE_REPOSITORY_REF
+  value: "master"
+- description: Path within Git project to build; empty for root project directory.
+  name: CONTEXT_DIR
+  value: basic-spring-boot
+- description: Source code repo for demo app
+  name: APPLICATION_SOURCE_REPO
+  required: true
+  value: https://github.com/redhat-cop/spring-rest.git
+- description: Source code branch for demo app
+  name: APPLICATION_SOURCE_REF
+  value: master
+- description: Path within Git project pointing to the pipeline run script
+  name: PIPELINE_SCRIPT
+  value: Jenkinsfile
+- description: GitHub trigger secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+  required: true
+- description: Generic build trigger secret
+  from: '[a-zA-Z0-9]{8}'
+  generate: expression
+  name: GENERIC_WEBHOOK_SECRET
+  required: true
+- description: Namespace in which the ImageStreams for Red Hat Middleware images are
+    installed. These ImageStreams are normally installed in the openshift namespace.
+    You should only need to modify this if you've installed the ImageStreams in a
+    different namespace/project.
+  name: IMAGE_STREAM_NAMESPACE
+  required: true
+  value: openshift
+- description: Image stream tag for the image you'd like to use to build the application
+  name: IMAGE_STREAM_TAG_NAME
+  required: true
+  value: redhat-openjdk18-openshift:1.1
+- description: Name of a service account that can deploy to this project
+  name: SA_NAME
+  required: true
+  value: tekton
