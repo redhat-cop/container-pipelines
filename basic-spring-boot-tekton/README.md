@@ -139,10 +139,11 @@ buildconfig "spring-rest" created
 
 ## Running the pipelines
 
-Once you have deployed the needed infrastructure either with applier or manually, you should you can run the pipeline by issuing the following command:
+Once you have deployed the needed infrastructure either with applier or manually, you can run the pipeline by issuing the following command:
 
 ```shell
-tkn pipeline start basic-spring-boot-pipeline -r basic-spring-boot=basic-spring-boot-git -s tekton
+oc project basic-spring-boot-build
+tkn -n basic-spring-boot-build pipeline start basic-spring-boot-pipeline -r basic-spring-boot-git=basic-spring-boot-git -s tekton
 ```
 
 ## Cleanup
