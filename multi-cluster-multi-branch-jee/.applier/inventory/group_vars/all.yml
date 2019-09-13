@@ -1,0 +1,7 @@
+---
+# Globals
+ansible_connection: local
+
+# NOTE: openshift_templates_raw MUST be accessible to OpenShift without authentication
+openshift_templates_raw: 'https://raw.githubusercontent.com/redhat-cop/openshift-templates'
+openshift_templates_raw_version_tag: 'v1.4.9'

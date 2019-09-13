@@ -1,0 +1,23 @@
+library(
+    identifier: 'my-orgs-pipeline-library@master',
+    retriever: modernSCM([
+        $class: 'GitSCMSource',
+        remote: 'TODO',
+        credentialsId: 'TODO_IF_NOT_PUBLIC_REPO'
+    ])
+)
+
+pipelineJEE8(
+  'my-app-foo',                                          // applicationName
+  'my-service-hello',                                    // serviceName
+  'my-ocp-user-group',                                   // ownerGroupName
+  'https://my-image-push-registry.example.xyz',          // imagePushRegistry
+  'https://my-image-pull-registry.example.xyz',          // imagePullRegistry
+  'my-jenkins-credential-with-my-ansible-vault-password' // ansibleVaultJenkinsCredentialName
+  'image-push-repo-credential',                          // immagePushSecret - default value
+  'image-pull-repo-credential',                          // immagePullSecret - default value
+  'jboss-eap-7/eap72-openjdk11-openshift-rhel8:1.0',     // builderImage - default value
+  'https://my-maven-mirror.example.xyz',                 // mavenMirrorUrl - optional
+  '-Dcom.redhat.xpaas.repo.jbossorg',                    // mvnAdditionalArgs - optional. default value
+  'sonarQubeEnv'                                         // sonarQubeEnv - optional
+)

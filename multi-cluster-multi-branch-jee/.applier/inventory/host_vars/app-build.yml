@@ -1,0 +1,135 @@
+---
+create_project_params:
+  NAMESPACE: '{{ ci_cd_namespace }}'
+  NAMESPACE_DISPLAY_NAME: '{{ ci_cd_namespace }}'
+
+jenkins_rolebinding_params:
+  JENKINS_NAMESPACE: '{{ ci_cd_namespace }}'
+
+group_rolebinding_params:
+  ROLE: 'admin'
+  GROUP: "{{ app_owner_group_name }}"
+
+build_params:
+  NAME: '{{ app_name }}'
+  PUSH_SECRET: '{{ app_build_push_secret }}'
+  PULL_SECRET: '{{ app_build_pull_secret }}'
+  DESTINATION_IMAGE_NAME: '{{ app_build_destination_image_name }}'
+  DESTINATION_REPO_NAME: '{{ app_build_destination_repo_name }}'
+  DESTINATION_IMAGE_TAG: '{{ app_build_destination_image_tag }}'
+  DESTINATION_REPO_NAMESPACE: '{{ app_build_destination_repo_namespace }}'
+  BUILDER_IMAGE_NAME: '{{ app_build_builder_image_name }}'
+  MAVEN_MIRROR_URL: '{{ app_build_maven_mirror_url }}'
+  MAVEN_ARGS_APPEND: '{{ app_build_maven_args_append }}'
+
+cluster_credential_dev_secret_params:
+  NAME: 'cluster-credential-dev'
+  API: "TODO_CLUSTER_API_ADDRESS_EX_https://ocp.non-prod.example.com"
+  TOKEN: TODO_VAULTED_CLUSTER_API_TOKEN
+
+cluster_credential_test_secret_params:
+  NAME: 'cluster-credential-test'
+  API: "TODO_CLUSTER_API_ADDRESS_EX_https://ocp.non-prod.example.com"
+  TOKEN: TODO_VAULTED_CLUSTER_API_TOKEN
+
+cluster_credential_qa_secret_params:
+  NAME: 'cluster-credential-qa'
+  API: "TODO_CLUSTER_API_ADDRESS_EX_https://ocp.non-prod.example.com"
+  TOKEN: TODO_VAULTED_CLUSTER_API_TOKEN
+
+cluster_credential_prod_secret_params:
+  NAME: 'cluster-credential-prod'
+  API: "TODO_CLUSTER_API_ADDRESS_EX_https://ocp.prod.example.com"
+  TOKEN: TODO_VAULTED_CLUSTER_API_TOKEN
+
+image_pull_repo_credential_secret_params:
+  NAME: 'image-pull-repo-credential'
+  REPO_FQDN: 'registry.example.com'
+  REPO_AUTH: TODO_VAULTED_REPO_AUTH
+
+image_push_repo_credential_secret_params:
+  NAME: 'image-push-repo-credential'
+  REPO_FQDN: 'registry.example.com'
+  REPO_AUTH: TODO_VAULTED_REPO_AUTH
+
+openshift_cluster_content:
+  - object: deploy-cicd
+    content:
+      - name: '{{ app_name }}-{{ ci_cd_namespace }}-create'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/project-requests/create-project.yml'
+        action: create
+        params_from_vars: '{{ create_project_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-{{ ci_cd_namespace }}-jenkins-role-binding'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/role-bindings/jenkins-rolebinding-template.yml'
+        params_from_vars: '{{ jenkins_rolebinding_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - deploy
+          - dev
+      - name: '{{ app_name }}-{{ ci_cd_namespace }}-owner-role-binding'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/role-bindings/group-rolebinding-template.yml'
+        params_from_vars: '{{ group_rolebinding_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - deploy
+          - dev
+      - name: '{{ app_name }}-build'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/app-build/s2i-build-template-binary-to-dockerimage-with-pull-and-push-secrets.yaml'
+        params_from_vars: '{{ build_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-secret-cluster-credential-dev'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/secrets/cluster-credential-secret.yml'
+        params_from_vars: '{{ cluster_credential_dev_secret_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-secret-cluster-credential-test'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/secrets/cluster-credential-secret.yml'
+        params_from_vars: '{{ cluster_credential_test_secret_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-secret-cluster-credential-qa'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/secrets/cluster-credential-secret.yml'
+        params_from_vars: '{{ cluster_credential_qa_secret_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-secret-cluster-credential-prod'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/secrets/cluster-credential-secret.yml'
+        params_from_vars: '{{ cluster_credential_prod_secret_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-secret-image-pull-repo-credential'
+        template: 'https://raw.github.epb.net/EASL/epb-openshift-templates/master/docker-config-json-secret.yml?token=AAAAYZCqr6sQPbRRGcezspQP-y5Ylwboks5dPwXKwA%3D%3D'
+        params_from_vars: '{{ image_pull_repo_credential_secret_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
+      - name: '{{ app_name }}-secret-image-push-repo-credential'
+        template: 'https://raw.github.epb.net/EASL/epb-openshift-templates/master/docker-config-json-secret.yml?token=AAAAYZCqr6sQPbRRGcezspQP-y5Ylwboks5dPwXKwA%3D%3D'
+        params_from_vars: '{{ image_push_repo_credential_secret_params }}'
+        namespace: '{{ ci_cd_namespace }}'
+        tags:
+          - build
+          - deploy
+          - cicd
