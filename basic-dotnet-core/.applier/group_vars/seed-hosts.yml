@@ -1,0 +1,70 @@
+sb_application_name: basic-dotnet-core
+sb_build_namespace: basic-dotnet-core-build
+sb_dev_namespace: basic-dotnet-core-dev
+sb_stage_namespace: basic-dotnet-core-stage
+sb_prod_namespace: basic-dotnet-core-prod
+sb_application_repository_url: "https://github.com/redhat-developer/s2i-dotnetcore-ex.git"
+sb_application_repository_ref: master
+sb_application_readiness_response: "html"
+sb_application_readiness_path: "/"
+sb_sa_name: "jenkins"
+sb_source_repository_url: "https://github.com/mathianasj/container-pipelines.git"
+sb_source_repository_ref: master
+sb_pipeline_script: "Jenkinsfile"
+
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    file: "{{ inventory_dir }}/../.openshift/projects/projects.yml"
+    action: create
+    tags:
+      - project
+- object: builds
+  content:
+  - name: "deploy build pipeline to dev"
+    template: "{{ inventory_dir }}/../.openshift/templates/build.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_build_namespace }}"
+      SOURCE_REPOSITORY_URL: "{{ sb_source_repository_url }}"
+      SOURCE_REPOSITORY_REF: "{{ sb_source_repository_ref }}"
+      APPLICATION_SOURCE_REPO: "{{ sb_application_repository_url }}"
+      APPLICATION_SOURCE_REF: "{{ sb_application_repository_ref }}"
+      PIPELINE_SCRIPT: "{{ sb_pipeline_script }}"
+    tags:
+      - build
+- object: deployments
+  content:
+  - name: "deploy dev environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_dev_namespace }}"
+      SA_NAMESPACE: "{{ sb_build_namespace }}"
+      READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
+      READINESS_PATH: "{{ sb_application_readiness_path }}"
+    tags:
+      - deployment
+  - name: "deply stage environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_stage_namespace }}"
+      SA_NAME: "{{ sb_sa_name }}"
+      SA_NAMESPACE: "{{ sb_build_namespace }}"
+      READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
+      READINESS_PATH: "{{ sb_application_readiness_path }}"
+    tags:
+      - deployment
+  - name: "deply prod environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_prod_namespace }}"
+      SA_NAME: "{{ sb_sa_name }}"
+      SA_NAMESPACE: "{{ sb_build_namespace }}"
+      READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
+      READINESS_PATH: "{{ sb_application_readiness_path }}"
+    tags:
+      - deployment
