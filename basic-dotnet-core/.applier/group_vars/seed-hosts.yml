@@ -8,7 +8,7 @@ sb_application_repository_ref: master
 sb_application_readiness_response: "html"
 sb_application_readiness_path: "/"
 sb_sa_name: "jenkins"
-sb_source_repository_url: "https://github.com/mathianasj/container-pipelines.git"
+sb_source_repository_url: "https://github.com/redhat-cop/container-pipelines.git"
 sb_source_repository_ref: master
 sb_pipeline_script: "Jenkinsfile"
 
