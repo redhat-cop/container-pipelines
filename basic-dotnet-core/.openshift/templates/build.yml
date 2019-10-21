@@ -78,7 +78,7 @@ objects:
       <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
         <inheritFrom></inheritFrom>
         <name>dotnet-22</name>
-        <instanceCap></instanceCap>
+        <instanceCap>10</instanceCap>
         <idleMinutes>0</idleMinutes>
         <label>dotnet-22</label>
         <serviceAccount>jenkins</serviceAccount>
