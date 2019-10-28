@@ -22,7 +22,6 @@ Articles and guides from the community:
 
 * [Code School AngularJS course](https://www.codeschool.com/courses/shaping-up-with-angular-js)
 * [5 Awesome AngularJS Features](http://net.tutsplus.com/tutorials/javascript-ajax/5-awesome-angularjs-features)
-* [Using Yeoman with AngularJS](http://briantford.com/blog/angular-yeoman.html)
 * [me&ngular - an introduction to MVW](http://stephenplusplus.github.io/meangular)
 
 Get help from other AngularJS users:
