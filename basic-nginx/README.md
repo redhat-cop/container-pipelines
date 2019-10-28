@@ -20,7 +20,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
 $ ansible-playbook -i ./.applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
-At this point you should have 4 projects created (`basic-nginx-build`, `basic-nginx-dev`, `basic-nginx-stage`, and `basic-nginx-prod`) with a pipeline in the `-build` project, and our [Nginx](https://github.com/redhat-cop/basic-nginx) demo app deployed to the dev/stage/prod projects.
+At this point you should have 4 projects created (`basic-nginx-build`, `basic-nginx-dev`, `basic-nginx-stage`, and `basic-nginx-prod`) with a pipeline in the `-build` project, and our [Nginx](../basic-nginx) demo app deployed to the dev/stage/prod projects.
 
 ## Architecture
 
@@ -55,7 +55,7 @@ This project includes a sample `Jenkinsfile` pipeline script that could be inclu
 * The project is built with Maven
 * The OpenShift projects that represent the Application's lifecycle stages are of the naming format: `<app-name>-dev`, `<app-name>-stage`, `<app-name>-prod`.
 
-This pipeline defaults to use our [Nginx Demo App](https://github.com/redhat-cop/basic-nginx).
+This pipeline defaults to use our [Nginx Demo App](../basic-nginx).
 
 ## Bill of Materials
 
