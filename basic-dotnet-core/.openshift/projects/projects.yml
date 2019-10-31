@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: List
+items:
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-dotnet-core-build
+    creationTimestam: null
+  displayName: .NET Core App - Build
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-dotnet-core-dev
+    creationTimestam: null
+  displayName: .NET Core App - Dev
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-dotnet-core-stage
+    creationTimestam: null
+  displayName: .NET Core Appp - Stage
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: basic-dotnet-core-prod
+    creationTimestam: null
+  displayName: .NET Core App - Prod
