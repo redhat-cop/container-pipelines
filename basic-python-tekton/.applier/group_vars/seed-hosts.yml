@@ -1,0 +1,35 @@
+sb_application_name: python-example
+sb_build_namespace: python-example-ns
+sb_dev_namespace: python-example-ns
+sb_application_repository_url: "https://github.com/NissesSenap/python_s2i_pipenv.git"
+sb_application_repository_ref: master
+sb_sa_name: "tekton"
+
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "create environments"
+    file: "{{ inventory_dir }}/../.openshift/projects/projects.yml"
+    action: create
+    tags:
+      - project
+- object: builds
+  content:
+  - name: "deploy build pipeline to dev"
+    template: "{{ inventory_dir }}/../.openshift/templates/build.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_build_namespace }}"
+      APPLICATION_SOURCE_REPO: "{{ sb_application_repository_url }}"
+      APPLICATION_SOURCE_REF: "{{ sb_application_repository_ref }}"
+    tags:
+      - build
+- object: deployments
+  content:
+  - name: "deploy dev environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_dev_namespace }}"
+    tags:
+      - deployment

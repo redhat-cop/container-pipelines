@@ -1,0 +1,151 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: generic-python-pipeline
+metadata:
+  annotations:
+    description: Application template python responder
+    iconClass: icon-python
+    tags: python
+    version: 1.0.0
+  name: generic-python-tekton-pipeline
+objects:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${SA_NAME}
+    namespace: ${NAMESPACE}
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: ${SA_NAME}_edit
+    namespace: ${NAMESPACE}
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: ${SA_NAME}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${NAMESPACE}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: "${NAMESPACE}"
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    source:
+      git:
+        uri: https://github.com/NissesSenap/python_s2i_pipenv.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ${IMAGE_STREAM_TAG_NAME}
+          namespace: ${IMAGE_STREAM_NAMESPACE}
+      type: Source
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: ${APPLICATION_NAME}-image
+    namespace: ${NAMESPACE}
+  spec:
+    type: image
+    params:
+    - name: url
+      value: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${APPLICATION_NAME}
+- apiVersion: tekton.dev/v1alpha1
+  kind: PipelineResource
+  metadata:
+    name: ${APPLICATION_NAME}-git
+    namespace: ${NAMESPACE}
+  spec:
+    type: git
+    params:
+    - name: url
+      value: ${APPLICATION_SOURCE_REPO}
+    - name: revision
+      value: ${APPLICATION_SOURCE_REF}
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: start-python-build
+    namespace: ${NAMESPACE}
+  spec:
+    inputs:
+      resources:
+      - name: source
+        type: git
+    steps:   
+    - name: oc-binary-build 
+      image: quay.io/openshift-pipeline/openshift-cli:latest
+      command: ["/usr/local/bin/oc"]
+      workingDir: /workspace
+      args:
+        - start-build
+        - -w
+        - -F
+        - ${APPLICATION_NAME}
+- apiVersion: tekton.dev/v1alpha1
+  kind: Pipeline
+  metadata:
+    name: ${APPLICATION_NAME}-pipeline
+    namespace: ${NAMESPACE}
+  spec:
+    resources:
+    - name: ${APPLICATION_NAME}-git
+      type: git
+    tasks:
+    - name: start-python-build
+      taskRef: 
+        name: start-python-build
+      resources:
+        inputs:
+        - name: source
+          resource: ${APPLICATION_NAME}-git                 
+
+parameters:
+- description: Name of a service account that can deploy to this project
+  name: SA_NAME
+  required: true
+  value: tekton
+- description: The name for the application.
+  name: APPLICATION_NAME
+  required: true
+  value: python-example
+- description: The namespace to deploy into
+  name: NAMESPACE
+  required: true
+  value: python-example-ns
+- description: Source code repo for demo app
+  name: APPLICATION_SOURCE_REPO
+  required: true
+  value: https://github.com/NissesSenap/python_s2i_pipenv.git
+- description: Source code branch for demo app
+  name: APPLICATION_SOURCE_REF
+  value: master
+- description: Namespace in which the ImageStreams for Red Hat Middleware images are
+    installed. These ImageStreams are normally installed in the openshift namespace.
+    You should only need to modify this if you've installed the ImageStreams in a
+    different namespace/project.
+  name: IMAGE_STREAM_NAMESPACE
+  required: true
+  value: openshift
+- description: Image stream tag for the image you'd like to use to build the application
+  name: IMAGE_STREAM_TAG_NAME
+  required: true
+  value: python:3.6
+
