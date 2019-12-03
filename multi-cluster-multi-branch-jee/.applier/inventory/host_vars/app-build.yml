@@ -118,7 +118,7 @@ openshift_cluster_content:
           - deploy
           - cicd
       - name: '{{ app_name }}-secret-image-pull-repo-credential'
-        template: 'https://raw.github.epb.net/EASL/epb-openshift-templates/master/docker-config-json-secret.yml?token=AAAAYZCqr6sQPbRRGcezspQP-y5Ylwboks5dPwXKwA%3D%3D'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/secrets/secret-docker-cfg-stringdata.yml'
         params_from_vars: '{{ image_pull_repo_credential_secret_params }}'
         namespace: '{{ ci_cd_namespace }}'
         tags:
@@ -126,7 +126,7 @@ openshift_cluster_content:
           - deploy
           - cicd
       - name: '{{ app_name }}-secret-image-push-repo-credential'
-        template: 'https://raw.github.epb.net/EASL/epb-openshift-templates/master/docker-config-json-secret.yml?token=AAAAYZCqr6sQPbRRGcezspQP-y5Ylwboks5dPwXKwA%3D%3D'
+        template: '{{ openshift_templates_raw }}/{{ openshift_templates_raw_version_tag }}/secrets/secret-docker-cfg-stringdata.yml'
         params_from_vars: '{{ image_push_repo_credential_secret_params }}'
         namespace: '{{ ci_cd_namespace }}'
         tags:
