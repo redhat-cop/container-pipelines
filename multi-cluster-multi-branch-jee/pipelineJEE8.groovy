@@ -54,9 +54,9 @@
  *                             such as Artifactory, then imagePushRegistry and imagePullRegistry can have the same value.
  * @param ansibleVaultJenkinsCredentialName    Name of the Jenkins credential that contians the Ansible Vault password to
  *                                             access vaulted variables when running Ansible.
- * @param immagePushSecret     Name of the OpenShift Secret that contains the credentials for pushing to the imagePushRegistry.
+ * @param imagePushSecret      Name of the OpenShift Secret that contains the credentials for pushing to the imagePushRegistry.
  *                             Default: image-push-repo-credenetial
- * @param immagePullSecret     Name of the OpenShift Secret that contains the credentials for pulling from the imagePullRegistry.
+ * @param imagePullSecret      Name of the OpenShift Secret that contains the credentials for pulling from the imagePullRegistry.
  *                             Default: image-pull-repo-credential
  * @param builderImage         S2I Image that supports binary builds to use to build the application service image.
  *                             Default: jboss-eap-7/eap72-openjdk11-openshift-rhel8:1.0
@@ -72,8 +72,8 @@ def call(
     imagePushRegistry,
     imagePullRegistry,
     ansibleVaultJenkinsCredentialName = ''
-    immagePushSecret  = 'image-push-repo-credential',
-    immagePullSecret  = 'image-pull-repo-credential',
+    imagePushSecret   = 'image-push-repo-credential',
+    imagePullSecret   = 'image-pull-repo-credential',
     builderImage      = 'jboss-eap-7/eap72-openjdk11-openshift-rhel8:1.0',
     mavenMirrorUrl    = '',
     mvnAdditionalArgs = '-Dcom.redhat.xpaas.repo.jbossorg',
@@ -155,7 +155,7 @@ spec:
   volumes:
   - name: dockerconfigjson 
     secret:
-      secretName: "${immagePushSecret}"
+      secretName: "${imagePushSecret}"
   - name: maven-settings
     configMap:
       name: maven
@@ -207,8 +207,8 @@ spec:
                         echo "ownerGroupName:    ${ownerGroupName}"
                         echo "imagePushRegistry: ${imagePushRegistry}"
                         echo "imagePullRegistry: ${imagePullRegistry}"
-                        echo "immagePushSecret:  ${immagePushSecret}"
-                        echo "immagePullSecret:  ${immagePullSecret}"
+                        echo "imagePushSecret:   ${imagePushSecret}"
+                        echo "imagePullSecret:   ${imagePullSecret}"
                         echo "ansibleVaultJenkinsCredentialName: ${ansibleVaultJenkinsCredentialName}"
                         echo "builderImage:      ${builderImage}"
                         echo "mavenMirrorUrl:    ${mavenMirrorUrl}"
@@ -274,8 +274,8 @@ spec:
                                         -e app_env=app-build \
                                         -e app_name=${serviceName} \
                                         -e ci_cd_namespace=${env.CICD_NAMESPACE} \
-                                        -e app_build_push_secret=${immagePushSecret} \
-                                        -e app_build_pull_secret=${immagePullSecret} \
+                                        -e app_build_push_secret=${imagePushSecret} \
+                                        -e app_build_pull_secret=${imagePullSecret} \
                                         -e app_build_destination_image_name=${serviceName} \
                                         -e app_owner_group_name=${ownerGroupName} \
                                         -e app_build_destination_repo_name=${imagePushRegistry} \
@@ -377,7 +377,7 @@ spec:
                                                     -e app_image_namespace=${applicationName} \
                                                     -e repo_name=${imagePullRegistry} \
                                                     -e app_custom_env='{}' \
-                                                    -e image_pull_secret=${immagePullSecret}
+                                                    -e image_pull_secret=${imagePullSecret}
                                                 """,
                                                 inventoryPath: "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
@@ -462,7 +462,7 @@ spec:
                                                     -e app_image_namespace=${applicationName} \
                                                     -e repo_name=${imagePullRegistry} \
                                                     -e app_custom_env='{}' \
-                                                    -e image_pull_secret=${immagePullSecret}
+                                                    -e image_pull_secret=${imagePullSecret}
                                                 """,
                                                 inventoryPath: "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
@@ -552,7 +552,7 @@ spec:
                                                     -e app_image_namespace=${applicationName} \
                                                     -e repo_name=${imagePullRegistry} \
                                                     -e app_custom_env='{}' \
-                                                    -e image_pull_secret=${immagePullSecret}
+                                                    -e image_pull_secret=${imagePullSecret}
                                                 """,
                                                 inventoryPath: "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
@@ -640,7 +640,7 @@ spec:
                                                     -e app_image_namespace=${applicationName} \
                                                     -e repo_name=${imagePullRegistry} \
                                                     -e app_custom_env='{}' \
-                                                    -e image_pull_secret=${immagePullSecret}
+                                                    -e image_pull_secret=${imagePullSecret}
                                                 """,
                                                 inventoryPath: "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
