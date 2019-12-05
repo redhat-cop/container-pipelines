@@ -40,6 +40,19 @@
  *     * PROD  - ${applicationName}-prod-pipeline-*
  */
 
+/* Namespace ownership and creation stratigy:
+ *
+ * CICD_NAMSPACE  - created by jenkins service account
+ * DEV_NAMESPACE  - created by service account associated with token in provided in secret named by DEV_CLUSTER_CREDENTIAL_SECRET_NAME
+ * TEST_NAMESPACE - created by service account associated with token in provided in secret named by TEST_CLUSTER_CREDENTIAL_SECRET_NAME
+ * QA_NAMESPACE   - created by service account associated with token in provided in secret named by QA_CLUSTER_CREDENTIAL_SECRET_NAME
+ * PROD_NAMESPACE - created by service account associated with token in provided in secret named by PROD_CLUSTER_CREDENTIAL_SECRET_NAME
+ *
+ * Permissions:
+ *   * all of the service accounts, the one used by jenkins, and the ones specfied in the secrets,
+ *     need to have self-provisioniner permissions in their respective clusters
+ */
+
 /* 
  * @param applicationName      The name of the application. This will be used as part of the dynamically created
  *                             OpenShift Project names as well as the image group when pushing and pulling
@@ -108,8 +121,6 @@ def call(
             QA_IMAGE_TAG   = 'qa'
             PROD_IMAGE_TAG = 'prod'
 
-            // NOTE: assume the BUILD and DEV clusters are the same
-            BUILD_CLUSTER_CREDENTIAL_SECRET_NAME  = 'cluster-credential-dev'
             DEV_CLUSTER_CREDENTIAL_SECRET_NAME    = 'cluster-credential-dev'
             TEST_CLUSTER_CREDENTIAL_SECRET_NAME   = 'cluster-credential-test'
             QA_CLUSTER_CREDENTIAL_SECRET_NAME     = 'cluster-credential-qa'
@@ -264,25 +275,13 @@ spec:
                     }
                 }
                 stages {
-                    stage ("BUILD: Get OpenShift cluster credentials") {
-                        steps {
-			    container('jenkins-worker-image-mgmt') {
-				script {
-				    def (buildAPI, buildToken) = clusterCredentials(
-					projectName: env.CICD_NAMESPACE,
-					secretName : env.BUILD_CLUSTER_CREDENTIAL_SECRET_NAME
-				    )
-				    env.BUILD_API   = buildAPI
-				    env.BUILD_TOKEN = buildToken
-				}
-			    }
-                        }
-                    }
                     stage ("BUILD: Create OpenShift artifacts") {
                         steps {
                             container('jenkins-worker-ansible') {
                                 withCredentials([file(credentialsId: "${ansibleVaultJenkinsCredentialName}", variable: 'ANSIBLE_VAULT_PASSWORD_FILE')]) {
                                     // NOTE: openshift_templates_raw MUST be accessible to OpenShift without authentication
+                                    // NOTE: this will use the serivce account that Jenkins is running as to create these resoruces to "solve"
+                                    //       the chicken and egg problem of creating the CICD namespace and the cluster secrets in it for the other environments.
                                     applier(
                                         applierPlaybook: "apply.yml",
                                         playbookAdditionalArgs: """ \
@@ -303,9 +302,7 @@ spec:
                                         """,
                                         inventoryPath:    "inventory/hosts",
                                         requirementsPath: "requirements.yml",
-                                        ansibleRootDir:   ".openshift-applier",
-                                        clusterAPI:       env.BUILD_API,
-                                        clusterToken:     env.BUILD_TOKEN
+                                        ansibleRootDir:   ".openshift-applier"
                                     )
                                 }
                             }
