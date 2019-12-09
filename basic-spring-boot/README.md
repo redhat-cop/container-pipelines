@@ -119,7 +119,7 @@ imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
 rolebinding "jenkins_edit" configured
 $ oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
- -p NAMESPACE=basic-spring-boot-stage -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f- | oc apply -f-
+ -p NAMESPACE=basic-spring-boot-stage -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f-
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
