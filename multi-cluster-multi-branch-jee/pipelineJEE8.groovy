@@ -40,6 +40,19 @@
  *     * PROD  - ${applicationName}-prod-pipeline-*
  */
 
+/* Namespace ownership and creation stratigy:
+ *
+ * CICD_NAMSPACE  - created by jenkins service account
+ * DEV_NAMESPACE  - created by service account associated with token in provided in secret named by DEV_CLUSTER_CREDENTIAL_SECRET_NAME
+ * TEST_NAMESPACE - created by service account associated with token in provided in secret named by TEST_CLUSTER_CREDENTIAL_SECRET_NAME
+ * QA_NAMESPACE   - created by service account associated with token in provided in secret named by QA_CLUSTER_CREDENTIAL_SECRET_NAME
+ * PROD_NAMESPACE - created by service account associated with token in provided in secret named by PROD_CLUSTER_CREDENTIAL_SECRET_NAME
+ *
+ * Permissions:
+ *   * all of the service accounts, the one used by jenkins, and the ones specfied in the secrets,
+ *     need to have self-provisioniner permissions in their respective clusters
+ */
+
 /* 
  * @param applicationName      The name of the application. This will be used as part of the dynamically created
  *                             OpenShift Project names as well as the image group when pushing and pulling
@@ -108,10 +121,10 @@ def call(
             QA_IMAGE_TAG   = 'qa'
             PROD_IMAGE_TAG = 'prod'
 
-            DEV_CLUSTER_CREDENTIAL_SECRET_NAME  = 'cluster-credential-dev'
-            TEST_CLUSTER_CREDENTIAL_SECRET_NAME = 'cluster-credential-test'
-            QA_CLUSTER_CREDENTIAL_SECRET_NAME   = 'cluster-credential-qa'
-            PROD_CLUSTER_CREDENTIAL_SECRET_NAME = 'cluster-credential-prod'
+            DEV_CLUSTER_CREDENTIAL_SECRET_NAME    = 'cluster-credential-dev'
+            TEST_CLUSTER_CREDENTIAL_SECRET_NAME   = 'cluster-credential-test'
+            QA_CLUSTER_CREDENTIAL_SECRET_NAME     = 'cluster-credential-qa'
+            PROD_CLUSTER_CREDENTIAL_SECRET_NAME   = 'cluster-credential-prod'
         }
         // The options directive is for configuration that applies to the whole job.
         options {
@@ -267,6 +280,8 @@ spec:
                             container('jenkins-worker-ansible') {
                                 withCredentials([file(credentialsId: "${ansibleVaultJenkinsCredentialName}", variable: 'ANSIBLE_VAULT_PASSWORD_FILE')]) {
                                     // NOTE: openshift_templates_raw MUST be accessible to OpenShift without authentication
+                                    // NOTE: this will use the serivce account that Jenkins is running as to create these resoruces to "solve"
+                                    //       the chicken and egg problem of creating the CICD namespace and the cluster secrets in it for the other environments.
                                     applier(
                                         applierPlaybook: "apply.yml",
                                         playbookAdditionalArgs: """ \
@@ -285,9 +300,9 @@ spec:
                                         -e app_build_builder_image_name=${builderImage} \
                                         -e app_build_maven_args_append=${mvnAdditionalArgs}
                                         """,
-                                        inventoryPath: "inventory/hosts",
+                                        inventoryPath:    "inventory/hosts",
                                         requirementsPath: "requirements.yml",
-                                        ansibleRootDir: ".openshift-applier"
+                                        ansibleRootDir:   ".openshift-applier"
                                     )
                                 }
                             }
@@ -359,6 +374,20 @@ spec:
                             lock("env-dev-${applicationName}-${serviceName}")
                         }
                         stages {
+                            stage ("DEV: Get OpenShift cluster credentials") {
+                                steps {
+				    container('jenkins-worker-image-mgmt') {
+					script {
+					    def (devAPI, devToken) = clusterCredentials(
+						projectName: env.CICD_NAMESPACE,
+						secretName : env.DEV_CLUSTER_CREDENTIAL_SECRET_NAME
+					    )
+					    env.DEV_API   = devAPI
+					    env.DEV_TOKEN = devToken
+					}
+				    }
+                                }
+                            }
                             stage ("DEV: Create OpenShift artifacts") {
                                 steps {
                                     container('jenkins-worker-ansible') {
@@ -379,9 +408,11 @@ spec:
                                                     -e app_custom_env='{}' \
                                                     -e image_pull_secret=${imagePullSecret}
                                                 """,
-                                                inventoryPath: "inventory/hosts",
+                                                inventoryPath:    "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
-                                                ansibleRootDir: ".openshift-applier"
+                                                ansibleRootDir:   ".openshift-applier",
+                                                clusterAPI:       env.DEV_API,
+                                                clusterToken:     env.DEV_TOKEN
                                             )
                                         }
                                     }
@@ -389,16 +420,6 @@ spec:
       		            }
                             stage('DEV: Deploy') {
                                 steps {
-                                    container('jenkins-worker-image-mgmt') {
-                                        script {
-                                            def (devAPI, devToken) = clusterCredentials(
-                                                projectName: env.CICD_NAMESPACE,
-                                                secretName : env.DEV_CLUSTER_CREDENTIAL_SECRET_NAME
-                                            )
-                                            env.DEV_API   = devAPI
-                                            env.DEV_TOKEN = devToken
-                                        }
-                                    }
                                     tagAndDeploy(
                                         imageName                    : serviceName,
                                         imageNamespace               : applicationName,
@@ -444,6 +465,20 @@ spec:
                             lock("env-test-${applicationName}-${serviceName}")
                         }
                         stages {
+                            stage ("TEST: Get OpenShift cluster credentials") {
+                                steps {
+                                    container('jenkins-worker-image-mgmt') {
+                                        script {
+                                            def (testAPI, testToken) = clusterCredentials(
+                                                projectName: env.CICD_NAMESPACE,
+                                                secretName : env.TEST_CLUSTER_CREDENTIAL_SECRET_NAME
+                                            )
+                                            env.TEST_API   = testAPI
+                                            env.TEST_TOKEN = testToken
+                                        }
+                                    }
+                                }
+                            }
                             stage ("TEST: Create OpenShift artifacts") { 
                                 steps {
                                     container('jenkins-worker-ansible') {
@@ -464,9 +499,11 @@ spec:
                                                     -e app_custom_env='{}' \
                                                     -e image_pull_secret=${imagePullSecret}
                                                 """,
-                                                inventoryPath: "inventory/hosts",
+                                                inventoryPath:    "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
-                                                ansibleRootDir: ".openshift-applier"
+                                                ansibleRootDir:   ".openshift-applier",
+                                                clusterAPI:       env.TEST_API,
+                                                clusterToken:     env.TEST_TOKEN
                                             )
                                         }
                                     }
@@ -474,16 +511,6 @@ spec:
       		            }
                             stage('TEST: Deploy') {
                                 steps {
-                                    container('jenkins-worker-image-mgmt') {
-                                        script {
-                                            def (testAPI, testToken) = clusterCredentials(
-                                                projectName: env.CICD_NAMESPACE,
-                                                secretName : env.TEST_CLUSTER_CREDENTIAL_SECRET_NAME
-                                            )
-                                            env.TEST_API   = testAPI
-                                            env.TEST_TOKEN = testToken
-                                        }
-                                    }
                                     tagAndDeploy(
                                         imageName                    : serviceName,
                                         imageNamespace               : applicationName,
@@ -534,6 +561,20 @@ spec:
                             lock("env-qa-${applicationName}-${serviceName}")
                         }
                         stages {
+                            stage ("QA: Get OpenShift cluster credentials") {
+                                steps {
+                                    container('jenkins-worker-image-mgmt') {
+                                        script {
+                                            def (qaAPI, qaToken) = clusterCredentials(
+                                                projectName: env.CICD_NAMESPACE,
+                                                secretName : env.QA_CLUSTER_CREDENTIAL_SECRET_NAME
+                                            )
+                                            env.QA_API   = qaAPI
+                                            env.QA_TOKEN = qaToken
+                                        }
+                                    }
+                                }
+                            }
                             stage ("QA: Create OpenShift artifacts") { 
                                 steps {
                                     container('jenkins-worker-ansible') {
@@ -554,9 +595,11 @@ spec:
                                                     -e app_custom_env='{}' \
                                                     -e image_pull_secret=${imagePullSecret}
                                                 """,
-                                                inventoryPath: "inventory/hosts",
+                                                inventoryPath:    "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
-                                                ansibleRootDir: ".openshift-applier"
+                                                ansibleRootDir:   ".openshift-applier",
+                                                clusterAPI:       env.QA_API,
+                                                clusterToken:     env.QA_TOKEN
                                             )
                                         }
                                     }
@@ -564,16 +607,6 @@ spec:
       		            }
                             stage('QA: Deploy') {
                                 steps {
-                                    container('jenkins-worker-image-mgmt') {
-                                        script {
-                                            def (qaAPI, qaToken) = clusterCredentials(
-                                                projectName: env.CICD_NAMESPACE,
-                                                secretName : env.QA_CLUSTER_CREDENTIAL_SECRET_NAME
-                                            )
-                                            env.QA_API   = qaAPI
-                                            env.QA_TOKEN = qaToken
-                                        }
-                                    }
                                     tagAndDeploy(
                                         imageName                    : serviceName,
                                         imageNamespace               : applicationName,
@@ -622,6 +655,20 @@ spec:
                             lock("env-prod-${applicationName}-${serviceName}")
                         }
                         stages {
+                            stage ("PROD: Get OpenShift cluster credentials") {
+                                steps {
+                                    container('jenkins-worker-image-mgmt') {
+                                        script {
+                                            def (prodAPI, prodToken) = clusterCredentials(
+                                                projectName: env.CICD_NAMESPACE,
+                                                secretName : env.PROD_CLUSTER_CREDENTIAL_SECRET_NAME
+                                            )
+                                            env.PROD_API   = prodAPI
+                                            env.PROD_TOKEN = prodToken
+                                        }
+                                    }
+                                }
+                            }
                             stage ("PROD: Create OpenShift artifacts") { 
                                 steps {
                                     container('jenkins-worker-ansible') {
@@ -642,9 +689,11 @@ spec:
                                                     -e app_custom_env='{}' \
                                                     -e image_pull_secret=${imagePullSecret}
                                                 """,
-                                                inventoryPath: "inventory/hosts",
+                                                inventoryPath:    "inventory/hosts",
                                                 requirementsPath: "requirements.yml",
-                                                ansibleRootDir: ".openshift-applier"
+                                                ansibleRootDir:   ".openshift-applier",
+                                                clusterAPI:       env.PROD_API,
+                                                clusterToken:     env.PROD_TOKEN
                                             )
                                         }
                                     }
@@ -652,16 +701,6 @@ spec:
       	                    }
                             stage('PROD: Deploy') {
                                 steps {
-                                    container('jenkins-worker-image-mgmt') {
-                                        script {
-                                            def (prodAPI, prodToken) = clusterCredentials(
-                                                projectName: env.CICD_NAMESPACE,
-                                                secretName : env.PROD_CLUSTER_CREDENTIAL_SECRET_NAME
-                                            )
-                                            env.PROD_API   = prodAPI
-                                            env.PROD_TOKEN = prodToken
-                                        }
-                                    }
                                     tagAndDeploy(
                                         imageName                    : serviceName,
                                         imageNamespace               : applicationName,
