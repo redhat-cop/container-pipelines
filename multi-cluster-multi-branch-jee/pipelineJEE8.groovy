@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-/* The branching and promotion stratigy defined in this pipeline
+/* The branching and promotion strategy defined in this pipeline
  * is based on the GitFlow paradigm merged with OpenShift promotion concepts.
  * 
  * Branches to Stages to OpenShift Project Mapping
@@ -17,11 +17,11 @@
  *     * DEV   - ${applicationName}-dev
  *     * TEST  - ${applicationName}-test
  *     * QA    - ${applicationName}-qa
- *   * develop - branch for developer intigration before merging into a release/* or master branch
+ *   * develop - branch for developer integration before merging into a release/* or master branch
  *     * SETUP - N/A
  *     * BUILD - ${applicationName}-ci-cd
  *     * DEV   - ${applicationName}-dev
- *   * hotfix/* - branch for a hotfix that needs to be tested through QA without interupting primary development
+ *   * hotfix/* - branch for a hotfix that needs to be tested through QA without interrupting primary development
  *     * SETUP - N/A
  *     * BUILD - ${applicationName}-ci-cd-hotfix-*
  *     * DEV   - ${applicationName}-dev-hotfix-*
@@ -50,14 +50,14 @@
  *
  * Permissions:
  *   * all of the service accounts, the one used by jenkins, and the ones specfied in the secrets,
- *     need to have self-provisioniner permissions in their respective clusters
+ *     need to have self-provisioner permissions in their respective clusters
  */
 
 /* 
  * @param applicationName      The name of the application. This will be used as part of the dynamically created
  *                             OpenShift Project names as well as the image group when pushing and pulling
  *                             images form image repository.
- * @param serviceName          The servcie name within the applciation. Used for creating the OpenShift BuildConfig, Service, etc
+ * @param serviceName          The service name within the applciation. Used for creating the OpenShift BuildConfig, Service, etc
  *                             as well as the image name pushed to the image group within the image repository.
  * @param ownerGroupName       The OpenShift RBAC group that should own the OpenShift resources created by this pipeline.
  * @param imagePushRegistry    The container image repository to push images to.
@@ -65,7 +65,7 @@
  *                             won't let you push to a group repository, hence the need for the seperation of push and pull
  *                             repositories, if your repository supports pushing to a default repository within an group repository,
  *                             such as Artifactory, then imagePushRegistry and imagePullRegistry can have the same value.
- * @param ansibleVaultJenkinsCredentialName    Name of the Jenkins credential that contians the Ansible Vault password to
+ * @param ansibleVaultJenkinsCredentialName    Name of the Jenkins credential that contains the Ansible Vault password to
  *                                             access vaulted variables when running Ansible.
  * @param imagePushSecret      Name of the OpenShift Secret that contains the credentials for pushing to the imagePushRegistry.
  *                             Default: image-push-repo-credenetial
@@ -310,7 +310,7 @@ spec:
       		    }
                     stage('BUILD: build') {
                         steps {
-                            // build the applciation
+                            // build the application
                             sh "mvn clean package -U -B ${mvnAdditionalArgs}"
 
                             // copy other binary artifacts expected by S2I build to target directory
@@ -344,10 +344,10 @@ spec:
                 }
                 post {
                     success {
-                       //TODO: send success notification to ChatOps / Email / Other notifciation system
+                       //TODO: send success notification to ChatOps / Email / Other notification system
                     }
                     failure {
-                       //TODO: send failure notification to ChatOps / Email / Other notifciation system
+                       //TODO: send failure notification to ChatOps / Email / Other notification system
                     }
                 }
             }
@@ -437,10 +437,10 @@ spec:
                 }
                 post {
                     success {
-                       //TODO: send success notification to ChatOps / Email / Other notifciation system
+                       //TODO: send success notification to ChatOps / Email / Other notification system
                     }
                     failure {
-                       //TODO: send failure notification to ChatOps / Email / Other notifciation system
+                       //TODO: send failure notification to ChatOps / Email / Other notification system
                     }
                 }
             }
@@ -533,10 +533,10 @@ spec:
                 }
                 post {
                     success {
-                       //TODO: send success notification to ChatOps / Email / Other notifciation system
+                       //TODO: send success notification to ChatOps / Email / Other notification system
                     }
                     failure {
-                       //TODO: send failure notification to ChatOps / Email / Other notifciation system
+                       //TODO: send failure notification to ChatOps / Email / Other notification system
                     }
                 }
             }
@@ -552,7 +552,7 @@ spec:
                 stages {
                     stage('QA: Approval') {
                         steps {
-                            //TODO: send wiating for approval notification to ChatOps / Email / Other notification system
+                            //TODO: send waiting for approval notification to ChatOps / Email / Other notification system
                             input 'Promote to QA environment?'
                         }
                     }
@@ -629,10 +629,10 @@ spec:
                 }
                 post {
                     success {
-                       //TODO: send success notification to ChatOps / Email / Other notifciation system
+                       //TODO: send success notification to ChatOps / Email / Other notification system
                     }
                     failure {
-                       //TODO: send failure notification to ChatOps / Email / Other notifciation system
+                       //TODO: send failure notification to ChatOps / Email / Other notification system
                     }
                 }
             }
@@ -718,10 +718,10 @@ spec:
                 }
                 post {
                     success {
-                       //TODO: send success notification to ChatOps / Email / Other notifciation system
+                       //TODO: send success notification to ChatOps / Email / Other notification system
                     }
                     failure {
-                       //TODO: send failure notification to ChatOps / Email / Other notifciation system
+                       //TODO: send failure notification to ChatOps / Email / Other notification system
                     }
                 }
             }
@@ -729,10 +729,10 @@ spec:
         post {
             post {
                 success {
-                    //TODO: send success notification to ChatOps / Email / Other notifciation system
+                    //TODO: send success notification to ChatOps / Email / Other notification system
                 }
                 failure {
-                    //TODO: send failure notification to ChatOps / Email / Other notifciation system
+                    //TODO: send failure notification to ChatOps / Email / Other notification system
                 }
             }
             failure {
