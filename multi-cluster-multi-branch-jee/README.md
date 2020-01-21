@@ -38,7 +38,7 @@ SERVICE_ACCOUNT_NAME=jenkins
 oc login ${CLUSTER_API}
 oc new-project ${SERVICE_ACCOUNT_NAMESPACE}
 oc create sa ${SERVICE_ACCOUNT_NAME} -n ${SERVICE_ACCOUNT_NAMESPACE}
-oc adm policy add-cluster-role-to-user self-provisioners system:serviceaccount:${SERVICE_ACCOUNT_NAMESPACE}:jenkins
+oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:${SERVICE_ACCOUNT_NAMESPACE}:jenkins
 
 TOKEN_NAME=$(oc get secret -n ${SERVICE_ACCOUNT_NAMESPACE} | grep ${SERVICE_ACCOUNT_NAME}-token | head -n 1 | awk '{ print $1 }')
 echo TOKEN_NAME=${TOKEN_NAME}
