@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: basic-spring-boot
+  template: ${APPLICATION_NAME}
 metadata:
   annotations:
     description: Application template for JWS applications built using a Jenkins Pipeline
     iconClass: icon-tomcat
     tags: java,spring
     version: 1.2.0
-  name: basic-sprint-boot
+  name: ${APPLICATION_NAME}
 objects:
 - apiVersion: v1
   kind: Service

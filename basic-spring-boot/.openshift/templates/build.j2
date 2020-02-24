@@ -14,22 +14,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
-    name: ${APPLICATION_NAME}
-    namespace: ${NAMESPACE}
+      application: {{ sb_application_name }}
+    name: {{ sb_application_name }}
+    namespace: {{ sb_build_namespace }}
 - kind: "BuildConfig"
   apiVersion: "v1"
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
-    name: "${APPLICATION_NAME}-pipeline"
-    namespace: "${NAMESPACE}"
+      application: {{ sb_application_name }}
+    name: "{{ sb_application_name }}-pipeline"
+    namespace: "{{ sb_build_namespace }}"
   spec:
     source:
       type: Git
       git:
-        uri: ${SOURCE_REPOSITORY_URL}
-        ref: ${SOURCE_REPOSITORY_REF}
+        uri: {{ sb_source_repository_url }}
+        ref: {{ sb_source_repository_ref }}
       contextDir: ${CONTEXT_DIR}
     triggers:
     - type: "GitHub"
@@ -42,21 +42,21 @@ objects:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
         env:
         - name: "APPLICATION_SOURCE_REPO"
-          value: "${APPLICATION_SOURCE_REPO}"
+          value: "{{ sb_application_repository_url }}"
         - name: "APPLICATION_SOURCE_REF"
-          value: "${APPLICATION_SOURCE_REF}"
+          value: "{{ sb_application_repository_ref }}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
-    name: ${APPLICATION_NAME}
-    namespace: "${NAMESPACE}"
+      application: {{ sb_application_name }}
+    name: {{ sb_application_name }}
+    namespace: "{{ sb_build_namespace }}"
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: ${APPLICATION_NAME}:latest
+        name: {{ sb_application_name }}:latest
     source:
       binary: {}
       type: Binary
@@ -71,7 +71,7 @@ parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true
-  value: basic-spring
+  value: {{ sb_application_name }}
 - description: The namespace to deploy into
   name: NAMESPACE
   required: true
@@ -84,11 +84,11 @@ parameters:
   value: "master"
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
-  value: basic-spring-boot
-- description: Source code repo for demo app
+  value: {{ sb_application_name }}
+- description: Source code repo for app
   name: APPLICATION_SOURCE_REPO
   required: true
-  value: https://github.com/redhat-cop/spring-rest.git
+  value: {{ sb_application_repository_url }}
 - description: Source code branch for demo app
   name: APPLICATION_SOURCE_REF
   value: master
