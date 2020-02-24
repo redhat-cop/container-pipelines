@@ -14,22 +14,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: {{ sb_application_name }}
-    name: {{ sb_application_name }}
-    namespace: {{ sb_build_namespace }}
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: ${NAMESPACE}
 - kind: "BuildConfig"
   apiVersion: "v1"
   metadata:
     labels:
-      application: {{ sb_application_name }}
-    name: "{{ sb_application_name }}-pipeline"
-    namespace: "{{ sb_build_namespace }}"
+      application: ${APPLICATION_NAME}
+    name: "${APPLICATION_NAME}-pipeline"
+    namespace: "${NAMESPACE}"
   spec:
     source:
       type: Git
       git:
-        uri: {{ sb_source_repository_url }}
-        ref: {{ sb_source_repository_ref }}
+        uri: ${SOURCE_REPOSITORY_URL}
+        ref: ${SOURCE_REPOSITORY_REF}
       contextDir: ${CONTEXT_DIR}
     triggers:
     - type: "GitHub"
@@ -42,21 +42,21 @@ objects:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
         env:
         - name: "APPLICATION_SOURCE_REPO"
-          value: "{{ sb_application_repository_url }}"
+          value: "${APPLICATION_SOURCE_REPO}"
         - name: "APPLICATION_SOURCE_REF"
-          value: "{{ sb_application_repository_ref }}"
+          value: "${APPLICATION_SOURCE_REF}"
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     labels:
-      application: {{ sb_application_name }}
-    name: {{ sb_application_name }}
-    namespace: "{{ sb_build_namespace }}"
+      application: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+    namespace: "${NAMESPACE}"
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: {{ sb_application_name }}:latest
+        name: ${APPLICATION_NAME}:latest
     source:
       binary: {}
       type: Binary

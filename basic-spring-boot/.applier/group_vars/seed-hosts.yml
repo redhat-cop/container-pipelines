@@ -19,16 +19,15 @@ sb_pipeline_script: "Jenkinsfile"
 openshift_cluster_content:
 - object: projects
   content:
-  - name: apply variables to projects template
+  - name: "apply variables to projects template and create environments"
     file: "{{ inventory_dir }}/../.openshift/projects/projects.j2"
     action: create
     tags:
       - project
-- object: builds
+- object: build
   content:
   - name: "apply variables to build template and deploy build pipeline to dev"
     template: "{{ inventory_dir }}/../.openshift/templates/build.j2"
-    action: create
     params_from_vars:
       APPLICATION_NAME: "{{ sb_application_name }}"
       NAMESPACE: "{{ sb_build_namespace }}"
