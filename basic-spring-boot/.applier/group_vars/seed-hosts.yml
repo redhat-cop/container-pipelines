@@ -24,7 +24,7 @@ openshift_cluster_content:
     action: create
     tags:
       - project
-- object: build
+- object: builds
   content:
   - name: "apply variables to build template and deploy build pipeline to dev"
     template: "{{ inventory_dir }}/../.openshift/templates/build.j2"
