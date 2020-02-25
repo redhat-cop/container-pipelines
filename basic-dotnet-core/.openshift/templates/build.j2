@@ -110,7 +110,7 @@ parameters:
 - description: The name for the application.
   name: APPLICATION_NAME
   required: true
-  value: basic-dotnet
+  value: {{ sb_application_name }}
 - description: The namespace to deploy into
   name: NAMESPACE
   required: true
@@ -123,11 +123,11 @@ parameters:
   value: "master"
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
-  value: basic-dotnet-core
+  value: {{ sb_application_name }}
 - description: Source code repo for demo app
   name: APPLICATION_SOURCE_REPO
   required: true
-  value: https://github.com/redhat-developer/s2i-dotnetcore-ex.git
+  value: {{ sb_application_repository_url }}
 - description: Source code branch for demo app
   name: APPLICATION_SOURCE_REF
   value: master

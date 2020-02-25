@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: List
+items:
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: {{ sb_build_namespace }}
+    creationTimestamp: null
+  displayName: {{ sb_build_application_display_name }}
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: {{ sb_dev_namespace }}
+    creationTimestamp: null
+  displayName: {{ sb_dev_application_display_name }}
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: {{ sb_stage_namespace }}
+    creationTimestamp: null
+  displayName: {{ sb_stage_application_display_name }}
+- kind: ProjectRequest
+  apiVersion: v1
+  metadata:
+    name: {{ sb_prod_namespace }}
+    creationTimestamp: null
+  displayName: {{ sb_prod_application_display_name }}
