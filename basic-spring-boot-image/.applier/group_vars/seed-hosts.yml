@@ -1,0 +1,88 @@
+sb_application_name:
+sb_build_application_display_name: Spring Rest App - Build
+sb_build_namespace: basic-spring-boot-image-build
+sb_dev_application_display_name: Spring Rest App - Dev
+sb_dev_namespace: basic-spring-boot-image-dev
+sb_stage_application_display_name: Spring Rest App - Stage
+sb_stage_namespace: basic-spring-boot-image-stage
+sb_prod_application_display_name: Spring Rest App - Prod
+sb_prod_namespace: basic-spring-boot-image-prod
+sb_application_repository_url: "https://github.com/redhat-cop/spring-rest.git"
+sb_application_repository_ref: master
+sb_application_readiness_response: "status.:.UP"
+sb_application_readiness_path: "/health"
+sb_sa_name: "jenkins"
+sb_source_repository_url: "https://github.com/redhat-cop/container-pipelines.git"
+sb_source_repository_ref: master
+sb_pipeline_script: "Jenkinsfile"
+sb_dest_credentials: "jenkins:CYkKY0eh0meG8soj8R5n+A+ivA2hWjn2ydlUrlSKDNF8bwCvqb5lKg65smWgjV9g"
+sb_src_registry: "docker://docker-registry.default.svc.cluster.local:5000"
+sb_dest_registry: "docker://10.128.88.25"
+sb_src_project: "basic-spring-boot-image"
+sb_dest_project: "productionpipeline"
+sb_mvn_snapshot_deployment_repository: "nexus::default::http://nexus:8081/repository/maven-snapshots"
+sb_mvn_release_deployment_repository: "nexus::default::http://nexus:8081/repository/maven-releases"
+
+openshift_cluster_content:
+- object: projects
+  content:
+  - name: "apply variables to projects template and create environments"
+    file: "{{ inventory_dir }}/../.openshift/projects/projects.j2"
+    action: create
+    tags:
+      - project
+- object: builds
+  content:
+  - name: "apply variables to build template and deploy build pipeline to dev"
+    template: "{{ inventory_dir }}/../.openshift/templates/build.j2"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_build_namespace }}"
+      SOURCE_REPOSITORY_URL: "{{ sb_source_repository_url }}"
+      SOURCE_REPOSITORY_REF: "{{ sb_source_repository_ref }}"
+      APPLICATION_SOURCE_REPO: "{{ sb_application_repository_url }}"
+      APPLICATION_SOURCE_REF: "{{ sb_application_repository_ref }}"
+      PIPELINE_SCRIPT: "{{ sb_pipeline_script }}"
+      DEST_CREDENTIALS: "{{ sb_dest_credentials }}"
+      SRC_REGISTRY: "{{ sb_src_registry }}"
+      DEST_REGISTRY: "{{ sb_dest_registry }}"
+      SRC_PROJECT: "{{ sb_src_project }}"
+      DEST_PROJECT: "{{ sb_dest_project }}"
+      MVN_SNAPSHOT_DEPLOYMENT_REPOSITORY: "{{ sb_mvn_snapshot_deployment_repository }}"
+      MVN_RELEASE_DEPLOYMENT_REPOSITORY: "{{ sb_mvn_release_deployment_repository }}"
+    tags:
+      - build
+- object: deployments
+  content:
+  - name: "deploy dev environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_dev_namespace }}"
+      SA_NAMESPACE: "{{ sb_build_namespace }}"
+      READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
+      READINESS_PATH: "{{ sb_application_readiness_path }}"
+    tags:
+      - deployment
+  - name: "deply stage environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_stage_namespace }}"
+      SA_NAME: "{{ sb_sa_name }}"
+      SA_NAMESPACE: "{{ sb_build_namespace }}"
+      READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
+      READINESS_PATH: "{{ sb_application_readiness_path }}"
+    tags:
+      - deployment
+  - name: "deply prod environment"
+    template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
+    params_from_vars:
+      APPLICATION_NAME: "{{ sb_application_name }}"
+      NAMESPACE: "{{ sb_prod_namespace }}"
+      SA_NAME: "{{ sb_sa_name }}"
+      SA_NAMESPACE: "{{ sb_build_namespace }}"
+      READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
+      READINESS_PATH: "{{ sb_application_readiness_path }}"
+    tags:
+      - deployment
