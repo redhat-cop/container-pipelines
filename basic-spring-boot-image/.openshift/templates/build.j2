@@ -92,10 +92,10 @@ parameters:
 - description: Git source URI for application
   name: SOURCE_REPOSITORY_URL
   required: true
-  value: https://github.com/redhat-cop/container-pipelines.git
+  value: {{ sb_source_repository_url }}
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
-  value: "master"
+  value: {{ sb_source_repository_ref }}
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
   value: {{ sb_application_name }}
@@ -105,10 +105,10 @@ parameters:
   value: {{ sb_application_repository_url }}
 - description: Source code branch for demo app
   name: APPLICATION_SOURCE_REF
-  value: master
+  value: {{ sb_application_repository_ref }}
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
-  value: Jenkinsfile
+  value: {{ sb_pipeline_script }}
 - description: GitHub trigger secret
   from: '[a-zA-Z0-9]{8}'
   generate: expression

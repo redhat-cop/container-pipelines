@@ -63,13 +63,13 @@ pipeline {
       }
     }
 
-    stage ('Static Analysis') {
-      steps {
-        withSonarQubeEnv('sonar') {
-            sh "mvn sonar:sonar -Dsonar.analysis.scmRevision=${env.CHANGE_ID} -Dsonar.analysis.buildNumber=${env.BUILD_NUMBER} -Dsonar.login=admin -Dsonar.password=admin -q"
-        }
-      }
-    }
+#    stage ('Static Analysis') {
+#      steps {
+#        sonarqubeStaticAnalysis('sonar') {
+#            sh "mvn sonar:sonar -Dsonar.analysis.scmRevision=${env.CHANGE_ID} -Dsonar.analysis.buildNumber=${env.BUILD_NUMBER} -Dsonar.login=admin -Dsonar.password=admin -q"
+#        }
+#      }
+#    }
 
     // Build Container Image using the artifacts produced in previous stages
     stage('Build Container Image'){

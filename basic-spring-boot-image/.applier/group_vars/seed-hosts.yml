@@ -1,4 +1,4 @@
-sb_application_name:
+sb_application_name: basic-spring-boot-image
 sb_build_application_display_name: Spring Rest App - Build
 sb_build_namespace: basic-spring-boot-image-build
 sb_dev_application_display_name: Spring Rest App - Dev
@@ -12,8 +12,8 @@ sb_application_repository_ref: master
 sb_application_readiness_response: "status.:.UP"
 sb_application_readiness_path: "/health"
 sb_sa_name: "jenkins"
-sb_source_repository_url: "https://github.com/redhat-cop/container-pipelines.git"
-sb_source_repository_ref: master
+sb_source_repository_url: "https://github.com/cziesman/container-pipelines.git"
+sb_source_repository_ref: Adding-variables-for-project-names-and-namespaces
 sb_pipeline_script: "Jenkinsfile"
 sb_dest_credentials: "jenkins:CYkKY0eh0meG8soj8R5n+A+ivA2hWjn2ydlUrlSKDNF8bwCvqb5lKg65smWgjV9g"
 sb_src_registry: "docker://docker-registry.default.svc.cluster.local:5000"
