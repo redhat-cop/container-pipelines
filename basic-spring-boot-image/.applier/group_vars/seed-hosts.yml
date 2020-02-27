@@ -1,12 +1,12 @@
-sb_application_name: basic-spring-boot-image
+sb_application_name: basic-spring-boot
 sb_build_application_display_name: Spring Rest App - Build
-sb_build_namespace: basic-spring-boot-image-build
+sb_build_namespace: basic-spring-boot-build
 sb_dev_application_display_name: Spring Rest App - Dev
-sb_dev_namespace: basic-spring-boot-image-dev
+sb_dev_namespace: basic-spring-boot-dev
 sb_stage_application_display_name: Spring Rest App - Stage
-sb_stage_namespace: basic-spring-boot-image-stage
+sb_stage_namespace: basic-spring-boot-stage
 sb_prod_application_display_name: Spring Rest App - Prod
-sb_prod_namespace: basic-spring-boot-image-prod
+sb_prod_namespace: basic-spring-boot-prod
 sb_application_repository_url: "https://github.com/redhat-cop/spring-rest.git"
 sb_application_repository_ref: master
 sb_application_readiness_response: "status.:.UP"
