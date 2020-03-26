@@ -121,8 +121,8 @@ objects:
         command: ["/usr/local/bin/oc"]
         args:
           - tag
-          - "${inputs.params.fromNamespace}/${inputs.params.imageStream}:${inputs.params.tag}"
-          - "${inputs.params.toNamespace}/${inputs.params.imageStream}:${inputs.params.tag}"
+          - "$(inputs.params.fromNamespace)/$(inputs.params.imageStream):$(inputs.params.tag)"
+          - "$(inputs.params.toNamespace)/$(inputs.params.imageStream):$(inputs.params.tag)"
       # not sure what to do here
       - name: verify-deployment
         image: quay.io/openshift-pipeline/openshift-cli:latest
