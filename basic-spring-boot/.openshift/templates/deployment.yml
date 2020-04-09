@@ -16,7 +16,11 @@ objects:
     annotations:
       description: The web server's http port.
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -32,7 +36,11 @@ objects:
     annotations:
       description: Route for application's http service.
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -43,14 +51,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -62,7 +78,11 @@ objects:
     template:
       metadata:
         labels:
-          app: ${APPLICATION_NAME}
+          app.kubernetes.io/name: ${APPLICATION_NAME}
+          app.kubernetes.io/instance: ${APPLICATION_NAME}
+          app.kubernetes.io/component: api
+          app.kubernetes.io/part-of: ${APPLICATION_NAME}
+          app.kubernetes.io/managed-by: applier
           deploymentConfig: ${APPLICATION_NAME}
         name: ${APPLICATION_NAME}
       spec:
@@ -106,6 +126,11 @@ objects:
   metadata:
     creationTimestamp: null
     labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
       template: basic-tomcat-template
     name: jenkins_edit
     namespace: ${NAMESPACE}

@@ -23,5 +23,7 @@ items:
   apiVersion: v1
   metadata:
     name: basic-spring-boot-prod
+    labels:
+      environment: production
     creationTimestam: null
   displayName: Spring Rest App - Prod
