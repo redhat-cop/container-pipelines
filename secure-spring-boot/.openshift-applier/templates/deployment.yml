@@ -26,7 +26,6 @@ objects:
     selector:
       deploymentConfig: ${APPLICATION_NAME}
 - apiVersion: v1
-  id: ${APPLICATION_NAME}-http
   kind: Route
   metadata:
     annotations:

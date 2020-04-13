@@ -62,7 +62,6 @@ objects:
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
 - apiVersion: v1
-  id: ${APPLICATION_NAME}-http
   kind: Route
   metadata:
     annotations:
