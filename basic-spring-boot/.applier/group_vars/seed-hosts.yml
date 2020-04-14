@@ -46,7 +46,7 @@ openshift_cluster_content:
       READINESS_PATH: "{{ sb_application_readiness_path }}"
     tags:
       - deployment
-  - name: "deply stage environment"
+  - name: "deploy stage environment"
     template: "{{ inventory_dir }}/../.openshift/templates/deployment.yml"
     params_from_vars:
       APPLICATION_NAME: "{{ sb_application_name }}"
@@ -68,3 +68,7 @@ openshift_cluster_content:
       READINESS_PATH: "{{ sb_application_readiness_path }}"
     tags:
       - deployment
+  - name: "deploy jenkins to build environment"
+    template: "openshift//jenkins-ephemeral"
+    tags:
+      - build

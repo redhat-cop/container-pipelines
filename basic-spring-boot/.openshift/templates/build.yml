@@ -14,14 +14,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
 - kind: "BuildConfig"
   apiVersion: "v1"
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: "${APPLICATION_NAME}-pipeline"
     namespace: "${NAMESPACE}"
   spec:
@@ -49,7 +57,11 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: "${NAMESPACE}"
   spec:
