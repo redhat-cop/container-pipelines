@@ -38,6 +38,7 @@ objects:
         - image: "${IMAGE_REPO}/${NAMESPACE}/${NAME}:${APP_TAG}"
           imagePullPolicy: Always
           name: "${NAME}"
+          env:
           - name: JAVA_OPTS_APPEND
             value: "${JAVA_OPTS_APPEND}"
           livenessProbe:
@@ -51,7 +52,6 @@ objects:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          name: eap-app
           ports:
             - containerPort: 8778
               name: jolokia
