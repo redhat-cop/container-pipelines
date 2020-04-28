@@ -41,7 +41,6 @@ objects:
     selector:
       deploymentConfig: ${APPLICATION_NAME}-blue
 - apiVersion: v1
-  id: ${APPLICATION_NAME}-http
   kind: Route
   metadata:
     annotations:
@@ -55,7 +54,6 @@ objects:
     to:
       name: ${APPLICATION_NAME}-blue
 - apiVersion: v1
-  id: ${APPLICATION_NAME}-http
   kind: Route
   metadata:
     annotations:
@@ -69,7 +67,6 @@ objects:
     to:
       name: ${APPLICATION_NAME}-blue
 - apiVersion: v1
-  id: ${APPLICATION_NAME}-http
   kind: Route
   metadata:
     annotations:
