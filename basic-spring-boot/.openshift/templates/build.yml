@@ -10,7 +10,7 @@ metadata:
     version: 1.2.0
   name: generic-java-jenkins-pipeline
 objects:
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     labels:
@@ -21,8 +21,8 @@ objects:
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
-- kind: "BuildConfig"
-  apiVersion: "v1"
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
   metadata:
     labels:
       app.kubernetes.io/name: ${APPLICATION_NAME}
@@ -53,7 +53,7 @@ objects:
           value: "${APPLICATION_SOURCE_REPO}"
         - name: "APPLICATION_SOURCE_REF"
           value: "${APPLICATION_SOURCE_REF}"
-- apiVersion: v1
+- apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
     labels:

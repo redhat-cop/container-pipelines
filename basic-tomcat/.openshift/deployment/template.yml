@@ -7,7 +7,7 @@ metadata:
     description: Application template for applications built using a Jenkins Pipeline
   name: deployment-template
 objects:
-- apiVersion: v1
+- apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     labels:
@@ -61,14 +61,14 @@ objects:
           name: ${APPLICATION_NAME}:latest
       type: ImageChange
     - type: ConfigChange
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     labels:
       app: ${APPLICATION_NAME}
     name: ${APPLICATION_NAME}
     namespace: ${APPLICATION_NAME}${ENV}
-- apiVersion: v1
+- apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
@@ -118,8 +118,7 @@ objects:
     selector:
       app: ${APPLICATION_NAME}
       deploymentConfig: ${APPLICATION_NAME}
-- apiVersion: v1
-  groupNames: null
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
     creationTimestamp: null
@@ -127,6 +126,7 @@ objects:
       template: basic-tomcat-template
     name: jenkins_edit
     namespace: ${APPLICATION_NAME}${ENV}
+  groupNames: null
   roleRef:
     name: edit
   subjects:

@@ -8,7 +8,7 @@ metadata:
     tags: jenkins, node
   name: jenkins-slave-node-8
 objects:
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     labels:
@@ -31,7 +31,7 @@ objects:
         type: Source
   status:
     dockerImageRepository: ""
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     labels:
@@ -43,7 +43,7 @@ objects:
       local: false
   status:
     dockerImageRepository: ""
-- apiVersion: v1
+- apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
     labels:

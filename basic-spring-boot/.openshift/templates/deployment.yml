@@ -29,7 +29,7 @@ objects:
       targetPort: 8080
     selector:
       deploymentConfig: ${APPLICATION_NAME}
-- apiVersion: v1
+- apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
@@ -46,7 +46,7 @@ objects:
     host: ${HOSTNAME_HTTP}
     to:
       name: ${APPLICATION_NAME}
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     labels:
@@ -57,7 +57,7 @@ objects:
       app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
-- apiVersion: v1
+- apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     labels:
@@ -119,8 +119,7 @@ objects:
           name: ${APPLICATION_NAME}:latest
       type: ImageChange
     - type: ConfigChange
-- apiVersion: v1
-  groupNames: null
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
     creationTimestamp: null
@@ -133,6 +132,7 @@ objects:
       template: basic-tomcat-template
     name: jenkins_edit
     namespace: ${NAMESPACE}
+  groupNames: null
   roleRef:
     name: edit
   subjects:
