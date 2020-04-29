@@ -15,6 +15,8 @@ items:
     namespace: multicluster-spring-boot-prod
   groupNames: null
   roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
     name: edit
   subjects:
   - kind: ServiceAccount
