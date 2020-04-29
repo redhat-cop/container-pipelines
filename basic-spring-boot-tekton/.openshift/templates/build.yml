@@ -27,7 +27,7 @@ objects:
   subjects:
   - kind: ServiceAccount
     name: ${SA_NAME}
-- apiVersion: v1
+- apiVersion: image.openshift.io/v1
   kind: ImageStream
   metadata:
     labels:
@@ -194,7 +194,7 @@ objects:
         value: ${APPLICATION_NAME} 
       - name: deployment
         value: ${APPLICATION_NAME}                                           
-- apiVersion: v1
+- apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
     labels:

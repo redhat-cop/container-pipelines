@@ -29,7 +29,7 @@ metadata:
   selfLink: /apis/template.openshift.io/v1/namespaces/openshift/templates/jenkins-ephemeral
   uid: 8695b82e-837d-11e8-bd48-fa163e2f4463
 objects:
-- apiVersion: v1
+- apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
     annotations:
@@ -44,7 +44,7 @@ objects:
     to:
       kind: Service
       name: ${JENKINS_SERVICE_NAME}
-- apiVersion: v1
+- apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     annotations:
@@ -134,12 +134,12 @@ objects:
       serviceaccounts.openshift.io/oauth-redirectreference.jenkins: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"${JENKINS_SERVICE_NAME}"}}'
     name: ${JENKINS_SERVICE_NAME}
     namespace: ${NAMESPACE}
-- apiVersion: v1
-  groupNames: null
+- apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
     name: ${JENKINS_SERVICE_NAME}_edit
     namespace: ${NAMESPACE}
+  groupNames: null
   roleRef:
     name: edit
   subjects:
