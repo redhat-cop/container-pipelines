@@ -1,26 +1,26 @@
 apiVersion: v1
 kind: List
 items:
-- kind: ProjectRequest
-  apiVersion: v1
+- apiVersion: project.openshift.io/v1
+  kind: ProjectRequest
   metadata:
     name: basic-tomcat-dev
     creationTimestam: null
   displayName: Basic Tomcat App - Dev
-- kind: ProjectRequest
-  apiVersion: v1
+- apiVersion: project.openshift.io/v1
+  kind: ProjectRequest
   metadata:
     name: basic-tomcat-stage
     creationTimestam: null
   displayName: Basic Tomcat App - Stage
-- kind: ProjectRequest
-  apiVersion: v1
+- apiVersion: project.openshift.io/v1
+  kind: ProjectRequest
   metadata:
     name: basic-tomcat-prod
     creationTimestam: null
   displayName: Basic Tomcat App - Prod
-- kind: ProjectRequest
-  apiVersion: v1
+- apiVersion: project.openshift.io/v1
+  kind: ProjectRequest
   metadata:
     name: basic-tomcat-build
     creationTimestam: null

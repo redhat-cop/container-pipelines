@@ -1,6 +1,6 @@
 ---
+apiVersion: template.openshift.io/v1
 kind: Template
-apiVersion: v1
 metadata:
   name: ${NAME}-deploy-jboss-eap
   annotations:

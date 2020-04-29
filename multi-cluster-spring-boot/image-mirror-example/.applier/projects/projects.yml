@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: List
 items:
-- kind: ProjectRequest
-  apiVersion: v1
+- apiVersion: project.openshift.io/v1
+  kind: ProjectRequest
   metadata:
     name: multicluster-spring-boot-dev
     creationTimestam: null
   displayName: MultiCluster Pipeline - Dev
-- kind: ProjectRequest
-  apiVersion: v1
+- apiVersion: project.openshift.io/v1
+  kind: ProjectRequest
   metadata:
     name: multicluster-spring-boot-stage
     creationTimestam: null
