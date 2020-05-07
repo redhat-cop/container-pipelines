@@ -70,5 +70,6 @@ openshift_cluster_content:
       - deployment
   - name: "deploy jenkins to build environment"
     template: "openshift//jenkins-ephemeral"
+    namespace: "{{ sb_build_namespace }}"
     tags:
       - build
