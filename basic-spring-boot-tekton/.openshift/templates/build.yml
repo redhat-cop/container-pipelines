@@ -112,8 +112,10 @@ objects:
         description: The image tag
       - name: imageStream
         description: The imageStream
+      - name: deploymentResource
+        description: the deployment resource, e.g deployment or deploymentconfig
       - name: deployment
-        description: the deployment                  
+        description: the deployment name
     steps:
       - name: tag-image
         image: quay.io/openshift-pipeline/openshift-cli:latest
@@ -122,12 +124,15 @@ objects:
           - tag
           - "$(params.fromNamespace)/$(params.imageStream):$(params.tag)"
           - "$(params.toNamespace)/$(params.imageStream):$(params.tag)"
-      # not sure what to do here
       - name: verify-deployment
         image: quay.io/openshift-pipeline/openshift-cli:latest
-        command: ["sleep"]
+        command: ["oc"]
         args:
-          - "1"                             
+          - rollout
+          - status
+          - "$(params.deploymentResource)/$(params.deployment)"
+          - -n
+          - "$(params.toNamespace)"
 - apiVersion: tekton.dev/v1beta1
   kind: Pipeline
   metadata:
@@ -158,7 +163,9 @@ objects:
       - name: tag
         value: latest 
       - name: imageStream
-        value: ${APPLICATION_NAME} 
+        value: ${APPLICATION_NAME}
+      - name: deploymentResource
+        value: deploymentconfig
       - name: deployment
         value: ${APPLICATION_NAME}
     - name: deploy-to-stage
@@ -175,6 +182,8 @@ objects:
         value: latest 
       - name: imageStream
         value: ${APPLICATION_NAME} 
+      - name: deploymentResource
+        value: deploymentconfig
       - name: deployment
         value: ${APPLICATION_NAME}
     - name: deploy-to-prod
@@ -190,7 +199,9 @@ objects:
       - name: tag
         value: latest 
       - name: imageStream
-        value: ${APPLICATION_NAME} 
+        value: ${APPLICATION_NAME}
+      - name: deploymentResource
+        value: deploymentconfig
       - name: deployment
         value: ${APPLICATION_NAME}                                           
 - apiVersion: build.openshift.io/v1
