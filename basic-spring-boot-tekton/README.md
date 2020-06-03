@@ -12,7 +12,7 @@ This example demonstrates how to implement a full end-to-end [Tekton](https://te
   * OpenShift 4.1+ is required
   * [Red Hat OpenJDK 1.8](https://access.redhat.com/containers/?tab=overview#/registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift) image is required
 * Access to GitHub
-* [Tekton Operator](https://github.com/openshift/tektoncd-pipeline-operator) In order to use Tekton pipelines you need to install the Tekton operator. To do that go to ***Catalog***-> ***Operator Hub*** page of you admin console. Look for ***OpenShift Pipelines Operator*** and install it. The default settings are fine for this demo. You can also automate the installation of the Tekton operator, but this is outside the scope of this demo.
+* [Tekton Operator](https://github.com/openshift/tektoncd-pipeline-operator) In order to use Tekton pipelines you need to install the Tekton operator (at least version v1.0.1). To do that go to ***Catalog***-> ***Operator Hub*** page of you admin console. Look for ***OpenShift Pipelines Operator*** and install it. The default settings are fine for this demo. You can also automate the installation of the Tekton operator, but this is outside the scope of this demo.
 * [Tekton CLI](https://github.com/tektoncd/cli)
 * *Highly recommended*: [tekton dashboard](https://github.com/tektoncd/dashboard)
 
