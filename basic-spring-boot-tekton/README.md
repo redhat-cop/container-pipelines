@@ -100,7 +100,7 @@ This template should be instantiated once in each of the namespaces that our app
 Deploy the deployment template to all three projects.
 
 ```shell
-$ oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot \
+$ oc process -f .openshift/templates/deployment.yml -p APPLICATION_NAME=basic-spring-boot \
  -p NAMESPACE=basic-spring-boot-dev -p SA_NAMESPACE=basic-spring-boot-build -p READINESS_PATH="/health" \
  -p READINESS_RESPONSE="status.:.UP" | oc apply -f -
 service "spring-rest" created
