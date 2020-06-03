@@ -26,7 +26,7 @@ This quickstart can be deployed quickly using Ansible. Here are the steps.
 4. Log into an OpenShift cluster, then run the following command.
 
 ```shell
-ansible-playbook -i ./.applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
+$ ansible-playbook -i ./.applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
 ```
 
 At this point you should have 4 projects created (`basic-spring-boot-build`, `basic-spring-boot-dev`, `basic-spring-boot-stage`, and `basic-spring-boot-prod`) with a pipeline in the `-build` project, and our [Spring Rest](https://github.com/redhat-cop/spring-rest) demo app deployed to the dev/stage/prod projects.
@@ -78,7 +78,7 @@ For the purposes of this demo, we are going to create three stages for our appli
 In the spirit of _Infrastructure as Code_ we have a YAML file that defines the `ProjectRequests` for us. This is as an alternative to running `oc new-project`, but will yeild the same result.
 
 ```shell
-oc create -f .openshift/projects/projects.yml
+$ oc create -f .openshift/projects/projects.yml
 projectrequest "basic-spring-boot-build" created
 projectrequest "basic-spring-boot-dev" created
 projectrequest "basic-spring-boot-stage" created
@@ -100,30 +100,33 @@ This template should be instantiated once in each of the namespaces that our app
 Deploy the deployment template to all three projects.
 
 ```shell
-oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
- -p NAMESPACE=basic-spring-boot-dev -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f-
+$ oc process -f .openshift/templates/deployment.yml -p APPLICATION_NAME=basic-spring-boot \
+ -p NAMESPACE=basic-spring-boot-dev -p SA_NAMESPACE=basic-spring-boot-build -p READINESS_PATH="/health" \
+ -p READINESS_RESPONSE="status.:.UP" | oc apply -f -
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
-rolebinding "jenkins_edit" configured
-oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
- -p NAMESPACE=basic-spring-boot-stage -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f- | oc apply -f-
+rolebinding "tekton_edit" configured
+$ oc process -f .openshift/templates/deployment.yml -p APPLICATION_NAME=basic-spring-boot \
+ -p NAMESPACE=basic-spring-boot-stage -p SA_NAMESPACE=basic-spring-boot-build -p READINESS_PATH="/health" \
+ -p READINESS_RESPONSE="status.:.UP" | oc apply -f -
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
-rolebinding "jenkins_edit" created
-oc process -f .openshift/templates/deployment.yml -p=APPLICATION_NAME=basic-spring-boot
- -p NAMESPACE=basic-spring-boot-prod -p=SA_NAMESPACE=basic-spring-boot-build -p=READINESS_PATH="/health" -p=READINESS_RESPONSE="status.:.UP" -p | oc apply -f-
+rolebinding "tekton_edit" created
+$ oc process -f .openshift/templates/deployment.yml -p APPLICATION_NAME=basic-spring-boot \
+ -p NAMESPACE=basic-spring-boot-prod -p SA_NAMESPACE=basic-spring-boot-build -p READINESS_PATH="/health" \
+-p READINESS_RESPONSE="status.:.UP" | oc apply -f -
 service "spring-rest" created
 route "spring-rest" created
 imagestream "spring-rest" created
 deploymentconfig "spring-rest" created
-rolebinding "jenkins_edit" created
+rolebinding "tekton_edit" created
 ```
 
-A _build template_ is provided at `applier/templates/build.yml` that defines all the resources required to build our java app. It includes:
+A _build template_ is provided at `.openshift/templates/build.yml` that defines all the resources required to build our java app. It includes:
 
 * A `Tekton` pipeline and associated objects.
 * A `BuildConfig` that defines a `Source` build with `Binary` input. This will build our image.
@@ -131,10 +134,18 @@ A _build template_ is provided at `applier/templates/build.yml` that defines all
 Deploy the pipeline template in build only.
 
 ```shell
-$ oc process -f applier/templates/build.yml -p=APPLICATION_NAME=basic-spring-boot
- -p NAMESPACE=basic-spring-boot-dev -p=SOURCE_REPOSITORY_URL="https://github.com/redhat-cop/container-pipelines.git" -p=APPLICATION_SOURCE_REPO="https://github.com/redhat-cop/spring-rest.git" | oc apply -f-
-buildconfig "spring-rest-pipeline" created
-buildconfig "spring-rest" created
+$ oc process -f .openshift/templates/build.yml -p APPLICATION_NAME=basic-spring-boot \
+ -p NAMESPACE=basic-spring-boot-build -p SOURCE_REPOSITORY_URL="https://github.com/redhat-cop/container-pipelines.git" \
+ -p APPLICATION_SOURCE_REPO="https://github.com/redhat-cop/spring-rest.git" | oc apply -f -
+serviceaccount/tekton created
+rolebinding.rbac.authorization.k8s.io/tekton_edit created
+imagestream.image.openshift.io/basic-spring-boot created
+pipelineresource.tekton.dev/basic-spring-boot-image created
+pipelineresource.tekton.dev/basic-spring-boot-git created
+task.tekton.dev/maven-build-binary-build created
+task.tekton.dev/deploy created
+pipeline.tekton.dev/basic-spring-boot-pipeline created
+buildconfig.build.openshift.io/basic-spring-boot created
 ```
 
 ## Running the pipelines
@@ -142,8 +153,9 @@ buildconfig "spring-rest" created
 Once you have deployed the needed infrastructure either with applier or manually, you can run the pipeline by issuing the following command:
 
 ```shell
-oc project basic-spring-boot-build
-tkn -n basic-spring-boot-build pipeline start basic-spring-boot-pipeline -r basic-spring-boot-git=basic-spring-boot-git -s tekton
+$ tkn pipeline start basic-spring-boot-pipeline \
+  -r basic-spring-boot-git=basic-spring-boot-git -s tekton \
+  -n basic-spring-boot-build
 ```
 
 ## Cleanup
@@ -151,5 +163,5 @@ tkn -n basic-spring-boot-build pipeline start basic-spring-boot-pipeline -r basi
 Cleaning up this example is as simple as deleting the projects we created at the beginning.
 
 ```shell
-oc delete project basic-spring-boot-build basic-spring-boot-dev basic-spring-boot-prod basic-spring-boot-stage
+$ oc delete project basic-spring-boot-build basic-spring-boot-dev basic-spring-boot-prod basic-spring-boot-stage
 ```
