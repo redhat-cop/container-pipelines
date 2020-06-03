@@ -56,14 +56,14 @@ objects:
       value: ${APPLICATION_SOURCE_REPO}
     - name: revision
       value: ${APPLICATION_SOURCE_REF}
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
     name: maven-build-binary-build
     namespace: ${NAMESPACE}
   spec:
-    inputs:
-      resources:
+    resources:
+      inputs:
       - name: source
         type: git
     steps:   
@@ -97,39 +97,38 @@ objects:
         - ${APPLICATION_NAME}
         - --from-dir
         - "."
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
     name: deploy
     namespace: ${NAMESPACE}
   spec:
-    inputs:
-      params:
-        - name: fromNamespace
-          description: The namespace we are tagging from
-        - name: toNamespace
-          description: The namespace we are tagging to  
-        - name: tag
-          description: The image tag
-        - name: imageStream
-          description: The imageStream
-        - name: deployment
-          description: the deployment                  
+    params:
+      - name: fromNamespace
+        description: The namespace we are tagging from
+      - name: toNamespace
+        description: The namespace we are tagging to  
+      - name: tag
+        description: The image tag
+      - name: imageStream
+        description: The imageStream
+      - name: deployment
+        description: the deployment                  
     steps:
       - name: tag-image
         image: quay.io/openshift-pipeline/openshift-cli:latest
         command: ["/usr/local/bin/oc"]
         args:
           - tag
-          - "$(inputs.params.fromNamespace)/$(inputs.params.imageStream):$(inputs.params.tag)"
-          - "$(inputs.params.toNamespace)/$(inputs.params.imageStream):$(inputs.params.tag)"
+          - "$(params.fromNamespace)/$(params.imageStream):$(params.tag)"
+          - "$(params.toNamespace)/$(params.imageStream):$(params.tag)"
       # not sure what to do here
       - name: verify-deployment
         image: quay.io/openshift-pipeline/openshift-cli:latest
         command: ["sleep"]
         args:
           - "1"                             
-- apiVersion: tekton.dev/v1alpha1
+- apiVersion: tekton.dev/v1beta1
   kind: Pipeline
   metadata:
     name: ${APPLICATION_NAME}-pipeline
