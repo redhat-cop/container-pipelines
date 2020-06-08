@@ -1,5 +1,6 @@
 source_code_url: https://github.com/redhat-cop/container-pipelines.git
 source_code_ref: master
+skip_manual_promotion: false
 
 openshift_cluster_content:
 - object: projectrequest
@@ -29,3 +30,4 @@ openshift_cluster_content:
     params_from_vars:
       SOURCE_REPOSITORY_URL: "{{ source_code_url }}"
       SOURCE_REPOSITORY_REF: "{{ source_code_ref }}"
+      SKIP_MANUAL_PROMOTION: "{{ skip_manual_promotion }}"

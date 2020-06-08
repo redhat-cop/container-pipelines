@@ -40,6 +40,8 @@ objects:
           value: "${SOURCE_REPOSITORY_REF}"
         - name: "CONTEXT_DIR"
           value: "${CONTEXT_DIR}"
+        - name: "SKIP_MANUAL_PROMOTION"
+          value: "${SKIP_MANUAL_PROMOTION}"
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
@@ -84,6 +86,8 @@ parameters:
   required: true
 - description: Git branch/tag reference
   name: SOURCE_REPOSITORY_REF
+- description: skip promotion flag so manual process is waived
+  name: SKIP_MANUAL_PROMOTION
 - description: Path within Git project to build; empty for root project directory.
   name: CONTEXT_DIR
   value: "basic-nginx"

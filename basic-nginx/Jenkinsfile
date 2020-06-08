@@ -1,4 +1,4 @@
-library identifier: "pipeline-library@v1.5",
+library identifier: "pipeline-library@1.6",
 retriever: modernSCM(
   [
     $class: "GitSCMSource",
@@ -55,9 +55,42 @@ pipeline {
       }
     }
 
+    stage('Verify Deployment to Dev') {
+      steps {
+        verifyDeployment(projectName: env.DEV, targetApp: env.APP_NAME)
+      }
+    }
+
+    stage('Promotion gate (Stage)') {
+      steps {
+        script {
+		echo "The skip var is: ${SKIP_MANUAL_PROMOTION}"
+		if(!("${SKIP_MANUAL_PROMOTION}")) {
+            		input message: 'Promote Application to Stage?'
+          	}
+        }
+      }
+    }
+
     stage('Promote from Dev to Stage') {
       steps {
         tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.DEV, toImagePath: env.STAGE)
+      }
+    }
+
+    stage('Verify Deployment to Stage') {
+      steps {
+        verifyDeployment(projectName: env.STAGE, targetApp: env.APP_NAME)
+      }
+    }
+
+    stage('Promotion gate (Prod)') {
+      steps {
+        script {
+          if(!("${SKIP_MANUAL_PROMOTION}")) {
+            input message: 'Promote Application to Prod?'
+          }
+        }
       }
     }
 
@@ -66,6 +99,11 @@ pipeline {
         tagImage(sourceImageName: env.APP_NAME, sourceImagePath: env.STAGE, toImagePath: env.PROD)
       }
     }
+
+    stage('Verify Deployment to Prod') {
+      steps {
+        verifyDeployment(projectName: env.PROD, targetApp: env.APP_NAME)
+      }
     }
   }
 }
