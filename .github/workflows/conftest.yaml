@@ -11,3 +11,5 @@ jobs:
 
       - name: Conftest
         uses: redhat-cop/github-actions/confbatstest@master
+        with:
+          tests: _test/conftest.sh
