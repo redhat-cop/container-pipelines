@@ -64,10 +64,9 @@ pipeline {
     stage('Promotion gate (Stage)') {
       steps {
         script {
-		echo "The skip var is: ${SKIP_MANUAL_PROMOTION}"
-		if(!("${SKIP_MANUAL_PROMOTION}")) {
-            		input message: 'Promote Application to Stage?'
-          	}
+	  if(!("${SKIP_MANUAL_PROMOTION}")) {
+            input message: 'Promote Application to Stage?'
+          }
         }
       }
     }
