@@ -64,7 +64,7 @@ pipeline {
     stage('Promotion gate (Stage)') {
       steps {
         script {
-	  if(!("${SKIP_MANUAL_PROMOTION}")) {
+	  if(!("${SKIP_MANUAL_PROMOTION}").toBoolean()) {
             input message: 'Promote Application to Stage?'
           }
         }
@@ -86,7 +86,7 @@ pipeline {
     stage('Promotion gate (Prod)') {
       steps {
         script {
-          if(!("${SKIP_MANUAL_PROMOTION}")) {
+          if(!("${SKIP_MANUAL_PROMOTION}").toBoolean()) {
             input message: 'Promote Application to Prod?'
           }
         }
