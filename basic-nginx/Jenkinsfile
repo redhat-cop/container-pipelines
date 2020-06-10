@@ -1,4 +1,4 @@
-library identifier: "pipeline-library@v1.5",
+library identifier: "pipeline-library@1.6",
 retriever: modernSCM(
   [
     $class: "GitSCMSource",
@@ -64,7 +64,9 @@ pipeline {
     stage('Promotion gate (Stage)') {
       steps {
         script {
-          input message: 'Promote Application to Stage?'
+	  if(!("${SKIP_MANUAL_PROMOTION}")) {
+            input message: 'Promote Application to Stage?'
+          }
         }
       }
     }
@@ -84,7 +86,9 @@ pipeline {
     stage('Promotion gate (Prod)') {
       steps {
         script {
-          input message: 'Promote Application to Prod?'
+          if(!("${SKIP_MANUAL_PROMOTION}")) {
+            input message: 'Promote Application to Prod?'
+          }
         }
       }
     }
