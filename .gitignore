@@ -33,3 +33,9 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+
+# Rego
+policy/
+
+# BATS
+_test/test_helper/
