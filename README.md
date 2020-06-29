@@ -1,3 +1,5 @@
+![Validate](https://github.com/redhat-cop/container-pipelines/workflows/Validate/badge.svg)
+
 # Container Pipelines
 
 Let's get the ball rolling on some Container-driven CI &amp; CD
