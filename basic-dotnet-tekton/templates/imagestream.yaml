@@ -3,6 +3,20 @@ kind: ImageStream
 metadata:
   name: {{ .Values.name }}
   namespace: {{ .Values.namespace }}
+{{ if .Values.useInternalRegistry != 'true' }}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - from:
+      kind: DockerImage
+      name: {{ .Values.externalOutputImage }}
+    importPolicy:
+      scheduled: true
+    name: "latest"
+    referencePolicy:
+      type: Local
+{{ end }}
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream

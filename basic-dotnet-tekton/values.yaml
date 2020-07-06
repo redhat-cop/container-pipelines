@@ -7,3 +7,4 @@ namespace: dotnet-tekton
 readinessResponse: html
 buildImage: image-registry.openshift-image-registry.svc:5000/openshift/dotnet:3.0
 cliImage: image-registry.openshift-image-registry.svc:5000/dotnet-tekton/origin-cli:latest
+useInternalRegistry: true

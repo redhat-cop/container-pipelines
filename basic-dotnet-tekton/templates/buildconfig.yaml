@@ -5,9 +5,17 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   output:
+{{ if .Values.useInternalRegistry == 'true' }}
     to:
       kind: ImageStreamTag
       name: {{ .Values.name }}:latest
+{{ else }}
+    to:
+      kind: DockerImage
+      name: {{ .Values.externalOutputImage }}
+    pushSecret:
+      name: {{ .Values.pushSecretName }}
+{{ end }}
   source:
     binary: {}
     type: Binary
@@ -15,7 +23,7 @@ spec:
     sourceStrategy:
       from:
         kind: ImageStreamTag
-        name: dotnet-runtime:3.0
+        name: dotnet-runtime:3.1
         namespace: {{ .Values.namespace }}
     type: Source
   triggers: []
