@@ -16,6 +16,6 @@ spec:
       from:
         kind: ImageStreamTag
         name: dotnet-runtime:3.0
-        namespace: openshift
+        namespace: {{ .Values.namespace }}
     type: Source
   triggers: []
