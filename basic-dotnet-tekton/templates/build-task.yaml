@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
   name: dotnet-build
+  namespace: {{ .Values.namespace }}
 spec:
   inputs:
     resources:
@@ -23,6 +24,6 @@ spec:
       command: ["/usr/bin/oc"]
       args:
         - "start-build"
-        - "dotnet-ex"
+        - {{ .Values.name }}
         - "--from-dir=bin/Release/netcoreapp3.0/publish"
         - "--follow"

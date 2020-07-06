@@ -1,12 +1,14 @@
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
-  name: dotnet-ex
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
 ---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
   name: origin-cli
+  namespace: {{ .Values.namespace }}
 spec:
   lookupPolicy:
     local: false

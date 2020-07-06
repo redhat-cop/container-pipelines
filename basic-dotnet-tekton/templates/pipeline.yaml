@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
   name: dotnet-pipeline
+  namespace: {{ .Values.namespace }}
 spec:
   resources:
   - name: workspace-git

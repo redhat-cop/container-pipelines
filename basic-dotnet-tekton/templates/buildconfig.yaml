@@ -1,12 +1,13 @@
 apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
-  name: dotnet-ex
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
 spec:
   output:
     to:
       kind: ImageStreamTag
-      name: dotnet-ex:latest
+      name: {{ .Values.name }}:latest
   source:
     binary: {}
     type: Binary
