@@ -25,5 +25,5 @@ spec:
       args:
         - "start-build"
         - {{ .Values.name }}
-        - "--from-dir=bin/Release/netcoreapp3.0/publish"
+        - "--from-dir=bin/Release/netcoreapp3.1/publish"
         - "--follow"
