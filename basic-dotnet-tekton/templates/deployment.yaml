@@ -1,0 +1,46 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: {{ .Values.name }}
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    deploymentConfig: {{ .Values.name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+        deploymentConfig: {{ .Values.name }}
+      name: {{ .Values.name }}
+    spec:
+      containers:
+      - image: {{ .Values.name }}
+        imagePullPolicy: Always
+        name: {{ .Values.name }}
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - curl -s 'http://localhost:8080'
+              |grep -iq '{{ .Values.readinessResponse }}'
+      terminationGracePeriodSeconds: 60
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - {{ .Values.name }}
+      from:
+        kind: ImageStreamTag
+        name: {{ .Values.name }}:latest
+    type: ImageChange
+  - type: ConfigChange

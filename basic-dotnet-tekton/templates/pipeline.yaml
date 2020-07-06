@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: dotnet-pipeline
+spec:
+  resources:
+  - name: workspace-git
+    type: git
+  tasks:
+  - name: dotnet-build
+    taskRef:
+      name: dotnet-build
+      kind: Task
+    resources:
+      inputs:
+      - name: source
+        resource: workspace-git

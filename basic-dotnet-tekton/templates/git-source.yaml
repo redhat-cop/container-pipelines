@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: pipelines
+spec:
+  type: git
+  params:
+  - name: url
+    value: https://github.com/redhat-developer/s2i-dotnetcore-ex.git
+  - name: revision
+    value: dotnetcore-3.0

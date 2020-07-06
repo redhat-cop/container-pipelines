@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: dotnet-build
+spec:
+  inputs:
+    resources:
+    - name: source
+      type: git
+  steps:    
+    - name: publish
+      image: image-registry.openshift-image-registry.svc:5000/openshift/dotnet:3.0
+      workingDir: /workspace/source/app
+      command: ["/opt/rh/rh-dotnet30/root/usr/bin/dotnet"]
+      args:
+        - "publish"
+        - "-c"
+        - "Release"
+        - "/p:MicrosoftNETPlatformLibrary=Microsoft.NETCore.App"
+    - name: build-image
+      image: image-registry.openshift-image-registry.svc:5000/{{ .Values.namespace }}/origin-cli:latest
+      workingDir: /workspace/source/app
+      command: ["/usr/bin/oc"]
+      args:
+        - "start-build"
+        - "dotnet-ex"
+        - "--from-dir=bin/Release/netcoreapp3.0/publish"
+        - "--follow"
