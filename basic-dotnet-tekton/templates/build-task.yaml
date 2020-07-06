@@ -10,7 +10,7 @@ spec:
       type: git
   steps:    
     - name: publish
-      image: image-registry.openshift-image-registry.svc:5000/openshift/dotnet:3.0
+      image: {{ .Values.buildImage }}
       workingDir: /workspace/source/app
       command: ["/opt/rh/rh-dotnet30/root/usr/bin/dotnet"]
       args:
@@ -19,7 +19,7 @@ spec:
         - "Release"
         - "/p:MicrosoftNETPlatformLibrary=Microsoft.NETCore.App"
     - name: build-image
-      image: image-registry.openshift-image-registry.svc:5000/{{ .Values.namespace }}/origin-cli:latest
+      image: {{ .Values.cliImage }}
       workingDir: /workspace/source/app
       command: ["/usr/bin/oc"]
       args:
