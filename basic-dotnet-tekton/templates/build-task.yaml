@@ -12,7 +12,7 @@ spec:
     - name: publish
       image: {{ .Values.buildImage }}
       workingDir: /workspace/source/app
-      command: ["/opt/rh/rh-dotnet30/root/usr/bin/dotnet"]
+      command: ["dotnet"]
       args:
         - "publish"
         - "-c"
