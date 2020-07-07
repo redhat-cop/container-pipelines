@@ -11,4 +11,4 @@ spec:
   - name: revision
     value: {{ .Values.gitBranch }}
   - name: sslVerify
-    value: {{ .Values.gitSslVerify }}
+    value: '{{ .Values.gitSslVerify }}'
