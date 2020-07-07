@@ -10,3 +10,5 @@ spec:
     value: https://github.com/redhat-developer/s2i-dotnetcore-ex.git
   - name: revision
     value: dotnetcore-3.0
+  - name: sslVerify
+    value: 'false'

@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   output:
-{{ if .Values.useInternalRegistry == 'true' }}
+{{ if .Values.useInternalRegistry }}
     to:
       kind: ImageStreamTag
       name: {{ .Values.name }}:latest

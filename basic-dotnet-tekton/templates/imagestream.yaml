@@ -3,7 +3,7 @@ kind: ImageStream
 metadata:
   name: {{ .Values.name }}
   namespace: {{ .Values.namespace }}
-{{ if .Values.useInternalRegistry != 'true' }}
+{{ if not .Values.useInternalRegistry }}
 spec:
   lookupPolicy:
     local: false
