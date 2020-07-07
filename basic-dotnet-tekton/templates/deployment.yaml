@@ -18,7 +18,7 @@ spec:
         deploymentConfig: {{ .Values.name }}
       name: {{ .Values.name }}
     spec:
-      {{ if .Values.useInternalRegistry }}
+      {{ if not .Values.useInternalRegistry }}
       imagePullSecrets:
       - name: {{ .Values.registrySecretName }}
       {{ end }}

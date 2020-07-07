@@ -5,7 +5,10 @@
 name: dotnet-ex
 namespace: dotnet-tekton
 readinessResponse: html
-buildImage: image-registry.openshift-image-registry.svc:5000/openshift/dotnet:3.0
-cliImage: image-registry.openshift-image-registry.svc:5000/dotnet-tekton/origin-cli:latest
 useInternalRegistry: true
 registrySecretName: dotnet-ex-pull-secret
+## this is the external registry to push the image to when useInternalRegistry is set to false
+externalOutputImage: quay.io/image/here:latest
+gitRepo: https://github.com/redhat-developer/s2i-dotnetcore-ex.git
+gitBranch: dotnetcore-3.1
+gitSslVerify: 'true'

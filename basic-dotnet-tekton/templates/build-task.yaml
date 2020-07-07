@@ -10,7 +10,11 @@ spec:
       type: git
   steps:    
     - name: publish
-      image: {{ .Values.buildImage }}
+      {{ if .Values.useInternalRegistry }}
+      image: image-registry.openshift-image-registry.svc:5000/openshift/dotnet:3.1
+      {{ else }}
+      image: registry.access.redhat.com/ubi8/dotnet-31:3.1
+      {{ end }}
       workingDir: /workspace/source/app
       command: ["dotnet"]
       args:
@@ -19,7 +23,11 @@ spec:
         - "Release"
         - "/p:MicrosoftNETPlatformLibrary=Microsoft.NETCore.App"
     - name: build-image
-      image: {{ .Values.cliImage }}
+      {{ if .Values.useInternalRegistry }}
+      image: image-registry.openshift-image-registry.svc:5000/dotnet-tekton/origin-cli:latest
+      {{ else }}
+      image: quay.io/openshift/origin-cli:latest
+      {{ end }}
       workingDir: /workspace/source/app
       command: ["/usr/bin/oc"]
       args:

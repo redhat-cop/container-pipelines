@@ -7,8 +7,8 @@ spec:
   type: git
   params:
   - name: url
-    value: https://github.com/redhat-developer/s2i-dotnetcore-ex.git
+    value: {{ .Values.gitRepo }}
   - name: revision
-    value: dotnetcore-3.0
+    value: {{ .Values.gitBranch }}
   - name: sslVerify
-    value: 'false'
+    value: {{ .Values.gitSslVerify }}

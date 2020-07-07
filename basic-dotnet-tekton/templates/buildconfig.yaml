@@ -14,7 +14,7 @@ spec:
       kind: DockerImage
       name: {{ .Values.externalOutputImage }}
     pushSecret:
-      name: {{ .Values.pushSecretName }}
+      name: {{ .Values.registrySecretName }}
 {{ end }}
   source:
     binary: {}
