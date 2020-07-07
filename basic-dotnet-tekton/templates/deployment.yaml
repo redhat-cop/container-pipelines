@@ -20,7 +20,7 @@ spec:
     spec:
       {{ if .Values.useInternalRegistry }}
       imagePullSecrets:
-        name: {{ .Values.registrySecretName }}
+      - name: {{ .Values.registrySecretName }}
       {{ end }}
       containers:
       - image: {{ .Values.name }}
