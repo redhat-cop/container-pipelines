@@ -27,6 +27,9 @@ openshift_cluster_content:
     params_from_vars:
       APPLICATION_NAME: "{{ sb_application_name }}"
       NAMESPACE: "{{ sb_build_namespace }}"
+      NAMESPACE_DEV: "{{ sb_dev_namespace }}"
+      NAMESPACE_STAGE: "{{ sb_stage_namespace }}"
+      NAMESPACE_PROD: "{{ sb_prod_namespace }}"
       SOURCE_REPOSITORY_URL: "{{ sb_source_repository_url }}"
       SOURCE_REPOSITORY_REF: "{{ sb_source_repository_ref }}"
       APPLICATION_SOURCE_REPO: "{{ sb_application_repository_url }}"
