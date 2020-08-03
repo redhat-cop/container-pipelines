@@ -154,4 +154,4 @@ parameters:
 - description: Image stream tag for the image you'd like to use to build the application
   name: IMAGE_STREAM_TAG_NAME
   required: true
-  value: dotnet-runtime:2.2
+  value: dotnet-runtime:2.1

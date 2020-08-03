@@ -13,6 +13,8 @@ sb_source_repository_ref: master
 sb_pipeline_script: "Jenkinsfile"
 
 openshift_cluster_content:
+- galaxy_requirements:
+  - "{{ inventory_dir }}/../galaxy-requirements.yml"
 - object: projects
   content:
   - name: "create environments"
@@ -68,3 +70,32 @@ openshift_cluster_content:
       READINESS_PATH: "{{ sb_application_readiness_path }}"
     tags:
       - deployment
+- object: jenkins
+  content:
+  - name: jenkins
+    template: "https://raw.githubusercontent.com/redhat-cop/openshift-templates/v1.4.16/jenkins/jenkins-ephemeral-template.yml"
+    params_from_vars:
+      MEMORY_REQUEST: 2Gi
+      MEMORY_LIMIT: 3Gi
+      CPU_REQUEST: 2
+      CPU_LIMIT: 3
+    namespace: "{{ sb_build_namespace }}"
+    post_steps:
+    - role: casl-ansible/roles/openshift-replicas-ready
+      vars:
+        type: deploymentconfig
+        resource: jenkins
+        namespace: "{{ sb_build_namespace }}"
+    - role: casl-ansible/roles/openshift-route-status
+      vars:
+        target_namespace: "{{ sb_build_namespace }}"
+        route: jenkins
+        protocol: https
+        status: 200
+        retries: 10
+        delay: 30
+        validate_certificates: no
+        headers:
+          Authorization: "Bearer {{ oc_token }}"
+    tags:
+      - jenkins
