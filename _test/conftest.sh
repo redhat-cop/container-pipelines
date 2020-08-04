@@ -23,7 +23,7 @@ setup_file() {
 @test "basic-nginx/.openshift" {
   tmp=$(split_files "basic-nginx/.openshift")
 
-  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
   cmd="conftest test ${tmp} --output tap ${namespaces}"
   run ${cmd}
 
@@ -56,7 +56,7 @@ setup_file() {
 @test "basic-tomcat/.openshift" {
   tmp=$(split_files "basic-tomcat/.openshift")
 
-  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
   cmd="conftest test ${tmp} --output tap ${namespaces}"
   run ${cmd}
 
@@ -67,7 +67,7 @@ setup_file() {
 @test "blue-green-spring/.openshift" {
   tmp=$(split_files "blue-green-spring/.openshift")
 
-  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
   cmd="conftest test ${tmp} --output tap ${namespaces}"
   run ${cmd}
 
@@ -78,7 +78,7 @@ setup_file() {
 @test "cucumber-selenium-grid/applier" {
   tmp=$(split_files "cucumber-selenium-grid/applier")
 
-  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
   cmd="conftest test ${tmp} --output tap ${namespaces}"
   run ${cmd}
 
@@ -111,7 +111,7 @@ setup_file() {
 @test "multi-cluster-spring-boot/image-mirror-example/.applier" {
   tmp=$(split_files "multi-cluster-spring-boot/image-mirror-example/.applier")
 
-  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
   cmd="conftest test ${tmp} --output tap ${namespaces}"
   run ${cmd}
 
@@ -122,7 +122,7 @@ setup_file() {
 @test "multi-cluster-spring-boot/skopeo-example/.applier" {
   tmp=$(split_files "multi-cluster-spring-boot/skopeo-example/.applier")
 
-  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
   cmd="conftest test ${tmp} --output tap ${namespaces}"
   run ${cmd}
 
