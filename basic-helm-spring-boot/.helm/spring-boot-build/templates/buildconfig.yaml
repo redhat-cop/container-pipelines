@@ -1,0 +1,23 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ .Values.name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  name: {{ .Values.name }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Values.name }}:{{ required "value 'tag' is required" .Values.tag }}
+  source:
+    type: Binary
+    binary: {}
+  strategy:
+    sourceStrategy:
+      from:
+        kind: ImageStreamTag
+        name: {{ .Values.builderImageStreamTag }}
+        namespace: {{ .Values.builderImageStreamNamespace }}
+    type: Source
+  triggers: []

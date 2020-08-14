@@ -1,0 +1,8 @@
+destTag: latest
+
+uri: https://github.com/redhat-cop/containers-quickstarts.git
+ref: master
+
+contextDir: jenkins-agents/jenkins-agent-helm
+
+dockerfilePath: Dockerfile

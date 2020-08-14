@@ -1,0 +1,5 @@
+## Required (provided by pipeline)
+tag:
+
+builderImageStreamTag: java:8
+builderImageStreamNamespace: openshift

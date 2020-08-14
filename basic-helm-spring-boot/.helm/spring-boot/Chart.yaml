@@ -1,0 +1,4 @@
+apiVersion: v2
+name: spring-boot
+description: A chart for deploying your Spring Boot app
+version: 1.0.0

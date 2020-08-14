@@ -1,0 +1,4 @@
+apiVersion: v2
+name: jenkins-agent-helm
+description: A chart for building the jenkins-agent-helm Jenkins agent, containing Helm, ct, and oc
+version: 1.0.0
