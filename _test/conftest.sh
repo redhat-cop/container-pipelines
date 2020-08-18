@@ -1,81 +1,142 @@
 #!/usr/bin/env bats
 
-load _helpers
+load bats-support-clone
+load test_helper/bats-support/load
+load test_helper/redhatcop-bats-library/load
+
+setup_file() {
+  rm -rf /tmp/rhcop
+  conftest_pull
+}
 
 @test "basic-dotnet-core/.openshift" {
-  run conftest test basic-dotnet-core/.openshift --output tap
-  print_err "$status" "$output"
+  tmp=$(split_files "basic-dotnet-core/.openshift")
+
+  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
 @test "basic-nginx/.openshift" {
-  run conftest test basic-nginx/.openshift --output tap
-  print_err "$status" "$output"
+  tmp=$(split_files "basic-nginx/.openshift")
+
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
+  [ "$status" -eq 0 ]
+}
+
+@test "basic-spring-boot/.openshift" {
+  tmp=$(split_files "basic-spring-boot/.openshift")
+
+  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
 @test "basic-spring-boot-tekton/.openshift" {
-  run conftest test basic-spring-boot-tekton/.openshift --output tap
-  print_err "$status" "$output"
+  tmp=$(split_files "basic-spring-boot-tekton/.openshift")
+
+  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "basic-spring-boot/.openshift basic-tomcat/.openshift" {
-  run conftest test basic-spring-boot/.openshift basic-tomcat/.openshift --output tap
-  print_err "$status" "$output"
+@test "basic-tomcat/.openshift" {
+  tmp=$(split_files "basic-tomcat/.openshift")
+
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
 @test "blue-green-spring/.openshift" {
-  run conftest test blue-green-spring/.openshift --output tap
-  print_err "$status" "$output"
+  tmp=$(split_files "blue-green-spring/.openshift")
+
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "cucumber-selenium-grid/applier/projects" {
-  run conftest test cucumber-selenium-grid/applier/projects --output tap
-  print_err "$status" "$output"
+@test "cucumber-selenium-grid/applier" {
+  tmp=$(split_files "cucumber-selenium-grid/applier")
+
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "cucumber-selenium-grid/applier/templates" {
-  run conftest test cucumber-selenium-grid/applier/templates --output tap
-  print_err "$status" "$output"
+@test "jenkins-s2i" {
+  tmp=$(split_files "jenkins-s2i")
+
+  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "jenkins-s2i multi-cluster-multi-branch-jee/.openshift" {
-  run conftest test jenkins-s2i multi-cluster-multi-branch-jee/.openshift --output tap
-  print_err "$status" "$output"
+@test "multi-cluster-multi-branch-jee/.openshift" {
+  tmp=$(split_files "multi-cluster-multi-branch-jee/.openshift")
+
+  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "multi-cluster-spring-boot/image-mirror-example/.applier/projects" {
-  run conftest test multi-cluster-spring-boot/image-mirror-example/.applier/projects --output tap
-  print_err "$status" "$output"
+@test "multi-cluster-spring-boot/image-mirror-example/.applier" {
+  tmp=$(split_files "multi-cluster-spring-boot/image-mirror-example/.applier")
+
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "multi-cluster-spring-boot/image-mirror-example/.applier/templates" {
-  run conftest test multi-cluster-spring-boot/image-mirror-example/.applier/templates --output tap
-  print_err "$status" "$output"
+@test "multi-cluster-spring-boot/skopeo-example/.applier" {
+  tmp=$(split_files "multi-cluster-spring-boot/skopeo-example/.applier")
+
+  namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
+
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
 
-@test "multi-cluster-spring-boot/skopeo-example/.applier/projects" {
-  run conftest test multi-cluster-spring-boot/skopeo-example/.applier/projects --output tap
-  print_err "$status" "$output"
-  [ "$status" -eq 0 ]
-}
+@test "secure-spring-boot/.openshift-applier" {
+  tmp=$(split_files "secure-spring-boot/.openshift-applier")
 
-@test "multi-cluster-spring-boot/skopeo-example/.applier/templates" {
-  run conftest test multi-cluster-spring-boot/skopeo-example/.applier/templates --output tap
-  print_err "$status" "$output"
-  [ "$status" -eq 0 ]
-}
+  namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
+  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  run ${cmd}
 
-@test "secure-spring-boot/.openshift-applier/templates" {
-  run conftest test secure-spring-boot/.openshift-applier/templates --output tap
-  print_err "$status" "$output"
+  print_info "${status}" "${output}" "${cmd}" "${tmp}"
   [ "$status" -eq 0 ]
 }
