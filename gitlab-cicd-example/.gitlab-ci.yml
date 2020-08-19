@@ -1,0 +1,256 @@
+# This is a templated GitLab CI file designed for use in Java projects being deployed to OpenShift.
+# Variables for URLs to deployed projects and build and deploy options will need to be added to this template.
+# Any addtional steps required for successful job execution can be added in the before_script, script, and after_script sections.
+
+variables:
+  # Define the shortname of the application here. It will be used throughout the pipeline and templates for the naming of resources.
+  # For example, if the project name is example, and this is a production deployment, it will be deployed in the example-prod project, and the
+  # URL will be https://example-prod.apps.<OCP_URL>
+  PROJECT_SHORTNAME: example
+  # The ephemeral feature projects will be created by the service account, so by default, developers won't have access to it.
+  # Add users here in a space separated string for them to be given admin permissions on the feature projects.
+  FEATURE_BRANCH_ADMINS: "dev@example.com"
+  DEV_AUTH_INFO: "--token=$OCP_SA_TOKEN --server=https://api.$OCP_CLUSTER:6443"
+  # If there is a production cluster in addition to the development cluster, modify the following line to point at prod
+  PROD_AUTH_INFO: "--token=$OCP_SA_TOKEN --server=https://api.$OCP_CLUSTER:6443"
+
+# Default image that has oc, helm, and java related packages.
+# See https://gitlab.com/mrjbanksy/ocp-tools
+image: quay.io/mrjbanksy/ocp-tools:latest
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_MERGE_REQUEST_ID
+      when: never
+
+stages:
+  - compile
+  - build
+  - test
+  - deploy_to_dev
+  - deploy_to_prod
+  - prod_set_to_50
+  - prod_set_to_100
+  - prod_revert
+  - cleanup
+
+compile:
+  tags:
+    - ocp-runner
+  stage: compile
+  script:
+    - mvn clean package
+  artifacts:
+    paths:
+      - target/
+
+test:
+  tags:
+    - ocp-runner
+  stage: test
+  script:
+    - mvn clean test
+  artifacts:
+    paths:
+      - target/surefire-reports/test/TEST-*.xml
+    reports:
+      junit:
+        - target/surefire-reports/test/TEST-*.xml
+
+build:
+  tags:
+    - ocp-runner
+  stage: build
+  script:
+    - if [ $CI_COMMIT_BRANCH ] && ( [ $CI_COMMIT_BRANCH == "master" ] || [ $CI_COMMIT_BRANCH == "main" ] ); then
+        BUILD_NAME=$PROJECT_SHORTNAME-latest;
+      elif [ $CI_COMMIT_BRANCH ]; then
+        BUILD_NAME=`echo $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG | cut -c 1-53 | sed 's/-*$//g'`;
+      else
+        BUILD_NAME=$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG;
+      fi
+    # create the BuildConfig
+    - helm template $BUILD_NAME helm/build-template
+      --namespace $PROJECT_SHORTNAME-build
+      --set imageName="$PROJECT_SHORTNAME"
+      --set imageTag="$CI_COMMIT_REF_SLUG"
+      --set buildName="$BUILD_NAME"
+      |
+      oc apply -f - -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO
+    # start the build
+    - oc start-build $BUILD_NAME --from-dir=./ -Fw -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO
+
+deploy_latest:
+  tags:
+    - ocp-runner
+  rules:
+    - if: ( $CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_REF_NAME == "main" )
+      when: on_success
+    - when: never
+  stage: deploy_to_dev
+  script:
+    # deploy using helm
+    - helm upgrade $PROJECT_SHORTNAME-latest helm/deploy-template/
+      --install
+      --namespace $PROJECT_SHORTNAME-latest
+      --kube-apiserver https://api.$OCP_CLUSTER:6443
+      --kube-token $OCP_SA_TOKEN
+      --set replicaCount="3"
+      --set image="$PROJECT_SHORTNAME-build/$PROJECT_SHORTNAME:$CI_COMMIT_REF_SLUG"
+      --set host="$PROJECT_SHORTNAME-latest"
+      --set cluster="$OCP_CLUSTER"
+      --set deploymentStrategy="non-prod"
+  environment:
+    name: latest
+    url: https://$PROJECT_SHORTNAME-latest.apps.$OCP_CLUSTER
+
+deploy_feature:
+  tags:
+    - ocp-runner
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_TAG == null
+      when: on_success
+    - when: never
+  stage: deploy_to_dev
+  before_script:
+    - export FEATURE_PROJECT=`echo $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG | cut -c 1-63 | sed 's/-*$//g'`
+    - export RELEASE_NAME=`echo $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG | cut -c 1-53 | sed 's/-*$//g'`
+    # create project if it doesn't exist
+    - if [[ -z `oc get projects $DEV_AUTH_INFO | grep "$FEATURE_PROJECT"` ]] ; then
+        oc new-project $FEATURE_PROJECT $DEV_AUTH_INFO ;
+        oc policy add-role-to-group system:image-puller system:serviceaccounts:$FEATURE_PROJECT -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO ;
+        for user in $FEATURE_BRANCH_ADMINS; do
+          oc policy add-role-to-user admin $user -n $FEATURE_PROJECT $DEV_AUTH_INFO ;
+        done;
+      fi
+  script:
+    - helm upgrade $RELEASE_NAME helm/deploy-template/
+      --install
+      --namespace $FEATURE_PROJECT
+      --kube-apiserver https://api.$OCP_CLUSTER:6443
+      --kube-token $OCP_SA_TOKEN
+      --set replicaCount="3"
+      --set image="$PROJECT_SHORTNAME-build/$PROJECT_SHORTNAME:$CI_COMMIT_REF_SLUG"
+      --set host="$FEATURE_PROJECT"
+      --set cluster="$OCP_CLUSTER"
+      --set deploymentStrategy="non-prod"
+  after_script:
+    - echo "Deployed to https://$FEATURE_PROJECT.apps.$OCP_CLUSTER"
+  environment:
+    name: feature/$CI_COMMIT_REF_NAME
+    url: https://$FEATURE_PROJECT.apps.$OCP_CLUSTER
+    on_stop: remove_feature_project
+
+remove_feature_project:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "master" && $CI_COMMIT_REF_NAME != "main" && $CI_COMMIT_TAG == null
+      when: manual
+      allow_failure: true
+  stage: cleanup
+  script:
+    - oc delete project `echo $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG | cut -c 1-63 | sed 's/-*$//g'` $DEV_AUTH_INFO
+    - oc delete bc `echo $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG | cut -c 1-53 | sed 's/-*$//g'` -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO
+  environment:
+    name: feature/$CI_COMMIT_REF_NAME
+    action: stop
+
+deploy_to_prod:
+  tags:
+    - ocp-runner
+  # only run on tags matching v* which can be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*$/
+    - when: never
+  stage: deploy_to_prod
+  before_script:
+    - if [[ -z `oc get routes -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | grep "$PROJECT_SHORTNAME-prod-route"` ]] ; then 
+        helm install $PROJECT_SHORTNAME-prod-route helm/prod-route-template
+          --namespace $PROJECT_SHORTNAME-prod
+          --kube-apiserver https://api.$OCP_CLUSTER:6443
+          --kube-token $OCP_SA_TOKEN
+          --set host="$PROJECT_SHORTNAME-prod"
+          --set cluster="$OCP_CLUSTER"
+          --set target="$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG" ;
+      fi
+  script:
+    # deploy using helm chart and oc
+    - helm upgrade $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG helm/deploy-template/
+      --install
+      --namespace $PROJECT_SHORTNAME-prod
+      --kube-apiserver https://api.$OCP_CLUSTER:6443
+      --kube-token $OCP_SA_TOKEN
+      --set replicaCount="3"
+      --set image="$PROJECT_SHORTNAME-build/$PROJECT_SHORTNAME:$CI_COMMIT_REF_SLUG"
+      --set deploymentStrategy="prod"
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then 
+        oc set route-backends $PROJECT_SHORTNAME-prod-route `oc set route-backends $PROJECT_SHORTNAME-prod-route -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | grep 100 | awk '{ print $3 }'`=90 $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG=10 -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+      fi
+  allow_failure: false
+  environment:
+    name: production
+    url: https://$PROJECT_SHORTNAME-prod.apps.$OSD_PROD_CLUSTER
+
+prod_set_to_50:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  # only run on tags matching v* which will be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*$/
+      when: manual
+      allow_failure: true
+    - when: never
+  stage: prod_set_to_50
+  script:
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then 
+        oc set route-backends $PROJECT_SHORTNAME-prod-route --adjust $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG=+40% -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+      fi
+
+prod_set_to_100:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  # only run on tags matching v* which will be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*$/
+      when: manual
+      allow_failure: true
+    - when: never
+  stage: prod_set_to_100
+  script:
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then 
+        oc set route-backends $PROJECT_SHORTNAME-prod-route $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG=100% -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ;
+        helm uninstall `oc get deployments --field-selector metadata.name!=$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG --no-headers -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | awk '{ print $1 }'`
+          --namespace $PROJECT_SHORTNAME-prod
+          --kube-apiserver https://api.$OCP_CLUSTER:6443
+          --kube-token $OCP_SA_TOKEN ;
+      fi
+
+prod_revert:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  # only run on tags matching v* which will be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v.*$/
+      when: manual
+      allow_failure: true
+    - when: never
+  stage: prod_revert
+  script:
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then
+        oc set route-backends $PROJECT_SHORTNAME-prod-route `oc get services --field-selector metadata.name!=$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG --no-headers -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | awk '{ print $1 }'`=100% -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ;
+        helm uninstall $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG
+          --namespace $PROJECT_SHORTNAME-prod
+          --kube-apiserver https://api.$OCP_CLUSTER:6443
+          --kube-token $OCP_SA_TOKEN ;
+      fi
