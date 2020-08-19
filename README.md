@@ -11,6 +11,7 @@ The following is a list of the pipeline samples available in this repository:
 - [Basic Tomcat](./basic-tomcat) - Builds a Java Application like Ticket Monster and deploys it to Tomcat
 - [Basic Spring Boot](./basic-spring-boot) - Builds a Spring Boot application and deploys using an Embedded Servlet jar file
 - [Blue Green Spring Boot](./blue-green-spring) - Build a Spring Boot application and deploys it using a blue-green deployment
+- [GitLab CI/CD Example](./gitlab-cicd-example) - An example pipeline integrating GitLab CI/CD with OpenShift
 - [Secure Spring Boot](./secure-spring-boot) - Build a Spring Boot app and deploy with a pipeline that includes code coverage reports, dependency scanning, sonarqube analysis
 - [Cross Cluster Promotion Pipeline](./multi-cluster-spring-boot) - A [declarative syntax](https://jenkins.io/doc/book/pipeline/syntax/#declarative-pipeline) pipeline that demonstrates promoting a microservice between clusters (i.e. a Non-Production to a Production cluster)
 

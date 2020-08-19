@@ -1,0 +1,235 @@
+# This is a templated GitLab CI file designed for use in Java projects being deployed to OpenShift.
+# Variables for URLs to deployed projects and build and deploy options will need to be added to this template.
+# Any addtional steps required for successful job execution can be added in the before_script, script, and after_script sections.
+
+variables:
+  # Define the shortname of the application here. It will be used throughout the pipeline and templates for the naming of resources.
+  # For example, if the project name is example, and this is a production deployment, it will be deployed in the example-prod project, and the
+  # URL will be https://example-prod.apps.<OCP_URL>.com
+  PROJECT_SHORTNAME: example
+  # The ephemeral feature projects will be created by the service account, so by default, developers won't have access to it.
+  # Add users here in a space separated string for them to be given admin permissions on the feature projects.
+  FEATURE_BRANCH_ADMINS: "dev@example.com"
+  DEV_AUTH_INFO: "--token=$OCP_SA_TOKEN --server=https://api.$OCP_CLUSTER:6443"
+  # If there is a production cluster in addition to the development cluster, modify the following line to point at prod
+  PROD_AUTH_INFO: "--token=$OCP_SA_TOKEN --server=https://api.$OCP_CLUSTER:6443"
+
+# Default image that has oc, helm, and java related packages.
+# See https://gitlab.com/mrjbanksy/ocp-tools
+image: quay.io/mrjbanksy/ocp-tools:latest
+
+stages:
+  - compile
+  - build
+  - test
+  - deploy_to_dev
+  - deploy_to_prod
+  - prod_set_to_50
+  - prod_set_to_100
+  - prod_revert
+  - cleanup
+
+compile:
+  tags:
+    - ocp-runner
+  stage: compile
+  script:
+    - mvn clean package
+  artifacts:
+    paths:
+      - target/
+
+test:
+  tags:
+    - ocp-runner
+  stage: test
+  script:
+    - mvn clean test
+  artifacts:
+    paths:
+      - target/surefire-reports/test/TEST-*.xml
+    reports:
+      junit:
+        - target/surefire-reports/test/TEST-*.xml
+
+build:
+  tags:
+    - ocp-runner
+  stage: build
+  script:
+    # create the BuildConfig
+    - helm template $PROJECT_SHORTNAME-build-$CI_COMMIT_REF_SLUG helm/build-template
+      --set imageName="$PROJECT_SHORTNAME"
+      --set imageTag="$CI_COMMIT_REF_SLUG"
+      --set buildName="$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG"
+      |
+      oc apply -f - -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO
+    # start the build
+    - oc start-build $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG --from-dir=./ -Fw -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO
+
+deploy_latest:
+  tags:
+    - ocp-runner
+  only:
+    refs:
+      - master
+  stage: deploy_to_dev
+  script:
+    # deploy using helm chart and oc
+    - helm template $PROJECT_SHORTNAME-latest helm/deploy-template/
+      --set replicaCount="3"
+      --set image="$PROJECT_SHORTNAME-build/$PROJECT_SHORTNAME:$CI_COMMIT_REF_SLUG"
+      --set host="$PROJECT_SHORTNAME-latest"
+      --set cluster="$OCP_CLUSTER"
+      --set deploymentStrategy="non-prod"
+      |
+      oc apply -f - -n $PROJECT_SHORTNAME-latest $DEV_AUTH_INFO
+  environment:
+    name: latest
+    url: https://$PROJECT_SHORTNAME-latest.apps.$OCP_CLUSTER
+
+deploy_feature:
+  tags:
+    - ocp-runner
+  only:
+    refs:
+      - branches
+  except:
+    - master
+  stage: deploy_to_dev
+  before_script:
+    # create project if it doesn't exist
+    - if [[ -z `oc get projects $DEV_AUTH_INFO | grep "$PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG"` ]] ; then
+        oc new-project $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG $DEV_AUTH_INFO ;
+        oc policy add-role-to-group system:image-puller system:serviceaccounts:$PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO ;
+        for user in $FEATURE_BRANCH_ADMINS; do
+          oc policy add-role-to-user admin $user -n $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG $DEV_AUTH_INFO ;
+        done;
+      fi
+  script:
+    - helm template $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG helm/deploy-template/
+      --set replicaCount="3"
+      --set image="$PROJECT_SHORTNAME-build/$PROJECT_SHORTNAME:$CI_COMMIT_REF_SLUG"
+      --set host="$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG"
+      --set cluster="$OCP_CLUSTER"
+      --set deploymentStrategy="non-prod"
+      |
+      oc apply -f - -n $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG $DEV_AUTH_INFO
+  after_script:
+    - echo "Deployed to https://$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG.apps.$OCP_CLUSTER"
+  environment:
+    name: feature/$CI_COMMIT_REF_NAME
+    url: https://$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG.apps.$OCP_CLUSTER
+    on_stop: remove_feature_project
+
+remove_feature_project:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  only:
+    refs:
+      - branches
+  except:
+    - master
+  stage: cleanup
+  when: manual
+  script:
+    - oc delete project $PROJECT_SHORTNAME-feature-$CI_COMMIT_REF_SLUG $DEV_AUTH_INFO
+    - oc delete bc $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG -n $PROJECT_SHORTNAME-build $DEV_AUTH_INFO
+  environment:
+    name: feature/$CI_COMMIT_REF_NAME
+    action: stop
+
+deploy_to_prod:
+  tags:
+    - ocp-runner
+  # only run on tags matching v* which can be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  only:
+    refs:
+      - /^v.*$/
+  except:
+    - branches
+  stage: deploy_to_prod
+  before_script:
+    - if [[ -z `oc get routes -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | grep "$PROJECT_SHORTNAME-prod-route"` ]] ; then 
+        helm template $PROJECT_SHORTNAME-prod-route helm/prod-route-template
+          --set host="$PROJECT_SHORTNAME-prod"
+          --set cluster="$OCP_CLUSTER"
+          --set target="$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG"
+        | 
+        oc apply -f - -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+      fi
+  script:
+    # deploy using helm chart and oc
+    - helm template $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG helm/deploy-template/
+      --set replicaCount="3"
+      --set image="$PROJECT_SHORTNAME-build/$PROJECT_SHORTNAME:$CI_COMMIT_REF_SLUG"
+      --set deploymentStrategy="prod"
+      |
+      oc apply -f - -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then 
+        oc set route-backends $PROJECT_SHORTNAME-prod-route `oc set route-backends $PROJECT_SHORTNAME-prod-route -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | grep 100 | awk '{ print $3 }'`=90 $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG=10 -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+      fi
+  when: manual
+  allow_failure: false
+  environment:
+    name: production
+    url: https://$PROJECT_SHORTNAME-prod.apps.$OSD_PROD_CLUSTER
+
+prod_set_to_50:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  # only run on tags matching v* which will be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  only:
+    refs:
+      - /^v.*$/
+  except:
+    - branches
+  stage: prod_set_to_50
+  script:
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then 
+        oc set route-backends $PROJECT_SHORTNAME-prod-route --adjust $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG=+40% -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+      fi
+  when: manual
+
+prod_set_to_100:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  # only run on tags matching v* which will be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  only:
+    refs:
+      - /^v.*$/
+  except:
+    - branches
+  stage: prod_set_to_100
+  script:
+    - if [[ `oc get services -o name -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | wc -l` == 2 ]] ; then 
+        oc set route-backends $PROJECT_SHORTNAME-prod-route $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG=100% -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+        oc delete deployment `oc get deployments --field-selector metadata.name!=$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG --no-headers -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | awk '{ print $1 }'` -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+        oc delete service `oc get services --field-selector metadata.name!=$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG --no-headers -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | awk '{ print $1 }'` -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO ; 
+      fi
+  when: manual
+
+prod_revert:
+  tags:
+    - ocp-runner
+  variables:
+    GIT_STRATEGY: none
+  # only run on tags matching v* which will be protected using https://docs.gitlab.com/ee/user/project/protected_tags.html
+  only:
+    refs:
+      - /^v.*$/
+  except:
+    - branches
+  stage: prod_revert
+  script:
+    - oc set route-backends $PROJECT_SHORTNAME-prod-route `oc get services --field-selector metadata.name!=$PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG --no-headers -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO | awk '{ print $1 }'`=100% -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO
+    - oc delete service $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO
+    - oc delete deployment $PROJECT_SHORTNAME-$CI_COMMIT_REF_SLUG -n $PROJECT_SHORTNAME-prod $PROD_AUTH_INFO 
+  when: manual
+

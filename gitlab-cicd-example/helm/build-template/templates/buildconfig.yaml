@@ -1,0 +1,24 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: "{{ .Values.buildName }}"
+  labels:
+    name: "{{ .Values.buildName }}"
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "{{ .Values.imageName }}:{{ .Values.imageTag }}"
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy: {}
+  postCommit: {}
+  source:
+    type: Binary
+    binary: {}
+  triggers: []
+  runPolicy: Serial
