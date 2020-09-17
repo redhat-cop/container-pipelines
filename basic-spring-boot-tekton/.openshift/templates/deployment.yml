@@ -129,7 +129,7 @@ parameters:
 - description: Name of a service account that can deploy to this project
   name: SA_NAME
   required: true
-  value: tekton
+  value: pipeline
 - description: Namespace of service account that can deploy to this project
   name: SA_NAMESPACE
   required: true

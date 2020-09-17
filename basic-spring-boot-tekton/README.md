@@ -154,7 +154,7 @@ Once you have deployed the needed infrastructure either with applier or manually
 
 ```shell
 $ tkn pipeline start basic-spring-boot-pipeline \
-  -r basic-spring-boot-git=basic-spring-boot-git -s tekton \
+  -r basic-spring-boot-git=basic-spring-boot-git -s pipeline \
   -n basic-spring-boot-build
 ```
 

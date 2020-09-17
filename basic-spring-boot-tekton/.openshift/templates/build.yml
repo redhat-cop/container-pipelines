@@ -66,7 +66,7 @@ objects:
       inputs:
       - name: source
         type: git
-    steps:   
+    steps:
     - name: package
       image: maven:3.6.0-jdk-8-slim
       workingDir: /workspace/source
@@ -74,19 +74,19 @@ objects:
       - /usr/bin/mvn
       args:
       - package
-    - name: make-upload-dir 
+    - name: make-upload-dir
       image: quay.io/openshift-pipeline/openshift-cli:latest
       command: ["mkdir"]
       args:
         - -p
         - /workspace/source/upload
-    - name: copy-assets 
+    - name: copy-assets
       image: quay.io/openshift-pipeline/openshift-cli:latest
       command: ["cp"]
       args:
         - /workspace/source/target/shift-rest-1.0.0-SNAPSHOT.jar
-        - /workspace/source/upload 
-    - name: oc-binary-build 
+        - /workspace/source/upload
+    - name: oc-binary-build
       image: quay.io/openshift-pipeline/openshift-cli:latest
       command: ["/usr/local/bin/oc"]
       workingDir: /workspace/source/upload
@@ -107,7 +107,7 @@ objects:
       - name: fromNamespace
         description: The namespace we are tagging from
       - name: toNamespace
-        description: The namespace we are tagging to  
+        description: The namespace we are tagging to
       - name: tag
         description: The image tag
       - name: imageStream
@@ -144,12 +144,12 @@ objects:
       type: git
     tasks:
     - name: maven-build-binary-build
-      taskRef: 
+      taskRef:
         name: maven-build-binary-build
       resources:
         inputs:
         - name: source
-          resource: ${APPLICATION_NAME}-git                 
+          resource: ${APPLICATION_NAME}-git
     - name: deploy-to-dev
       taskRef:
         name: deploy
@@ -159,9 +159,9 @@ objects:
       - name: fromNamespace
         value: ${APPLICATION_NAME}-build
       - name: toNamespace
-        value: ${APPLICATION_NAME}-dev  
+        value: ${APPLICATION_NAME}-dev
       - name: tag
-        value: latest 
+        value: latest
       - name: imageStream
         value: ${APPLICATION_NAME}
       - name: deploymentResource
@@ -177,11 +177,11 @@ objects:
       - name: fromNamespace
         value: ${APPLICATION_NAME}-dev
       - name: toNamespace
-        value: ${APPLICATION_NAME}-stage  
+        value: ${APPLICATION_NAME}-stage
       - name: tag
-        value: latest 
+        value: latest
       - name: imageStream
-        value: ${APPLICATION_NAME} 
+        value: ${APPLICATION_NAME}
       - name: deploymentResource
         value: deploymentconfig
       - name: deployment
@@ -195,15 +195,15 @@ objects:
       - name: fromNamespace
         value: ${APPLICATION_NAME}-stage
       - name: toNamespace
-        value: ${APPLICATION_NAME}-prod  
+        value: ${APPLICATION_NAME}-prod
       - name: tag
-        value: latest 
+        value: latest
       - name: imageStream
         value: ${APPLICATION_NAME}
       - name: deploymentResource
         value: deploymentconfig
       - name: deployment
-        value: ${APPLICATION_NAME}                                           
+        value: ${APPLICATION_NAME}
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
@@ -278,4 +278,4 @@ parameters:
 - description: Name of a service account that can deploy to this project
   name: SA_NAME
   required: true
-  value: tekton
+  value: pipeline
