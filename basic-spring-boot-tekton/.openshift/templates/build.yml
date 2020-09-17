@@ -13,11 +13,23 @@ objects:
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${SA_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${SA_NAME}_edit
     namespace: ${NAMESPACE}
   roleRef:
@@ -31,12 +43,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}-image
     namespace: ${NAMESPACE}
   spec:
@@ -47,6 +69,12 @@ objects:
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}-git
     namespace: ${NAMESPACE}
   spec:
@@ -59,6 +87,12 @@ objects:
 - apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: maven-build-binary-build
     namespace: ${NAMESPACE}
   spec:
@@ -100,6 +134,12 @@ objects:
 - apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: deploy
     namespace: ${NAMESPACE}
   spec:
@@ -136,6 +176,12 @@ objects:
 - apiVersion: tekton.dev/v1beta1
   kind: Pipeline
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}-pipeline
     namespace: ${NAMESPACE}
   spec:
@@ -208,7 +254,11 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: "${NAMESPACE}"
   spec:
