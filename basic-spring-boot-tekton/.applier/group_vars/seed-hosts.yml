@@ -7,7 +7,7 @@ sb_application_repository_url: "https://github.com/redhat-cop/spring-rest.git"
 sb_application_repository_ref: master
 sb_application_readiness_response: "status.:.UP"
 sb_application_readiness_path: "/health"
-sb_sa_name: "tekton"
+sb_sa_name: "pipeline"
 sb_source_repository_url: "https://github.com/redhat-cop/container-pipelines.git"
 sb_source_repository_ref: master
 sb_pipeline_script: "Jenkinsfile"
@@ -26,6 +26,7 @@ openshift_cluster_content:
     template: "{{ inventory_dir }}/../.openshift/templates/build.yml"
     params_from_vars:
       APPLICATION_NAME: "{{ sb_application_name }}"
+      SA_NAME: "{{ sb_sa_name }}"
       NAMESPACE: "{{ sb_build_namespace }}"
       SOURCE_REPOSITORY_URL: "{{ sb_source_repository_url }}"
       SOURCE_REPOSITORY_REF: "{{ sb_source_repository_ref }}"
@@ -41,6 +42,7 @@ openshift_cluster_content:
     params_from_vars:
       APPLICATION_NAME: "{{ sb_application_name }}"
       NAMESPACE: "{{ sb_dev_namespace }}"
+      SA_NAME: "{{ sb_sa_name }}"
       SA_NAMESPACE: "{{ sb_build_namespace }}"
       READINESS_RESPONSE: "{{ sb_application_readiness_response }}"
       READINESS_PATH: "{{ sb_application_readiness_path }}"
