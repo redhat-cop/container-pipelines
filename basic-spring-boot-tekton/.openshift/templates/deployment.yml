@@ -16,7 +16,11 @@ objects:
     annotations:
       description: The web server's http port.
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -31,7 +35,11 @@ objects:
     annotations:
       description: Route for application's http service.
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -42,14 +50,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: apps.openshift.io/v1
   kind: DeploymentConfig
   metadata:
     labels:
-      app: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
   spec:
@@ -61,7 +77,11 @@ objects:
     template:
       metadata:
         labels:
-          app: ${APPLICATION_NAME}
+          app.kubernetes.io/name: ${APPLICATION_NAME}
+          app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
+          app.kubernetes.io/component: api
+          app.kubernetes.io/part-of: ${APPLICATION_NAME}
+          app.kubernetes.io/managed-by: applier
           deploymentConfig: ${APPLICATION_NAME}
         name: ${APPLICATION_NAME}
       spec:
@@ -104,7 +124,11 @@ objects:
   metadata:
     creationTimestamp: null
     labels:
-      template: basic-tomcat-template
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${SA_NAME}_edit
     namespace: ${NAMESPACE}
   groupNames: null
@@ -129,7 +153,7 @@ parameters:
 - description: Name of a service account that can deploy to this project
   name: SA_NAME
   required: true
-  value: tekton
+  value: pipeline
 - description: Namespace of service account that can deploy to this project
   name: SA_NAMESPACE
   required: true

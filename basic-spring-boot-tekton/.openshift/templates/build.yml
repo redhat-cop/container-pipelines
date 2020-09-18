@@ -13,11 +13,23 @@ objects:
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${SA_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${SA_NAME}_edit
     namespace: ${NAMESPACE}
   roleRef:
@@ -31,12 +43,22 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: ${NAMESPACE}
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}-image
     namespace: ${NAMESPACE}
   spec:
@@ -47,6 +69,12 @@ objects:
 - apiVersion: tekton.dev/v1alpha1
   kind: PipelineResource
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}-git
     namespace: ${NAMESPACE}
   spec:
@@ -59,6 +87,12 @@ objects:
 - apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: maven-build-binary-build
     namespace: ${NAMESPACE}
   spec:
@@ -66,7 +100,7 @@ objects:
       inputs:
       - name: source
         type: git
-    steps:   
+    steps:
     - name: package
       image: maven:3.6.0-jdk-8-slim
       workingDir: /workspace/source
@@ -74,19 +108,19 @@ objects:
       - /usr/bin/mvn
       args:
       - package
-    - name: make-upload-dir 
+    - name: make-upload-dir
       image: quay.io/openshift-pipeline/openshift-cli:latest
       command: ["mkdir"]
       args:
         - -p
         - /workspace/source/upload
-    - name: copy-assets 
+    - name: copy-assets
       image: quay.io/openshift-pipeline/openshift-cli:latest
       command: ["cp"]
       args:
         - /workspace/source/target/shift-rest-1.0.0-SNAPSHOT.jar
-        - /workspace/source/upload 
-    - name: oc-binary-build 
+        - /workspace/source/upload
+    - name: oc-binary-build
       image: quay.io/openshift-pipeline/openshift-cli:latest
       command: ["/usr/local/bin/oc"]
       workingDir: /workspace/source/upload
@@ -100,6 +134,12 @@ objects:
 - apiVersion: tekton.dev/v1beta1
   kind: Task
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: deploy
     namespace: ${NAMESPACE}
   spec:
@@ -107,7 +147,7 @@ objects:
       - name: fromNamespace
         description: The namespace we are tagging from
       - name: toNamespace
-        description: The namespace we are tagging to  
+        description: The namespace we are tagging to
       - name: tag
         description: The image tag
       - name: imageStream
@@ -136,6 +176,12 @@ objects:
 - apiVersion: tekton.dev/v1beta1
   kind: Pipeline
   metadata:
+    labels:
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}-pipeline
     namespace: ${NAMESPACE}
   spec:
@@ -144,12 +190,12 @@ objects:
       type: git
     tasks:
     - name: maven-build-binary-build
-      taskRef: 
+      taskRef:
         name: maven-build-binary-build
       resources:
         inputs:
         - name: source
-          resource: ${APPLICATION_NAME}-git                 
+          resource: ${APPLICATION_NAME}-git
     - name: deploy-to-dev
       taskRef:
         name: deploy
@@ -159,9 +205,9 @@ objects:
       - name: fromNamespace
         value: ${APPLICATION_NAME}-build
       - name: toNamespace
-        value: ${APPLICATION_NAME}-dev  
+        value: ${APPLICATION_NAME}-dev
       - name: tag
-        value: latest 
+        value: latest
       - name: imageStream
         value: ${APPLICATION_NAME}
       - name: deploymentResource
@@ -177,11 +223,11 @@ objects:
       - name: fromNamespace
         value: ${APPLICATION_NAME}-dev
       - name: toNamespace
-        value: ${APPLICATION_NAME}-stage  
+        value: ${APPLICATION_NAME}-stage
       - name: tag
-        value: latest 
+        value: latest
       - name: imageStream
-        value: ${APPLICATION_NAME} 
+        value: ${APPLICATION_NAME}
       - name: deploymentResource
         value: deploymentconfig
       - name: deployment
@@ -195,20 +241,24 @@ objects:
       - name: fromNamespace
         value: ${APPLICATION_NAME}-stage
       - name: toNamespace
-        value: ${APPLICATION_NAME}-prod  
+        value: ${APPLICATION_NAME}-prod
       - name: tag
-        value: latest 
+        value: latest
       - name: imageStream
         value: ${APPLICATION_NAME}
       - name: deploymentResource
         value: deploymentconfig
       - name: deployment
-        value: ${APPLICATION_NAME}                                           
+        value: ${APPLICATION_NAME}
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
     labels:
-      application: ${APPLICATION_NAME}
+      app.kubernetes.io/name: ${APPLICATION_NAME}
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/component: api
+      app.kubernetes.io/part-of: ${APPLICATION_NAME}
+      app.kubernetes.io/managed-by: applier
     name: ${APPLICATION_NAME}
     namespace: "${NAMESPACE}"
   spec:
@@ -278,4 +328,4 @@ parameters:
 - description: Name of a service account that can deploy to this project
   name: SA_NAME
   required: true
-  value: tekton
+  value: pipeline
