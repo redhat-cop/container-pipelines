@@ -17,7 +17,7 @@ objects:
       description: The web server's http port.
     labels:
       app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
       app.kubernetes.io/component: api
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
@@ -36,7 +36,7 @@ objects:
       description: Route for application's http service.
     labels:
       app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
       app.kubernetes.io/component: api
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
@@ -51,7 +51,7 @@ objects:
   metadata:
     labels:
       app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
       app.kubernetes.io/component: api
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
@@ -62,7 +62,7 @@ objects:
   metadata:
     labels:
       app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
       app.kubernetes.io/component: api
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
@@ -78,7 +78,7 @@ objects:
       metadata:
         labels:
           app.kubernetes.io/name: ${APPLICATION_NAME}
-          app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+          app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
           app.kubernetes.io/component: api
           app.kubernetes.io/part-of: ${APPLICATION_NAME}
           app.kubernetes.io/managed-by: applier
@@ -125,7 +125,7 @@ objects:
     creationTimestamp: null
     labels:
       app.kubernetes.io/name: ${APPLICATION_NAME}
-      app.kubernetes.io/instance: ${APPLICATION_NAME}-build
+      app.kubernetes.io/instance: ${APPLICATION_NAME}-deployment
       app.kubernetes.io/component: api
       app.kubernetes.io/part-of: ${APPLICATION_NAME}
       app.kubernetes.io/managed-by: applier
