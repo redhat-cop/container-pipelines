@@ -49,10 +49,20 @@ objects:
       jenkinsPipelineStrategy:
         jenkinsfilePath: ${PIPELINE_SCRIPT}
         env:
+        - name: "APP_NAME"
+          value: "${APPLICATION_NAME}"
         - name: "APPLICATION_SOURCE_REPO"
           value: "${APPLICATION_SOURCE_REPO}"
         - name: "APPLICATION_SOURCE_REF"
           value: "${APPLICATION_SOURCE_REF}"
+        - name: "NAMESPACE_BUILD"
+          value: "${NAMESPACE}"
+        - name: "NAMESPACE_DEV"
+          value: "${NAMESPACE_DEV}"
+        - name: "NAMESPACE_STAGE"
+          value: "${NAMESPACE_STAGE}"
+        - name: "NAMESPACE_PROD"
+          value: "${NAMESPACE_PROD}"
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
@@ -84,7 +94,7 @@ parameters:
   name: APPLICATION_NAME
   required: true
   value: basic-spring
-- description: The namespace to deploy into
+- description: The namespace that will contain the build resources defined in this template
   name: NAMESPACE
   required: true
 - description: Git source URI for application
@@ -107,6 +117,15 @@ parameters:
 - description: Path within Git project pointing to the pipeline run script
   name: PIPELINE_SCRIPT
   value: Jenkinsfile
+- description: The namespace containing dev resources
+  name: NAMESPACE_DEV
+  required: true
+- description: The namespace containing stage resources
+  name: NAMESPACE_STAGE
+  required: true
+- description: The namespace containing prod resources
+  name: NAMESPACE_PROD
+  required: true
 - description: GitHub trigger secret
   from: '[a-zA-Z0-9]{8}'
   generate: expression
