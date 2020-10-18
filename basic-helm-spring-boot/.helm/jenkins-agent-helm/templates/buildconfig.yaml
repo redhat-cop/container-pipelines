@@ -20,4 +20,5 @@ spec:
     dockerStrategy:
       dockerfilePath: {{ .Values.dockerfilePath }}
     type: Docker
-  triggers: []
+  triggers:
+    - type: ConfigChange

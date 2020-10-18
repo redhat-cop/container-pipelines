@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
 metadata:
   name: {{ .Release.Name }}
   labels:
@@ -8,8 +8,7 @@ metadata:
 spec:
   replicas: {{ .Values.replicas }}
   selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}
   strategy:
     type: {{ .Values.strategy }}
   template:
@@ -19,7 +18,7 @@ spec:
     spec:
       containers:
         - name: {{ .Release.Name }}
-          image: image-registry.openshift-image-registry.svc:5000/{{ .Release.Namespace }}/{{ .Release.Name }}:{{ .Values.tag }}
+          image: ""
           imagePullPolicy: Always
 {{- if .Values.enableLiveness }}
           readinessProbe:
@@ -27,3 +26,8 @@ spec:
               path: /
               port: {{ .Values.port }}
 {{- end }}
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        from:
+          name: {{ .Release.Name }}:{{ .Values.tag }}
