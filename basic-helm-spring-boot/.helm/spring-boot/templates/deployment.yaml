@@ -1,14 +1,26 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   labels:
     app.kubernetes.io/name: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    image.openshift.io/triggers: |-
+      [
+        {
+          "from":{
+            "kind":"ImageStreamTag",
+            "name":"{{ .Release.Name }}:{{ .Values.tag }}"
+          },
+          "fieldPath":"spec.template.spec.containers[0].image"
+        }
+      ]
 spec:
   replicas: {{ .Values.replicas }}
   selector:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
   strategy:
     type: {{ .Values.strategy }}
   template:
@@ -18,7 +30,7 @@ spec:
     spec:
       containers:
         - name: {{ .Release.Name }}
-          image: ""
+          image: {{ .Release.Name }}:{{ .Values.tag }}
           imagePullPolicy: Always
 {{- if .Values.enableLiveness }}
           readinessProbe:
@@ -26,8 +38,3 @@ spec:
               path: /
               port: {{ .Values.port }}
 {{- end }}
-  triggers:
-    - type: ImageChange
-      imageChangeParams:
-        from:
-          name: {{ .Release.Name }}:{{ .Values.tag }}
