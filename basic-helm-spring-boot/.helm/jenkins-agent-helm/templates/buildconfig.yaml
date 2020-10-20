@@ -1,0 +1,24 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    application: {{ .Release.Name }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Release.Name }}:{{ .Values.destTag }}
+  source:
+    type: Git
+    git:
+      uri: {{ .Values.uri }}
+      ref: {{ .Values.ref }}
+    contextDir: {{ .Values.contextDir }}
+  strategy:
+    dockerStrategy:
+      dockerfilePath: {{ .Values.dockerfilePath }}
+    type: Docker
+  triggers:
+    - type: ConfigChange

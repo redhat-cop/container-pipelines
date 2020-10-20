@@ -1,0 +1,10 @@
+## Required (provided by pipeline)
+tag:
+
+replicas: 1
+
+port: 8080
+
+enableReadiness: true
+
+strategy: Recreate

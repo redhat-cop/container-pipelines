@@ -1,0 +1,4 @@
+apiVersion: v2
+name: spring-boot-build
+description: A chart for building your Spring Boot app
+version: 1.0.0
