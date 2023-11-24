@@ -5,5 +5,5 @@
   name: labs-ci-cd
 - src: https://github.com/redhat-cop/openshift-applier
   scm: git
-  version: v2.1.1
+  version: v2.1.2
   name: openshift-applier
