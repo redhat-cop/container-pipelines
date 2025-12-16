@@ -13,7 +13,7 @@ setup_file() {
   tmp=$(split_files "basic-dotnet-core/.openshift")
 
   namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -24,7 +24,7 @@ setup_file() {
   tmp=$(split_files "basic-nginx/.openshift")
 
   namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -35,7 +35,7 @@ setup_file() {
   tmp=$(split_files "basic-spring-boot/.openshift")
 
   namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -46,7 +46,7 @@ setup_file() {
   tmp=$(split_files "basic-spring-boot-tekton/.openshift")
 
   namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -57,7 +57,7 @@ setup_file() {
   tmp=$(split_files "basic-tomcat/.openshift")
 
   namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -68,7 +68,7 @@ setup_file() {
   tmp=$(split_files "blue-green-spring/.openshift")
 
   namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -79,7 +79,7 @@ setup_file() {
   tmp=$(split_files "cucumber-selenium-grid/applier")
 
   namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -90,7 +90,7 @@ setup_file() {
   tmp=$(split_files "jenkins-s2i")
 
   namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -101,7 +101,7 @@ setup_file() {
   tmp=$(split_files "multi-cluster-multi-branch-jee/.openshift")
 
   namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -112,7 +112,7 @@ setup_file() {
   tmp=$(split_files "multi-cluster-spring-boot/image-mirror-example/.applier")
 
   namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -123,7 +123,7 @@ setup_file() {
   tmp=$(split_files "multi-cluster-spring-boot/skopeo-example/.applier")
 
   namespaces=$(get_rego_namespaces "(?!ocp\.deprecated.ocp4_3\.buildconfig_jenkinspipeline_strategy)ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
@@ -134,7 +134,7 @@ setup_file() {
   tmp=$(split_files "secure-spring-boot/.openshift-applier")
 
   namespaces=$(get_rego_namespaces "ocp\.deprecated\.*")
-  cmd="conftest test ${tmp} --output tap ${namespaces}"
+  cmd="conftest test ${tmp} --output tap ${namespaces} --rego-version v0"
   run ${cmd}
 
   print_info "${status}" "${output}" "${cmd}" "${tmp}"
