@@ -9,7 +9,7 @@
     "angular": "^1.4.3",
     "angular-resource": "^1.4.3",
     "angular-route": "^ 1.4.3",
-    "express": "^4.16.3",
+    "express": "^5.0.0",
     "todomvc-app-css": "^2.1.0",
     "todomvc-common": "^1.0.0"
   },
@@ -23,7 +23,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "cucumber": "^4.2.0",
-    "express": "^4.16.3",
+    "express": "^5.0.0",
     "protractor": "^5.3.2",
     "protractor-cucumber-framework": "^5.0.0",
     "protractor-multiple-cucumber-html-reporter-plugin": "^1.7.0",
