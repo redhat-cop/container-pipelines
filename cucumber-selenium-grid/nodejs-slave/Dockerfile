@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
+FROM registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7@sha256:0af6f7f706321bba0c3898d7e431d4890b517dc6e8084bb97bff4784cd4eb293
 
 MAINTAINER Gabe Montero <gmontero@redhat.com>
 
